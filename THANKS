@@ -1,0 +1,17 @@
+THANKS
+=-=-=-
+
+This file contains a list of people that have contributed in one way
+or another to the development of dmd and a description of how they did
+so.  The list is in chronoligical order.  If you think I forgot
+anyone, please tell me.
+
+* Thanks to Alfred M. Szmidt <ams@kemisten.nu> for helping with the
+  design of dmd.
+
+* Thanks to Rob Browning <rlb@defaultvalue.org> for his various advice
+  related to Guile and Scheme in general, and finding a fix for a
+  problem with the communication between deco and dmd.
+
+* Thanks to Jeff Bailey <jbailey@nisa.net> for his advice about
+  autoconf and automake usage.

@@ -1,0 +1,13 @@
+Example configurations for dmd
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+This directory contains personal configuration files.  You can send me
+your configuration too, and I will include it here, provided that it
+is available under a license that makes it Free Software.
+
+Hint: If you send my your configuration, then not only can other
+people learn from it, but I can also make sure that I do not break
+your code too often by making incompatible changes, and if I do it
+anyway but notice it, I might tell you how to change the code to work
+with a new version.
+

@@ -1,0 +1,17 @@
+dnl Process this file with autoconf to procude a configure script.
+
+dnl Initialization
+AC_INIT(dmd.scm)
+AM_INIT_AUTOMAKE(dmd,-0.7)
+
+dnl Checks for programs.
+dnl FIXME: Check for Guile.
+
+dnl Checks for libraries.
+
+dnl Checks for header files.
+
+dnl Checks for library functions
+
+dnl Finish.
+AC_OUTPUT(Makefile examples/Makefile utils/Makefile)

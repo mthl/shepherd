@@ -1,0 +1,60 @@
+* An -*- outline -*- of the `dmd' service manager.
+
+** What is `dmd'?
+
+It is a service manager.  That is, on systems which are similar to
+Unix (e.g. GNU/Linux), it is a replacement for the part of the `init'
+program that manages runlevels and such.  On the GNU system, it is a
+replacement for `/sbin/init', but not for `/hurd/init'.
+
+** Requirements
+
+This program requires Guile (the GNU Ubiquitous Intelligent Language
+for Extension), version 1.6.  It uses GOOPS, but as GOOPS is part of
+Guile, a normal Guile installation is sufficient.
+
+It is intended for use on GNU/Linux and GNU, but is likely to also
+work elsewhere.
+
+** Getting started
+
+Despite the fact that this program is written in an interpreted
+language, you can install this program like all programs that use
+autoconf, but the recommended way is:
+
+  ./configure --prefix= --datadir=/usr/share
+  make
+  make install
+
+Actually setting up `dmd' currently requires some work.  You should
+read the Texinfo manual for details.
+
+** More information
+
+Detailed instructions on installing dmd are available in the file
+`INSTALL'.  A list of user-visible changes between releases can be
+found in the file `NEWS'.  Detailed information about changes on the
+source code level are listed in `ChangeLog'.
+
+A list of people who can be considered maintainers of this software is
+available in the file `AUTHORS'.  A list of people who have been
+helpful in improving dmd can be found in `THANKS'.
+
+This program can be distributed under the terms of the GNU General
+Public License, version 2 or any later version, see the file `COPYING'
+for details.  The Texinfo manual can be distributed under the terms of
+the GNU Free Documentation License, version 1.1 or any later version,
+see the file `COPYING.DOC' and the Texinfo manual (`dmd.texi' or any
+file generated from it) for details.
+
+** Bugs and Limitations
+
+There is no localization done yet.
+
+Code from the user configuration is allowed to mess up everything.
+
+Runlevels do not work yet.
+
+It is hard to setup currently.
+
+Send bug reports to <wolfgang@pro-linux.de>.

@@ -1,0 +1,57 @@
+Version -0.7
+
+	* Can fork into background via dmd extra-action `daemonize'.
+	* New action for all services: list-actions.
+	* New options for dmd: --logfile (-l), and --silent/--quiet
+	* Standard option --usage works for both dmd and deco.
+	* You can pass relative file names to deco.
+	* Never send respawn-output to deco by accident.
+	* Better handling of terminals and similar services.
+	* Documented evolution of runlevels.
+	* Service groups can be used to start/stop services at once.
+	* Persistency (i.e. safe state on exit and restore next time).
+	* Invoke actions of service `unknown' (if defined) as fallback.
+	* Read commands from standard input if socket file name is `none'.
+
+Version -0.8
+
+	* Show output in deco, not only in dmd.
+	* New options in deco: --insecure (-I) and --result-socket (-r)
+	* --help displays the options for both dmd and deco.
+	* Disable services which are respawning too fast.
+	* New actions for all services: enable, disable and enforce.
+	* Default extra actions work even when the service is stopped.
+	* Documented some internals of dmd.
+
+Version -0.9
+
+	* Example configuration added.
+	* New option for deco: --socket (-s).
+	* New option for dmd: --insecure (-I).
+	* Added tutorial and completed documentation.
+	* Create default socket dir on startup if desired.
+	* Added a real build system.
+
+Version -0.9.6
+
+	* Controlling dmd completely with deco is now possible.
+	* A few bugfixes for service handling.
+	* Long options can be abbreviated, short ones also work.
+	* Respawning of services works.
+
+Version -0.9.7
+
+	* User-defined code is always protected with a `catch'.
+	* New options: --config and --socket.
+	* The new deco program can be used to send commands to dmd.
+
+Version -0.9.8
+
+	* Starting and stopping of services by symbol works better.
+	* Performing extra actions on services possible.
+	* Improved documentation.
+	* More detailed output.
+
+Version -0.9.9
+
+	* Initial release.

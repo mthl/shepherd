@@ -1,0 +1,1330 @@
+\input texinfo @c -*- texinfo -*-
+@c dmd.texi -- The documentation in Texinfo format.
+@setfilename dmd.info
+@settitle dmd Manual
+
+@include version.texi
+@set YEARS 2002
+
+@dircategory System software
+@direntry
+* dmd Manual: (dmd).    The manual of the dmd service manager.
+@end direntry
+
+@titlepage
+@title dmd Manual
+@subtitle For use with dmd @value{VERSION}
+@subtitle Last updated @value{UPDATED}
+
+@author Wolfgang J@"ahrling
+@end titlepage
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@ifinfo
+@node Top
+@top dmd Manual
+@end ifinfo
+
+Copyright @copyright{} @value{YEARS} Wolfgang J@"ahrling
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+Texts.  A copy of the license is included in the file COPYING.DOC of
+the dmd distribution.
+
+@menu
+* Introduction::      Introduction to the dmd service manager.
+* Jump Start::        How to do simple things with dmd.
+* deco and dmd::      User interface to service management.
+* Services::          Details on services.
+* Runlevels::         Details on runlevels.
+* Misc Facilities::   Generally useful things provided by dmd.
+* Internals::         Hacking dmd.
+
+* Concept Index::
+* Procedure and Macro Index::
+* Variable Index::
+* Type Index::
+@end menu
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Introduction
+@chapter Introduction
+
+@cindex service manager
+This manual documents the @dfn{dmd} service manager.  It is used to
+start and stop system services (typically daemons).  It ensures that
+this will work - by automatically starting services that are needed
+for another service to run and avoiding that conflicting services are
+started at the same time.  It does so in a very flexible way.
+
+As with all flexible software, it takes some work to learn how to use
+it.  To make it as easy as possible for you, this manual contains a
+chapter that enables you to start using dmd without reading about all
+the details first @ref{Jump Start}.  The second chapter @ref{deco and
+dmd} describes the programs in detail.  The other chapters provide a
+reference with examples, where all possibilities that dmd provides are
+explained.  An exception is the last chapter, which contains
+information for those brave enough to modify dmd itself.
+
+The name dmd stands for @dfn{Daemon Managing Daemons} (or
+@dfn{Daemons-Managing Daemon}?).
+
+@cindex Guile
+@cindex Scheme
+@cindex GOOPS
+This program is written in @dfn{Guile}, an implementation of the
+Scheme programming language, using the @dfn{GOOPS} extension for
+object-orientation, therefore Guile is also used as the language for
+the configuration.  When you want to make use of advanced features of
+dmd, you should know how to work with Guile and GOOPS, but it has been
+tried to make using basic features of dmd possible without knowing how
+to program in Scheme at all.
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Jump Start
+@chapter Jump Start
+
+@cindex prefix
+This chapter gives a short overview of dmd.  It is enough if you just
+need the basic features of it.  As it is not assumed that readers are
+familiar with all the involved issues, a very experienced user might
+be annoyed by the often very detailed descriptions in this
+introduction.  Those users are encouraged to just skip to the
+reference section.
+
+Note that all the full file names in the following text are based on
+the assumption that you have installed dmd with an empty prefix.  If
+your dmd installation for example resides in @code{/usr/local}
+instead, add this directory name in front of the absolute file names
+mentioned below.
+
+@cindex configuration file
+When dmd gets started, it reads a configuration file.  When it is
+started with superuser priviledges, it tries to use
+@code{/etc/dmdconf.scm}, when started as normal user, it looks for a
+file called @code{.dmdconf.scm} in the users home directory.  With the
+option @code{--config} (or, for short, @code{-c}), you can specify
+where to look instead.  So if you want to start dmd with an
+alternative file, use one of the following commands:
+
+@example
+dmd --config=/etc/dmdconf.scm.old
+dmd -c /etc/dmdconf.scm.old
+@end example
+
+As its name suggests, dmd is just a daemon that (usually) runs in the
+background, so you will not interact with it directly.  After it is
+started, dmd will listen on a socket special file, usually
+@code{/var/run/dmd/$USER/default}, for further commands.  You use the
+tool @dfn{deco} to send these commands to dmd.  Usage of deco is
+simple and straight forward: To start a service called @code{apache},
+you use:
+
+@example
+deco start apache
+@end example
+
+When you do this, all its dependencies will get resolved.  For
+example, a webserver is quite likely to depend on working networking,
+thus it will depend on a service called @code{network}.  So if you
+want to start @code{apache}, and @code{network} is not yet running, it
+will automatically be started as well.  In the same way, you can stop
+a service and all the services that depend on it will be stopped.
+Using the example above, if you stop @code{network}, the service
+@code{apache} will be stopped as well - Which makes perfectly sense,
+as it can not work without the network being up.  To actually stop a
+service, you use the following, probably not very surprising, command:
+
+@example
+deco stop networking
+@end example
+
+There are two more actions you can perform on every service: The
+actions @code{enable} and @code{disable} are used to prevent and allow
+starting of the particular service.  If a service is intended to be
+restarted whenever it terminates (how this can be done will not be
+covered in this introduction), but it is respawning too often in a
+short period of time (by default 5 times in 5 seconds), it will
+automatically be disabled.  After you have fixed the problem that
+caused it from being respawned too fast, you can start it again with
+the commands:
+
+@example
+deco enable foo
+deco start foo
+@end example
+
+@cindex virtual services
+@cindex fallback services
+But there is far more you can do than just that.  Services can not
+only simply depend on other services, they can also depend on
+@emph{virtual} services.  A virtual service is a service that is
+provided by one or more service additionally.  For instance, a service
+called @code{exim} might provide the virtual service
+@code{mailer-daemon}.  That could as well be provided by a service
+called @code{smail}, as both are mailer-daemons.  If a service needs
+any mailer-daemon, no matter which one, it can just depend on
+@code{mailer-daemon}, and one of those who provide it gets started (if
+none is running yet) when resolving dependencies.  The nice thing is
+that, if trying to start one of them fails, dmd will go on and try to
+start the next one, so you can also use virtual services for
+specifying @emph{fallbacks}.
+
+Additionally to all that, you can perform service-specific actions.
+Coming back to our original example, @code{apache} is able to
+reload its modules, therefore the action @code{reload-modules} might
+be available:
+
+@example
+deco reload-modules apache
+@end example
+
+The service-specific actions can only be used when the service is
+started, i.e. the only thing you can do to a stopped service is
+starting it.  An exception exists, see below.  (If you may at some
+point find this too restrictive because you want to use variants of
+the same service which are started in different ways, consider using
+different services for those variants instead, which all provide the
+same virtual service and thus conflict with each other, if this is
+desired.  That's one of the reasons why virtual services exist, after
+all.)
+
+There are two actions which are special, because even if services
+can implement them on their own, a default implementation is provided
+by dmd (another reason why they are special is that the default
+implementations can be called even when the service is not running;
+this inconsistency is just to make it more intuitive to get
+information about the status of a service, see below).
+
+These actions are @code{restart} and @code{status}.  The default
+implementation of @code{restart} calls @code{stop} and @code{start} on
+the affected service in order, the @code{status} action displays some
+general information about the service, like what it provides, what it
+depends on and with which other services it conflicts (because they
+provide a virtual service that is also provided by that particular
+service).
+
+Another special action is @code{list-actions}, which displays a list
+of the additional actions a service provides; obviously, it can also
+be called when the service is not running.  Services cannot provide
+their own implementation of @code{list-actions}.
+
+A special service is @code{dmd}, which is used for controlling dmd
+itself.  It implements various actions.  For example, the
+@code{status} action displays which services are started and which
+ones are stopped, whereas @code{detailed-status} has the effect of
+applying the default implementation of @code{status} to all services
+one after another.  The @code{silent} and @code{verbose} actions
+disable and enable the output of dmd, respectively.  The @code{load}
+action is unusual insofar as it shows a feature that is actually
+available to all services, but which we have not seen yet: It takes an
+additional argument.  You can use @code{load} to load arbitrary code
+into dmd at runtime, like this:
+
+@example
+deco load dmd ~/additional-services.scm
+@end example
+
+This is enough now about the @code{deco} and @code{dmd} programs, we
+will now take a look at how to configure dmd.  In the configuration
+file, we need mainly the definition of services.  We can also do
+various other things there, like starting a few services already.
+
+FIXME: Finish.  For now, look at the @code{examples/} subdirectory.
+
+@example
+...
+@end example
+
+Ok, to summerize:
+
+@itemize @bullet
+@item
+dmd is a daemon, deco the program that controls it.
+@item
+You can start, stop, restart, enable and disable every service, as
+well as display its status.
+@item
+You can perform additional service-specific actions, which you can
+also list.
+@item
+Actions can have arguments.
+@item
+You can display the status of a service, even if the service does not
+provide a specific implementation for this action.  The same is true
+for restarting.
+@item
+The @code{dmd} service is used to control dmd itself.
+@end itemize
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node deco and dmd
+@chapter deco and dmd
+
+@cindex deco
+@cindex dmd
+@cindex daemon
+@cindex daemon controller
+@cindex relative file names
+The daemon that runs in the background and is responsible for
+controlling the services is @dfn{dmd}, while the user interface tool
+is called @dfn{deco}, the @dfn{DaEmon COntroller}@footnote{Some people
+might argue that it actually is short for ``decoration'', indicating
+that it is useless. :-)}.  To perform an action, like stopping a
+service or calling an extra-action of a service, you use the deco
+program.  It will communicate with dmd over a Unix Domain Socket.
+
+Thus, you start dmd once, and then always use deco whenever you want
+to do something service-related.  Since deco passes its current
+working directory to dmd, you can pass relative file names without
+trouble.  Both dmd and deco understand the standard arguments
+@code{--help}, @code{--version} and @code{--usage}.
+
+
+@menu
+* Invoking dmd::    How to start the service damon.
+* Invoking deco::   Controlling daemons.
+@end menu
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Invoking dmd
+@section Invoking dmd
+
+@cindex dmd Invocation
+@cindex invoking dmd
+The @code{dmd} program has the following synopsis:
+
+@example
+dmd [@var{option}@dots{}]
+@end example
+
+It accepts the following options:
+
+@table @samp
+@item -c @var{file}
+@itemx --config=@var{file}
+Read @var{file} as the configuration script on startup.
+
+@item -I
+@itemx --insecure
+@cindex security
+@cindex insecure
+Do not check if the directory where the socket - from which we are
+going to receive commands - is located has secure permissions set.  If
+this option is not specified, dmd will abort if the permissions are
+set to something that is considered dangerous.
+
+@item -l [@var{file}]
+@itemx --logfile[=@var{file}]
+@cindex logging
+@cindex log file
+Log output into @var{file}, or if @var{file} is not given,
+@code{/var/log/dmd.log} when running as superuser, @var{~/.dmd.log}
+otherwise.
+
+@item -p [@var{file}]
+@itemx --persistency[=@var{file}]
+Undocumented
+@c FIXME-CRITICAL
+
+@item -S
+@itemx --silent
+Don't write to standard output.
+
+@item -s @var{file}
+@itemx --socket=@var{file}
+@cindex socket special file
+Receive further commands on the socket special file @var{file}.  If
+this option is not specified, @code{/var/run/dmd/$USER/default} is
+taken.  If @code{none} is specified as file name, the commands will be
+read from standard input.  Note that you can still use a socket with
+the name @code{none} if you specify the directory name as well, like
+this: @code{./none}.
+
+@item --quiet
+Synonym for @code{--silent}.
+
+@end table
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Invoking deco
+@section Invoking deco
+
+@cindex deco Invocation
+@cindex invoking deco
+The @code{deco} command has the following synopsis:
+
+@example
+deco [@var{option}@dots{}] @var{action} @var{service} [@var{arg}@dots{}]
+@end example
+
+It causes the @var{action} of the @var{service} to be invoked.  For
+each action, you should pass the appropriate @var{arg}s.  Actions that
+are available for every service are start, stop, restart, status,
+enable and disable.
+
+If you pass a file name as an @var{arg}, it will be passed as-is to
+dmd, thus if it is not an absolute name, it is local to the current
+working directory of dmd, not to deco.
+
+The @code{deco} command understands the following options:
+
+@table @samp
+@item -I
+@itemx --insecure
+Do not check if the directory where the socket - from which we are
+going to receive output from dmd - is located has secure permissions
+set.  If this option is not specified, deco will abort if the
+permissions are set to something that is considered dangerous.
+
+@item -r @var{file}
+@itemx --result-socket=@var{file}
+@cindex socket special file
+Receive the output from dmd on the socket special file @var{file}.  By
+default, /var/run/dmd/$USER/deco is used.
+
+@item -s @var{file}
+@itemx --socket=@var{file}
+Send commands to the socket special file @var{file}. If this option is
+not specified, /var/run/dmd/$USER/default is taken.
+
+@end table
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Services
+@chapter Services
+
+@cindex service
+@tindex <service>
+The @dfn{service} is obviously a very important concept of dmd.  On
+the Guile-level, a service is represented as an instance of the class
+@code{<service>}.  When creating an instance of it, you can specify
+the initial values of its slots, and you actually must do this for
+some of the slots.
+
+@menu
+* Slots of services::            What a <service> object consists of.
+* Methods of services::          What you can do with a <service> object.
+* Service Convenience::          How to conveniently work with services.
+* Service De- and Constructors:: Commonly used ways of starting and
+                                   stopping services.
+* Service Examples::             Examples that show how services are used.
+* The dmd and unknown services:: Special services in dmd.
+@end menu
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Slots of services
+@section Slots of services
+
+@cindex <service>, slots of
+@cindex slots of <service>
+A service has the following slots, all of which can be initialized
+with a keyword (i.e. @code{#:provides}, used when creating the object)
+of the same name, except where stated otherwise.  You should not
+access them directly with @code{slot-ref} or @code{slot-set!}
+usually, use the methods of the service class @ref{Methods of
+services} instead.
+
+@itemize @bullet
+@item
+@vindex provides (slot of <service>)
+@cindex canonical names of services
+@code{provides} is a list of symbols that are provided by the service.
+A symbol can only be provided by one service running at a time,
+i.e. if two services provide the same symbol, only one of them can
+run, starting the other one will fail.  Therefore, these symbols are
+mainly used to denote conflicting services.  The first symbol in the
+list is the canonical name for the service, thus it must be unique.
+This slot has no default value and must therefore be initialized.
+
+@item
+@vindex requires (slot of <service>)
+@code{requires} is, like @code{provides}, a list of symbols that
+specify services.  In this case, they name what this service depends
+on, i.e. before the service can be started, services that provide
+those symbols must be started.  If a required symbol is provided by
+several services, one will be started.  By default, this slot
+contains the empty list.
+
+@item
+@vindex running (slot of <service>)
+@cindex Hook for individual services
+@code{running} is a hook that can be used by each service in its own
+way.  The default value is @code{#f}, which indicates that the service
+is not running. When an attempt is made to start the service, it will
+be set to the return value of the procedure in the @code{start} slot.
+It will also be passed as an argument to the procedure in the
+@code{stop} slot.  This slot can not be initialized with a keyword.
+
+@item
+@vindex respawn? (slot of <service>)
+@cindex Respawning services
+@code{respawn?} specifies whether the service should be respawned by
+dmd.  If this slot has the value @code{#t}, then assume the
+@code{running} slot specifies a child process PID and restart the
+service if that process terminates.  Otherwise this slot is @code{#f},
+which is the default.  See also the @code{last-respawns} slot.
+
+@item
+@vindex start (slot of <service>)
+@cindex Starting a service
+@cindex Service constructor
+@code{start} contains the ``constructor'' for the service, which will
+be called to start the service.  (Therefore, it is not a constructor
+in the sense that it initializes the slots of a @code{<service>}
+object.)  This must be a procedure that accepts any amount of
+arguments, which will be the additional arguments supplied by the
+user.  If the starting attempt failed, it must return @code{#f}.  The
+value will be stored in the @code{running} slot.  The default value is
+a procedure that returns @code{#t} and performs no further actions,
+therefore it is desirable to specify a different one usually.
+
+@item
+@vindex stop (slot of <service>)
+@cindex Stoping a service
+@cindex Service destructor
+@code{stop} is, similar to @code{start}, a slot containing a
+procedure.  But in this case, it gets the current value of the
+@code{running} slot as first argument and the user-supplied arguments
+as further arguments; it gets called to stop the service.  Its return
+value will again be stored in the @code{running} slot, so that it
+should return @code{#f} if it is now possible again to start the
+service at a later point.  The default value is a procedure that
+returns @code{#f} and performs no further actions.
+
+@item
+@vindex extra-actions (slot of <service>)
+@cindex Addition actions of services
+@cindex Extra actions of services
+@code{extra-actions} specifies the additional actions that can be
+performed on a service when it is running.  A typical example for this
+is the @code{restart} action.  The macro @code{make-extra-actions}
+@ref{Service Convenience} is provided to abstract the actual data
+representation format for this slot.  (It actually is a hash
+currently.)
+
+@item
+@vindex enabled? (slot of <service>)
+@code{enabled?} cannot be initialized with a keyword, and contains
+@code{#t} by default.  When the value becomes @code{#f} at some point,
+this will prevent the service from getting started.  A service can be
+enabled and disabled with the methods @code{enable} and
+@code{disable}, respectively @ref{Methods of services}.
+
+@item
+@vindex last-respawns (slot of <service>)
+@code{last-respawns} cannot be initialized with a keyword and is only
+ever used when the @code{respawn?} slot contains @code{#t}; it is a
+circular list with @code{(car respawn-limit)} elements, where each
+element contains the time when it was restarted, initially all 0,
+later a time in seconds since the Epoch.  The first element is the one
+that contains the oldest one, the last one the newest.
+
+@item
+@vindex stop-delay? (slot of <service>)
+@code{stop-delay?} being false causes the @code{stop} slot to be
+unused; instead, stopping the service will just cause the
+@code{waiting-for-termination?} slot be set to @code{#t}.
+
+@item
+@vindex waiting-for-termination? (slot of <service>)
+@code{waiting-for-termination?} cannot be initialized with a keyword
+and should not be used by others, it is only used internally for
+respawnable services when the @code{stop-delay?} slot contains a true
+value.  @code{waiting-for-termination?} contains @code{#t} if the
+service is still running, but the user requested that it be stopped,
+in which case if the service terminates the next time, the respawn
+handler will not start it again.
+
+otherwise @code{#f}.
+
+@end itemize
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Methods of services
+@section Methods of services
+
+@deffn {method} start (obj <service>)
+Start the service @var{obj}, including all the services it depends on.
+It tries quite hard to do this: When a service that provides a
+required symbol can not be started, it will look for another service
+that also provides this symbol, until starting one such service
+succeeds.  There is some room for theoretical improvement here, of
+course, but in pratice the current strategy already works very well.
+This method returns the new value of the @code{running} slot
+@ref{Slots of services}, which is @code{#f} if the service could not
+be started.
+@end deffn
+
+@deffn {method} stop (obj <service>)
+This will stop the service @var{obj}, trying to stop services that
+depend in it first, so they can be shutdown cleanly.  If this will
+fail, it will continue anyway.  Stopping of services should usually
+succeed, though.  Otherwise, the behaviour is very similar to the
+@code{start} method.  The return value is also the new @code{running}
+value, thus @code{#f} if the service was stopped.
+@end deffn
+
+@deffn {method} extra-action (obj <service>) action . args
+Calls the extra-action @var{action} (a symbol) of the service
+@var{obj}, with the specified @var{args}, which are dependend on the
+particular extra-action.
+@end deffn
+
+@deffn {method} conflicts-with (obj <service>)
+Returns a list of the canonical names of services that conflict with
+the service @var{obj}.
+@end deffn
+
+@deffn {method} canonical-name (obj <service>)
+Returns the canonical name of @var{obj}, which is the first element of
+the @code{provides} list.
+@end deffn
+
+@deffn {method} provided-by (obj <service>)
+Returns which symbols are provided by @var{obj}.
+@end deffn
+
+@deffn {method} required-by (obj <service>)
+Returns which symbols are required by @var{obj}.
+@end deffn
+
+@deffn {method} running? (obj <service>)
+Returns whether the service @var{obj} is running.
+@end deffn
+
+@deffn {method} respawn? (obj <service>)
+Returns whether the service @var{obj} should be respawned if it
+terminates.
+@end deffn
+
+@deffn {method} default-display-status (obj <service>)
+Display status information about @var{obj}.  This method is called
+when the user performs the extra-action @code{status} on @var{obj},
+but there is no specific implementation given for it.  It is also
+called when @code{detailed-status} is applied on @code{dmd}.
+@end deffn
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Service Convenience
+@section Service Convenience
+
+In addition to the facilities listed below, there are also some
+procedures that provide commonly needed constructors and destructors
+for services @ref{Service De- and Constructors}.
+
+@deffn {procedure} register-services . services
+Register all @var{services}, so that they can be taken into account
+when trying to resolve dependencies.
+@end deffn
+
+@deffn {procedure} lookup-services name
+Return a list of all registered services which provide the symbol
+@var{name}.
+@end deffn
+
+@deffn {macro} make-extra-actions (name proc) ...
+This macro is used to create a value for the @code{extra-actions} slot
+of a service object @ref{Slots of services}.  Each @var{name} is a
+symbol and each @var{proc} the corresponding procedure that will be
+called to perform the action.  A @var{proc} has one argument, which
+will be the current value of the @code{running} slot of the service.
+@end deffn
+
+@deffn {method} start (obj <symbol>)
+Start a registered service providing @var{obj}.
+@end deffn
+
+@deffn {method} stop (obj <symbol>)
+Stop a registered service providing @var{obj}.
+@end deffn
+
+@deffn {method} extra-action (obj <symbol>) action . args
+The same as the @code{extra-action} method of class @code{<service>},
+but uses a service that provides @var{obj} and is running.
+@end deffn
+
+@deffn {procedure} for-each-service proc
+Call @var{proc}, a procedure taking one argument, once for each
+registered service.
+@end deffn
+
+@deffn {procedure} find-running services
+Check if any of @var{services} is running.  If this is the case,
+return its canonical name.  If not, return @code{#f}.  Only the first
+one will be returned; this is because this is mainly intended to be
+applied on the return value of @code{lookup-services}.
+@end deffn
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Service De- and Constructors
+@section Service De- and Constructors
+
+@cindex generating constructors
+@cindex generating destructors
+@cindex constructors, generation of
+@cindex destructors, generation of
+All of the procedures listed below return procedures generated from
+the supplied arguments.  These procedures take one argument in the
+case of destructors and no arguments in the case of constructors.
+
+@deffn {procedure} make-system-constructor . command
+The returned procedure will execute @var{command} in a shell and
+return @code{#t} if execution was successful, otherwise @code{#f}.
+For convenience, it takes multiple arguments which will be
+concatenated first.
+@end deffn
+
+@deffn {procedure} make-system-destructor . command
+Similar to @code{make-system-constructor}, but returns @code{#f} if
+execution of the @var{command} was successful, @code{#t} if not.
+@end deffn
+
+@deffn {procedure} make-childexec-constructor program . args
+The returned procedure will fork a child process and execute
+@var{program} with the additional arguments @var{args}.  Note that you
+don't have to supply the program name as the first argument again,
+like it is necessary for @code{execl} and friends.  It returns the pid
+of the child process.
+@end deffn
+
+@deffn {procedure} make-kill-destructor signal
+Returns a procedure that sends @var{signal} to the pid which it takes
+as argument.  This @emph{does} work together with respawning services,
+because in that case the @code{stop} method of the @code{<service>}
+class sets the @code{running} slot to @code{#f} before actually
+calling the destructor; if it would not do that, killing the process
+in the destructor would immediatelly respawn the service.
+@end deffn
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Service Examples
+@section Service Examples
+
+FIXME: This needs a lot of work.
+
+You can create a service and then register it this way:
+
+@lisp
+(define apache (make <service>
+                     #:provides '(apache)
+                     #:start (...)
+                     #:stop (...)))
+(register-services apache)
+@end lisp
+
+However, as you usually won't need a variable for the service, you can
+pass it directly to @code{register-services}.  Here is an example that
+also specifies some more initial values for the slots:
+
+@lisp
+(register-services
+  (make <service>
+        #:provides '(apache-2.0 apache httpd)
+        #:requires '()
+        #:start (...)
+        #:stop (...)
+        #:extra-actions (make-extra-actions
+                          (reload-modules (...))
+                          (restart (...)))))
+@end lisp
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node The dmd and unknown services
+@section The @code{dmd} and @code{unknown} services
+
+@cindex dmd service
+@cindex special services
+The service @code{dmd} is special, because it is used to control dmd
+itself.  It provides the following extra-actions (in addition to
+@code{enable}, @code{disable} and @code{restart} which do not make
+sense here).
+
+@table @samp
+@item @code{status}
+Displays which services are started and which ones are not.
+
+@item @code{detailed-status}
+Displays detailed information about every registered service.
+
+@item @code{load @var{file}}
+Evaluate the Scheme code in @var{file}.
+
+@item @code{silent}
+Don't send output to dmd's standard output, only to deco.
+
+@item @code{verbose}
+Undo what @code{silent} did.
+
+@item @code{daemonize}
+Fork and go into the background.  This should be called before
+respawnable services are started, as otherwise we would not get the
+@code{SIGCHLD} signals when they terminate.
+
+@item @code{enable-persistency}
+When terminating, safe the list of running services in a file.
+@c FIXME-CRITICAL: How can we specify which one?
+
+@item @code{disable-persistency}
+Don't safe the list of running services when terminating.
+
+@end table
+
+@cindex unknown service
+@cindex fallback service
+The @code{unknown} service must be defined by the user and if it
+exists, is used as a fallback whenever we try to invoke an unknown
+action of an existing service or use a service that does not exist.
+This is useful only in few cases, but enables you to do various sorts
+of unusual things.
+
+@c FIXME-CRITICAL: finish
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Runlevels
+@chapter Runlevels
+
+RUNLEVELS DO NOT WORK YET! Do not use them! Ignore this section!
+
+@cindex runlevel
+@tindex <runlevel>
+A @dfn{runlevel} makes it easier to start and stop groups of services,
+to bring the system into a certain state.  An object of class
+@code{<runlevel>} is an abstract runlevel, and has the following
+methods:
+
+@deffn {method} enter (rl <runlevel>) services
+This will be called when the runlevel should be entered.
+@var{services} is the list of the currently running services.
+@end deffn
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Misc Facilities
+@chapter Misc Facilities
+
+This is a list of facilities which are available to code running
+inside of dmd and is considered generally useful, but is not directly
+related to one of the other topic covered in this manual.
+
+@menu
+* Errors::         Signalling, handling and ignoring errors.
+* Communication::  Input/Output in various ways.
+* Others::         Stuff that is useful, but is homeless.
+@end menu
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Errors
+@section Errors
+
+@cindex assertions
+@deffn {macro} assert expr
+If @var{expr} yields @code{#f}, display an appropriate error
+message and throw an @code{assertion-failed} exception.
+@end deffn
+
+@deffn {procedure} caught-error key args
+Tell dmd that a @var{key} error with @var{args} has occured.  This is
+the simplest way to cause caught error result in uniformly formated
+warning messages.  The current implementation is not very good,
+though.
+@end deffn
+
+@deffn {procedure} call/cc proc
+An alias for @code{call-with-current-continuation}.
+@end deffn
+
+@deffn {procedure} call/ec proc
+A simplistic implementation of the nonstandard, but popular procedure
+@code{call-with-escape-continuation}, i.e. a @code{call/cc} for
+outgoing continuations only.  Note that the variant included in dmd is
+not aware of @code{dynamic-wind} at all and does not yet support
+returning multiple values.
+@end deffn
+
+@cindex system errors
+@deffn {macro} without-system-error expr@dots{}
+Evaluates the @var{expr}s, not going further if a system error occurs,
+but also doing nothing about it.
+@end deffn
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Communication
+@section Communication
+
+@cindex output
+@deffn {procedure} local-output format-string . args
+This procedure should be used for all output operations in dmd.  It
+outputs the @var{args} according to the @var{format-string}, then
+inserts a newline.  It writes to whatever is the main output target of
+dmd, which might be multiple at the same time in future versions.
+@end deffn
+
+@tindex <receiver>
+For paket-based communication over a Unix Domain Socket, there are two
+classes.  They exist to make it easiely possible to use pakets of
+arbitrary size.  To receive data, you use an instance of the class
+@code{<receiver>}.  This can be done this way:
+
+@lisp
+(define my-receiver (make <receiver> "/tmp/socket-name"))
+@end lisp
+
+A @code{<receiver>} has the following method:
+
+@deffn {method} receive-data (obj <receiver>)
+This will return a string containing the data of the next paket.
+@end deffn
+
+@tindex <sender>
+Sending data so that a @code{<receiver>} understands it can be done
+with the class @code{<sender>}.  You can create an instance like this:
+
+@lisp
+(define my-sender (make <sender> "/tmp/socket-name"))
+@end lisp
+
+The class @code{<sender>} has the following method:
+
+@deffn {method} send-data (obj <sender) data
+Send @var{data} to the sender object @var{obj}.  You should always use
+this when the receiver-side is using a @code{<receiver>} object.
+@end deffn
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Others
+@section Others
+
+@cindex hashes
+@deffn {procedure} copy-hashq-table table new-size
+Create a hash-table with size @var{new-size}, and insert all values
+from @var{table} into it, using @code{eq?} when inserting.  This
+procedure is mainly used internally, but is a generally useful
+utillity, so it can by used by everyone.
+@end deffn
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Internals
+@chapter Internals
+
+This chapter contains information about the design and the
+implementation details of dmd for people who want to hack dmd itself.
+If you want your work to get included in dmd, please contact me and
+say what you intend to do so that I can give advice on how to do it
+and we can avoid duplicating work.  My development version is usually
+a bit ahead of what I release, as I only want to publish code that got
+some testing.
+
+@menu
+* Design decisions::    Why dmd is what it is.
+* Service Internals::   How services actually work.
+* Runlevel evolution::  Learning from past mistakes.
+@end menu
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Design decisions
+@section Design decisions
+
+The general idea of a service manager that uses dependencies, similar
+to those of a Makefile, came from the developers of the GNU Hurd, but
+as few people are satisfied with System V Init, many other people had
+the same idea independently.  Nevertheless, dmd was written with the
+goal of becoming a replacement for System V Init on GNU/Hurd, which
+was one of the reasons for choosing the extension language of the GNU
+project, Guile, for implementation (another reason being that it makes
+it just so much easier).
+
+The runlevel concept (i.e. thinking in @emph{groups} of services) is
+sometimes useful, but often one also wants to operate on single
+services.  System V Init makes this hard: While you can start and stop
+a service, @code{init} will not know about it, and use the runlevel
+configuration as its source of information, opening the door for
+inconsistencies (which fortunatly are not a practical problem
+usually).  In dmd, this was avoided by having a central entity that is
+responsible for starting and stopping the services, which therefore
+knows which services are actually started (if not completely
+inproperly used, but that is a requirement which is impossible to
+avoid anyway).  While runlevels are not implemented yet, it is clear
+that they will sit on top of the service concept, i.e. runlevels will
+merely be an optional extension that the service concept does not rely
+on.  This also makes changes in the runlevel design easier when it may
+become necessary.
+
+The consequence of having a daemon running that controls the services
+is that we need another program as user interface which communicates
+with the daemon.  Fortunatly, this makes the commands necessary for
+controlling services pretty short and intuitive, and gives the
+additional bonus of adding some more flexibility.  For example, it is
+easiely possible to grant password-protected control over certain
+services to unprivileged users, if desired.
+
+An essential aspect of the design of dmd (which was already mentioned
+above) is that dmd should always know exactly what is happening,
+i.e. which services are started and stopped.  The alternative would
+have been to not use a daemon, but to save the state on the file
+system, again opening the door for inconsistencies of all sorts.
+Also, we would have to use a seperate program for respawning a service
+(which just starts the services, waits until it terminates and then
+starts it again).  Killing the program that does the respawning (but
+not the service that is supposed to be respawned) would cause horrible
+confusion.  My understanding of ``The Right Thing'' is that this
+conceptionally limited strategy is exactly what we do not want.
+
+The way dependencies work in dmd took a while to mature, as it was not
+easy to figure out what is appropriate.  I decided to not make it too
+sophisticated by trying to guess what the user might want just to
+theoretically fulfill the request we are processing.  If something
+goes wrong, it is usually better to tell the user about the problem
+and let her fix it, taking care to make finding solutions or
+workarounds for problems (like a misconfigured service) easy.  This
+way, the user is in control of what happens and we can keep the
+implementation simple.  To make a long story short, @emph{we don't try
+to be too clever}, which is usually a good idea in developing
+software.
+
+If you wonder why I was giving a ``misconfigured service'' as an
+example above, consider the following situation, which actually is a
+wonderful example for what was said in the previous paragraph: Service
+X depends on symbol S, which is provided by both A and B.  A depends
+on AA, B depends on BB.  AA and BB conflict with each other.  The
+configuration of A contains an error, which will prevent it from
+starting; no service is running, but we want to start X now.  In
+resolving its dependencies, we first try to start A, which will cause
+AA to be started.  After this is done, the attempt of starting A
+fails, so we go on to B, but its dependency BB will fail to start
+because it conflicts with the running service AA.  So we fail to
+provide S, thus X cannot be started.  There are several possibilities
+to deal with this:
+
+@itemize @bullet
+@item
+When starting A fails, terminate those services which have been
+started in order to fulfill its dependencies (directly and
+indirectly).  In case AA was running already, we would not want to
+terminate it.  Well, maybe we would, to avoid the conflict with BB.
+But even if we would find out somehow that we need to terminate AA to
+eventually start X, is the user aware of this and wants this to happen
+(assuming AA was running already)?  Probably not, she very likely has
+assumed that starting A succeeds and thus terminating AA is not
+necessary.  Remember, unrelated (running) services might depend in AA.
+Even if we ignore this issue, this strategy is not only complicated,
+but also far from being perfect: Let's assume starting A succeeds, but
+X also depends on a service Z, which requires BB.  In that case, we
+would need to detect in the first place that we should not even try to
+start A, but directly satisfy X's dependency on S with B.
+
+@item
+We could do it like stated above, but stop AA only if we know we won't
+need it anymore (for resolving further dependencies), and start it
+only when it does not conflict with anything that needs to get
+started.  But should we stop it if it conflicts with something that
+@emph{might} get started?  (We do not always know for sure what we
+will start, as starting a service might fail and we want to fall back
+to a service that also provides the particular required symbol in that
+case.)  I think that either decision will be bad in one case or
+another, even if this solution is already horribly complicated.
+
+@item
+When we are at it, we could just calculate a desired end-position, and
+try to get there by starting (and stopping!) services, recalculating
+what needs to be done whenever starting a service fails, also marking
+that particular service as unstartable, except if it fails to start
+because a dependency could not be resolved (or maybe even then?).
+This is even more complicated (and somehow smells for @code{call/cc},
+don't you think?).  Instead of implementing this and thereby producing
+code that (a) nobody understands, (b) certainly has a lot of bugs, (c)
+will be unmaintainable and (d) causes users to panic because they
+won't understand what will happen, I decided to do the following
+instead:
+
+@item
+Just report the error, and let the user fix it (in this case, fix the
+configuration of A) or work around it (in this case, disable A so that
+we won't start AA but directly go on to starting B).
+@end itemize
+
+I hope you can agree that the latter solution after all is the best
+one, because we can be sure to not do something that the user does not
+want us to do.  Software should not run amok.  This explanation was
+very long, but I think it was necessary to justify why dmd uses a very
+primitive algorithm to resolve dependencies, despite the fact that it
+could theoretically be a bit more clever in certain situations.
+
+One might argue that it is possible to ask the user if the planned
+actions are ok with her, and if the plan changes ask again, but
+especially given that services are supposed to usually work, I see few
+reasons to make the source code of dmd more complicated than
+necessary.  If you volunteer to write @emph{and} maintain a more
+clever strategy (and volunteer to explain it to everyone who wants to
+understand it), you are welcome to do so, of course@dots{}
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Service Internals
+@section Service Internals
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Runlevel evolution
+@section Runlevel evolution
+
+This section describes how the runlevel concept evolved over time.
+This is basically a collection of mistakes, but is provided here for
+your information, and possibly for your amusement, but I'm not sure if
+all this weird dependency stuff is really that funny.
+
+@menu
+* Runlevel assumptions::    What runlevels should be like
+* Runlevels - part one::    The first attempts of making it work
+* Runlevels - part two::    A more promising attempt
+* Runlevels - part three::  It should work... somehow...
+@end menu
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Runlevel assumptions
+@subsection Runlevel assumptions
+
+A runlevel is a system state, i.e. it consists of the information
+about which services are supposed to be available and which not.  This
+vague definition implies that several different runlevel styles can be
+implemented in a service manager.
+
+For example, you can do it like System V Init, specifying which
+services should be started when we enter a runlevel and which ones
+should be stopped when leaving it.  But one could also specify for
+every service in which runlevels it should be running.
+
+In dmd, we do not want to limit ourselfes to a single runlevel style.
+We allow for all possible strategies to be implemented, providing the
+most useful ones as defaults.  We also want to make it possible to
+combine the different styles arbitrariely.
+
+Therefore, when entering a runlevel, we call a user-defined piece of
+code, passing it the list of currently active services and expecting
+as the result a list of service symbols which tell us which services
+we want to have running.  This interface makes it very easy to
+implement runlevel styles, but makes it not-so-easy for the runlevel
+implementation itself, because we have to get from the current state
+into a desired state, which might be more or less vague (since it is
+not required to be a list of canonical names).  Obviously service
+conflicts and already running services need to be taken into account
+when deciding which services should be used to provide the various
+symbols.
+
+Also, the runlevel implementation should be implemented completely on
+top of the service concept, i.e. the service part should not depend on
+the idea of runlevels or care about them at all.  Otherwise
+understanding the service part (which is the most essential aspect of
+dmd) would become harder than necessary.
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Runlevels - part one
+@subsection Runlevels, part one
+
+@c FIXME-CRITICAL
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Runlevels - part two
+@subsection Runlevels, part two
+
+I came up with the following algorithm (here in Pseudo-Scheme), which
+is possibly slightly buggy, but should give you the idea:
+
+@lisp
+;; Beginning with the canonical names in CURRENT-SERVICES, start and
+;; stop services until getting into a state where everything requested
+;; in TARGET-SERVICES (which does not only consist of canonical names)
+;; is provided, and the things they depends on, but no more.
+(define (switch-runlevel current-services target-services)
+  (let ((target-services-backup target-services)
+	(unstartable '()))
+    (let retry ()
+      (repeat-until-none-of-these-changes-annythig
+       ;; Replace all of them with canonical names which provide them.
+       (canonicalize-names! target-services unstartable current-services)
+       ;; Add what we need additionally.
+       (add-dependencies! target-services unstartable current-services))
+      (remove-redundancy! target-services)
+      (stop-all-unneeded target-services)
+      (catch 'service-could-not-be-started
+	     (lambda ()
+	       ;; Iterate over the list, starting only those which
+	       ;; have all dependencies already resolved, so nothing
+	       ;; we don't want will be started.  Repeat until done.
+	       (carefully-start target-services))
+	     (lambda (key service)
+	       (set! unstartable (cons service unstartable))
+	       (set! target-services backup-target-services)
+	       (set! current-services (compute-current-services))
+	       (retry))))))
+@end lisp
+
+This indeed looks like a nice way to get what we want.  However, the
+details of this are not as easy as it looks like.  When replacing
+virtual services with canonical names, we have to be very careful.
+Consider the following situation:
+
+The virtual service X is provided by both A and B, while Y is provided
+only by B.  We want to start C (which depends on X) and D (which
+depends on Y).  Obviously we should use B to fulfill the dependency
+of C and D on X and Y, respectively.  But when we see that we need
+something that provides X, we are likely to do the wrong thing: Select
+A.  Thus, we need to clean this up later. I wanted to do this as
+follows:
+
+While substituting virtual services with canonical names, we also safe
+which one we selected to fulfill what, like this:
+
+@lisp
+((A . (X))
+ (B . (Y)))
+@end lisp
+
+Later we look for conflicts, and as A and B conflict, we look which
+one can be removed (things they provide but are not required by anyone
+should be ignored, thus we need to create a list like the above).  In
+this case, we can replace A with B as B also provides X (but A does
+not provide Y, thus the reverse is impossible).  If both could be
+used, we probably should decide which one to use by looking at further
+conflicts, which gets pretty hairy.  But, in this case, we are lucky
+and end up with this:
+
+@lisp
+((B . (X Y)))
+@end lisp
+
+This way of finding out which service we should use in case of
+conflicts sounds pretty sane, but if you think it will work well, you
+have been fooled, because actually it breaks horribly in the following
+situation:
+
+@multitable @columnfractions .10 .30
+@item Service @tab Provides
+@item A @tab @code{W X Y -}
+@item B @tab @code{W X - Z}
+@item C @tab @code{- X Y Z}
+@item D @tab @code{W - - -}
+@end multitable
+
+If we need all of W, X, Y and Z, then obviously we need to take C and
+D.  But if we have a list like this, we cannot fix it:
+
+@lisp
+((A . (W X Y))
+ (B . (Z)))
+@end lisp
+
+Thus, we cannot do it this way.
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Runlevels - part three
+@subsection Runlevels, part three
+
+Let's look again at the table at the end of part two:
+
+@multitable @columnfractions .10 .30
+@item Service @tab Provides
+@item A @tab @code{W X Y -}
+@item B @tab @code{W X - Z}
+@item C @tab @code{- X Y Z}
+@item D @tab @code{W - - -}
+@end multitable
+
+If from this table it is so obvious for us what we should do, then it
+should also be possible to calculate it for a computer, given such a
+table as input.  Ok, we have to take into account conflicts that are
+not visible in this table, but the general idea is usable.  But how do
+we find which combination works?  I found only one way yet: Kind of a
+brute force attack: Try combinations until we find one that works.
+
+This alone would be too slow.  With 20 services we would have 2^20
+possible combinations, that is a bit more than a million.  Fortunatly,
+we can optimize this.  First I thought we could remove all services
+from the list that do not provide any symbol we need, but that is
+obviously a stupid idea, as we might need them for dependencies, in
+which case we need to take into account their conflicts.  But the
+following method would work:
+
+Very often a symbol that is required will be a canonical name already,
+i.e. be provided only by a single service.  Using our example above,
+let's suppose we also need the symbol V, which is provided only by D.
+The first step we do is to look which (required) symbols are provided
+only by a single service, as we will need this service for sure.  In
+this case, we would need D.  But by using it, we would also get the
+other symbols it provides, W in this case.  This means that we don't
+need to bother looking at other services that provide W, as we cannot
+use them because they conflict with a service that we definitely need.
+In this case, we can remove A and B from the list this way.  Note that
+we can remove them entirely, as all their conflicts become irrelevant
+to us now.  In this simple case we would not even have to do much
+else, C is the only remaining service.
+
+After this first step, there remain the symbols that are provided by
+two or more services.  In every combination we try, exactly one of
+them must be used (and somehow we should take into account which
+services are running already).  This also reduces the amount of
+possible combinations a lot.  So what remains after that are the
+services we might need for fulfilling dependencies.  For them, we
+could to try all combinations (2^n), making sure that we always try
+subsets before any of their supersets to avoid starting unneeded
+services.  We should take into account which services are already
+running as well.
+
+The remaining question is, what to do if starting a service fails.  A
+simple solution would be to recursively remove all services that
+depend on it directly or indirectly.  That might cause undesired
+side-effects, if a service was running but it had to be stopped
+because one of the services that provides something it depends on gets
+exchanged for another service that provides the same symbol, but fails
+to start.  The fact that we would have to stop the (first) service is
+a problem on its own, though.
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Concept Index
+@unnumbered Concept Index
+
+@printindex cp
+
+@node Procedure and Macro Index
+@unnumbered Procedure and Macro Index
+
+@printindex fn
+
+@node Variable Index
+@unnumbered Variable Index
+
+@printindex vr
+
+@node Type Index
+@unnumbered Type Index
+
+@printindex tp
+
+@bye
