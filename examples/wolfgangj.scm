@@ -74,17 +74,17 @@
 (register-services
  (make <service>
    #:provides '(term)
-   #:extra-actions (make-extra-actions
-		    (create
-		     (lambda (running)
-		       (add-new-term)))
-		    (counter-set
-		     (lambda (running num)
-		       (set! term-counter (string->number num))))
-		    (status
-		     (lambda (running)
-		       (local-output "Terminal counter is at ~a."
-				     term-counter)))))
+   #:actions (make-actions
+	      (create "Create a new terminal."
+	       (lambda (running)
+		 (add-new-term)))
+	      (counter-set "Set the terminal creation counter."
+	       (lambda (running num)
+		 (set! term-counter (string->number num))))
+	      (status "Display the terminal creation counter."
+	       (lambda (running)
+		 (local-output "Terminal counter is at ~a."
+			       term-counter)))))
  (make <service>
    #:provides '(apache insecurity)
    #:requires '(local-net)
@@ -94,15 +94,15 @@
    #:provides '(inet insecurity)
    #:start (make-system-constructor inet " start")
    #:stop (make-system-destructor inet " stop")
-   #:extra-actions (make-extra-actions
-		    (dial
-		     (lambda (running)
-		       (system inet-dial)
-		       #t))
-		    (hangup
-		     (lambda (running)
-		       (system inet-hangup)
-		       #t))))
+   #:actions (make-actions
+	      (dial "Connect to the big, evil internet."
+	       (lambda (running)
+		 (system inet-dial)
+		 #t))
+	      (hangup "Cut the internet connection."
+	       (lambda (running)
+		 (system inet-hangup)
+		 #t))))
  (make <service>
    #:provides '(local-net)
    #:start (make-system-constructor ifconfig " " local-interface " " local-ip)
@@ -122,7 +122,7 @@
   (loop default-terms))
 
 ;; Go into background.
-(extra-action 'dmd 'daemonize)
+(action 'dmd 'daemonize)
 
 ;; Setup internet, a mailer and a few terms.
 (for-each start

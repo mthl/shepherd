@@ -1441,7 +1441,7 @@ fi
 
 # Define the identity of the package.
  PACKAGE=dmd
- VERSION=-0.6
+ VERSION=-0.5
 
 
 cat >>confdefs.h <<_ACEOF

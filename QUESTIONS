@@ -1,0 +1,25 @@
+Open questions about dmd
+=-=-=-=-=-=-=-=-=-=-=-=-
+
+- Do we need a `requests' field for services?  Service-symbols
+  specified there would be started like requirements, but if starting
+  all services providing it would fail, we could continue anyway.
+  This sounds nice, but it can easiely be emulated by adding to the
+  `start' code something like:
+
+    (for-each start '(service1 service2))
+
+  Since this is so simple, I wonder if this functionality is that
+  commonly needed that it is worth adding it.  If desired, it would be
+  trivial to implement if we don't consider that we might get into
+  trouble due to conflicts of these services with other services we
+  need to start.
+
+- Do we need a field for services that specifies the global startup
+  order, which has a smaller priority than dependencies?  This is
+  implemented in Darwins init system and was requested for dmd, but I
+  have no idea what that should be good for.  If desired, it would
+  probably not be extremely hard to hack it into dmd.  However, a
+  better solution might be soft dependencies: "If we start both FOO
+  and BAR, start FOO first."
+

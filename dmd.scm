@@ -21,7 +21,7 @@
 (use-modules (ice-9 syncase)  ;; R5RS macros.
 	     (ice-9 rdelim)   ;; Line-based I/O.
 	     (ice-9 readline) ;; Readline (for interactive use).
-	     (oop goops)      ;; OO support.
+	     (oop goops)      ;; Defining classes and methods.
 	     (srfi srfi-1)    ;; List library.
 	     (srfi srfi-13)   ;; String library.
 	     (srfi srfi-16))  ;; `case-lambda'.
@@ -98,10 +98,10 @@
 		    #:long "socket" #:short #\s
 		    #:takes-arg? #t #:optional-arg? #f #:arg-name "FILE"
 		    #:description
-		    "get commands from socket FILE or from stdin (`none')"
+		    "get commands from socket FILE or from stdin (-)"
 		    #:action (lambda (file)
 			       (set! socket-file
-				     (if (not (string=? file "none"))
+				     (if (not (string=? file "-"))
 					 file
 				       ;; We will read commands
 				       ;; from stdin, thus we
@@ -191,8 +191,8 @@
       (local-output "Invalid command.")
     (let ((dir (car command))
 	  (file (cadr command))
-	  (action (string->symbol (caddr command)))
-	  (service (string->symbol (cadddr command)))
+	  (the-action (string->symbol (caddr command)))
+	  (service-symbol (string->symbol (cadddr command)))
 	  (args (cddddr command)))
       (chdir dir)
       (and file
@@ -201,14 +201,22 @@
       ;; line to deco before we actually quit.
       (catch 'quit
 	(lambda ()
-	  (case action
-	    ((start) (apply start service args))
-	    ((stop) (apply stop service args))
-	    ((enforce) (apply enforce service args))
-	    ;; `doc', `enable' and `disable' have the semantics
-	    ;; of `extra-action', thus they are handled there.
-	    (else (apply extra-action
-			 (cons* service action args)))))
+	  (case the-action
+	    ((start) (apply start service-symbol args))
+	    ((stop) (apply stop service-symbol args))
+	    ((enforce) (apply enforce service-symbol args))
+	    ((dmd-status)
+	     (if (not (null? args))
+		 (local-output "Too many arguments.")
+	       (let ((target-services (lookup-running-or-providing
+				       service-symbol)))
+		 (if (null? target-services)
+		     (handle-unknown service-symbol 'action the-action args)
+		   (for-each dmd-status
+			     target-services)))))
+	    ;; Actions which have the semantics of `action' are
+	    ;; handled there.
+	    (else (apply action service-symbol the-action args))))
 	(lambda (key)
 	  (and file
 	       (close-extra-sender))

@@ -48,11 +48,19 @@
 	value))))
 
 ;; Report the caught error.
-;; FIXME: There are better ways to do this.
+;; FIXME: Needs some more work.
 (define (caught-error key args)
-  (display key)
-  (write args)
-  (newline))
+  (case key
+    ((wrong-number-of-args)
+     (apply (lambda (subr fmt fmt-args data)
+	      (format #t "In ~a: " subr)
+	      (apply format #t fmt fmt-args)
+	      (newline))
+	    args))
+    (else
+     (display key)
+     (write args)
+     (newline))))
 
 ;; Assert that expression EXPR does not evaluate to `#f'.
 (define-syntax-rule (assert EXPR)
@@ -60,6 +68,43 @@
        (begin
 	 (local-output "Assertion ~a failed." 'EXPR)
 	 (throw 'assertion-failed))))
+
+;; Recursive procedures.
+(define-syntax-rule (label NAME PROC)
+  (lambda args
+    (letrec ((NAME PROC))
+      (apply NAME args))))
+
+;; Lambda with optional arguments, call this like:
+;; (opt-lambda (req1 req2)
+;;             ((opt1 default1) (opt2 default2))
+;;    body)
+(define-macro (opt-lambda required optional . body)
+  `(label opt-lambda-rec
+     (lambda args
+       (assert (>= (length args) (length ',required)))
+       (if (< (length args) (+ (length ',required)
+                               (length ',optional)))
+           (apply opt-lambda-rec
+                  (append args
+                          (map cadr
+                               (list-tail ',optional
+                                          (- (length args)
+                                             (length ',optional))))))
+         (apply (lambda ,(append required
+                                 (map car optional))
+                  ,@body)
+                args)))))
+
+
+;; Check whether a list of NUM-ARGS arguments can successfully be
+;; applied to PROC.
+(define (can-apply? proc num-args)
+  (apply-to-args (procedure-property proc 'arity)
+		 (lambda (required optional takes-rest)
+		   (and (>= num-args required)
+			(or takes-rest
+			    (<= num-args (+ required optional)))))))
 
 ;; Put the data from TABLE into a new hash-table of size SIZE.  Use
 ;; `eq?' when inserting.  This will be dropped as soon as stable Guile

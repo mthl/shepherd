@@ -45,12 +45,11 @@
 		    (write-line running-services
 				(open-output-file persistency-state-file))))
 	     (quit))
-    ;; All extra-actions here need to take care that they do not
-    ;; invoke any user-defined code without catching `quit', since
-    ;; they are allowed to quit, while user-supplied code shouldn't
-    ;; be.
-    #:extra-actions
-    (make-extra-actions
+    ;; All actions here need to take care that they do not invoke any
+    ;; user-defined code without catching `quit', since they are
+    ;; allowed to quit, while user-supplied code shouldn't be.
+    #:actions
+    (make-actions
      ;; Display status.
      (status
       "Display the status of dmd.  I.e. which services are running and
@@ -70,15 +69,15 @@ which ones are not."
      (detailed-status
       "Display detailed information about all services."
       (lambda (running)
-	(for-each-service default-display-status)))
+	(for-each-service dmd-status)))
      ;; Load a configuration file.
      (load
       "Load the Scheme code from FILE into dmd.  This is potentially
 dangerous.  You have been warned."
       (lambda (running file-name)
 	(local-output "Loading ~a." file-name)
-	;; Every extra-action is protected anyway, so
-	;; no need for a `catch' here.
+	;; Every action is protected anyway, so no need for a `catch'
+	;; here.  FIXME: What about `quit'?
 	(load file-name)))
      ;; Disable output.
      (silent
@@ -102,20 +101,23 @@ we want to receive these signals."
 	(if (zero? (primitive-fork))
 	    #t
 	  (quit))))
-     (enable-persistency
+     (persistency
       "Safe the current state of running and non-running services.
 This status gets written into a file on termination, so that we can
-restore the status on next startup."
-      (lambda (running)
-	(set! persistency #t)))
-     (disable-persistency
+restore the status on next startup.  Optionally, you can pass a file
+name as argument that will be used to store the status."
+      (opt-lambda (running) ((file #f))
+	(set! persistency #t)
+	(and file
+	     (set! persistency-state-file file))))
+     (no-persistency
       "Don't safe state in a file on exit."
       (lambda (running)
 	(set! persistency #f)))
      (cd
       "Change the working directory of dmd.  This only makes sense
 when in interactive mode, i.e. with `--socket=none'."
-      (lambda (running dir . args)
+      (lambda (running dir)
 	(chdir dir)))
      ;; Restart it - that does not make sense, but
      ;; we're better off by implementing it due to the

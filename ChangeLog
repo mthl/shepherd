@@ -1,3 +1,159 @@
+2003-05-01  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* service.scm (stop.<service>): Ignore the result of the
+	user-defined stop code.  Set the `running' slot of the service to
+	`#f' in any case.
+	(<service>): Adopted semantics of `stop' slot.
+
+	* support.scm (opt-lambda): New macro.
+	* self.scm (persistency): Use it.
+	* service.scm (make-kill-destructor): Likewise.
+
+2003-04-27  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* self.scm (enable-persistency): Renamed to ...
+	(persistency): ... this.  New action.
+	(disable-persistency): Renamed to ...
+	(no-persistency): ... this.  New action.
+
+2003-04-25  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* support.scm (label): New macro.
+	* self.scm (enable-persistency): Use `label' and `case-lambda'
+	instead of `lambda*'.
+	* dmd.scm: Don't use module `(ice-9 optargs)'.
+
+	* service.scm (doc.<service>): Don't break if given action is not
+	provided by the service.
+	(first-running): Simplify.
+
+2003-04-24  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* self.scm (enable-persistency): New optional argument `file' for
+	setting the persistency state file.
+	* dmd.scm: Use module `(ice-9 optargs)'.
+
+2003-04-21  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* dmd.scm (process-command): Fix handling of `dmd-status'.  Also
+	cleaned up the code.
+	* service.scm (handle-unknown): New procedure.
+
+	(make-actions): Bugfix: Exchange position of procedure and
+	docstring in the created pairs.
+
+	* self.scm (detailed-status): Updated to change of Apr 10.
+
+	* service.scm (<service>): Default init value of `start' slot is
+	now a procedure that takes no arguments.  Similar for `stop': It
+	accepts only one argument now.
+
+	* examples/_unknown.scm (compose): New procedure.
+	(unknown-service): Use it in the `start' action.
+	(look-for-service): Cleaned up.
+
+2003-04-20  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* service.scm (lookup-running): New procedure.
+	(depends-resolved?.<service>): Use it.
+	(launch-service): Likewise.
+	(stop.<symbol>): Likewise.
+	(action.<symbol>): Likewise.
+
+	(status.<symbol>): Show status of running service, if any.
+	Otherwise, show status of all who provide the symbol.  Also
+	display `dmd-status' only if service does not provide a `status'
+	action.
+
+	(lookup-running-or-providing): New procedure.
+	(action.<symbol>): Use it.
+	(status.<symbol>): Likewise.
+
+	(<service>): Field `actions' is a list now instead of a hash.
+	(action:name): New procedure.
+	(action:proc): New procedure.
+	(action:doc): New procedure.
+	(lookup-action.<service>): New method.
+	(defines-action?.<service>): Adopted to the new structure of the
+	`actions' slot.
+	(actions-list.<service>): Likewise.
+	(action.<service>): Likewise.
+	(doc.<service>): Likewise.
+	(make-actions): Made the docstring optional.  Also, adopted to new
+	structure of `actions' slot of `<service>'.
+
+	(action.<service>): Show `dmd-status' in the default
+	implementation of `status'.
+	(status.<symbol>): Removed.
+	* dmd.scm (process-command): Don't handle `status' action here.
+
+2003-04-18  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* support.scm (caught-error): Handle `wrong-number-of-args'
+	specially.
+
+	* service.scm (action.<service>): Check whether the number of args
+	is ok.  Display a useful message if not.
+	* support.scm (can-apply?): New procedure.
+
+2003-04-17  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	(stop.<service>): If the service is respawnable, still set its
+	running slot to `#f' before calling the destructor, but do call
+	the destructor with the original value of the slot.
+
+	* examples/_unknown.scm (look-for-service): Additional (optional)
+	argument: A predicate that a service must satisfy.
+	(unknown-service): Look for running or non-running services first,
+	whichever makes more sense in the particular case.
+
+2003-04-16  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* service.scm (<service>): Renamed slot `extra-actions' to
+	`actions'.
+	(defines-extra-action?.<service>): Renamed to ...
+	(defines-action?.<service>): ... this.  All callers changed.
+	(extra-action.<service>): Renamed to ...
+	(action.<service>): ... this.  All callers changed.
+	(extra-action.<symbol>): Renamed to ...
+	(action.<symbol>): ... this.  All callers changed.
+	(make-extra-actions): Renamed to ...
+	(make-actions): ... this.  All callers changed.
+
+	(make-forkexec-constructor): Use the arguments given to us, not
+	those given to the created procedure.
+
+2003-04-13  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* service.scm (status.<symbol>): Implement.
+
+	* Makefile.am (EXTRA_DIST): Add file `QUESTIONS'.
+
+2003-04-12  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* service.scm (extra-action.<service>): Handle `status' default
+	action, but do nothing in its implementation.
+	(status.<symbol>): New method.
+	* dmd.scm (process-command): Handle `dmd-status' and `status'.
+
+2003-04-10  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* service.scm (default-display-status.<service>): Renamed to ...
+	(dmd-status.<service>): ... this.  New procedure.
+	(extra-action.<service>): Don't provide a default implementation
+	of `status' here.
+
+2003-04-09  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* args.scm (process-args): Make `--file -' and `-f -' work like
+	`--file=-' and `-f-', repectively.
+	* dmd.scm (main): Use `-' instead of `none' as file name to
+	specify for readings commands from stdin (`--socket').
+
+2003-04-08  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* NEWS: Forked off version -0.6.
+
 2003-04-08  Wolfgang Jährling  <wolfgang@pro-linux.de>
 
 	* service.scm (extra-action.<symbol>): Prevent arguments from
@@ -387,7 +543,8 @@
 	* examples/README: New file.
 	* examples/Makefile.am (EXTRA_DIST): Add it.
 
-	* service.scm (make-service-group): New macro.
+	* service.scm (make-service-group): New macro.  Suggested by
+	Alfred M. Szmidt <ams@kemisten.nu>.
 
 	* support.scm (define-simple-syntax): New macro.  All callers of
 	define-syntax changed to use this instead.

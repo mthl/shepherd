@@ -1,4 +1,4 @@
-Dies ist dmd.info, hergestellt von Makeinfo Version 4.0 aus dmd.texi.
+This is dmd.info, produced by makeinfo version 4.0 from dmd.texi.
 
 INFO-DIR-SECTION System software
 START-INFO-DIR-ENTRY
@@ -225,8 +225,8 @@ deco and dmd
    The daemon that runs in the background and is responsible for
 controlling the services is "dmd", while the user interface tool is
 called "deco", the "DaEmon COntroller"(1).  To perform an action, like
-stopping a service or calling an extra-action of a service, you use the
-deco program.  It will communicate with dmd over a Unix Domain Socket.
+stopping a service or calling an action of a service, you use the deco
+program.  It will communicate with dmd over a Unix Domain Socket.
 
    Thus, you start dmd once, and then always use deco whenever you want
 to do something service-related.  Since deco passes its current working
@@ -411,10 +411,10 @@ of the service class *Note Methods of services:: instead.
      later point.  The default value is a procedure that returns `#f'
      and performs no further actions.
 
-   * `extra-actions' specifies the additional actions that can be
-     performed on a service when it is running.  A typical example for
-     this is the `restart' action.  The macro `make-extra-actions'
-     *Note Service Convenience:: is provided to abstract the actual data
+   * `actions' specifies the additional actions that can be performed
+     on a service when it is running.  A typical example for this is the
+     `restart' action.  The macro `make-actions' *Note Service
+     Convenience:: is provided to abstract the actual data
      representation format for this slot.  (It actually is a hash
      currently.)
 
@@ -471,10 +471,10 @@ Methods of services
      `start' method.  The return value is also the new `running' value,
      thus `#f' if the service was stopped.
 
- - method: extra-action (obj <service>) action . args
-     Calls the extra-action ACTION (a symbol) of the service OBJ, with
-     the specified ARGS, which are dependend on the particular
-     extra-action.
+ - method: action (obj <service>) the-action . args
+     Calls the action THE-ACTION (a symbol) of the service OBJ, with
+     the specified ARGS, which have a meaning depending on the
+     particular action.
 
  - method: conflicts-with (obj <service>)
      Returns a list of the canonical names of services that conflict
@@ -499,8 +499,8 @@ Methods of services
 
  - method: default-display-status (obj <service>)
      Display status information about OBJ.  This method is called when
-     the user performs the extra-action `status' on OBJ, but there is
-     no specific implementation given for it.  It is also called when
+     the user performs the action `status' on OBJ, but there is no
+     specific implementation given for it.  It is also called when
      `detailed-status' is applied on `dmd'.
 
 
@@ -521,12 +521,12 @@ for services *Note Service De- and Constructors::.
      Return a list of all registered services which provide the symbol
      NAME.
 
- - macro: make-extra-actions (name proc) ...
-     This macro is used to create a value for the `extra-actions' slot
-     of a service object *Note Slots of services::.  Each NAME is a
-     symbol and each PROC the corresponding procedure that will be
-     called to perform the action.  A PROC has one argument, which will
-     be the current value of the `running' slot of the service.
+ - macro: make-actions (name proc) ...
+     This macro is used to create a value for the `actions' slot of a
+     service object *Note Slots of services::.  Each NAME is a symbol
+     and each PROC the corresponding procedure that will be called to
+     perform the action.  A PROC has one argument, which will be the
+     current value of the `running' slot of the service.
 
  - method: start (obj <symbol>)
      Start a registered service providing OBJ.
@@ -534,9 +534,9 @@ for services *Note Service De- and Constructors::.
  - method: stop (obj <symbol>)
      Stop a registered service providing OBJ.
 
- - method: extra-action (obj <symbol>) action . args
-     The same as the `extra-action' method of class `<service>', but
-     uses a service that provides OBJ and is running.
+ - method: action (obj <symbol>) the-action . args
+     The same as the `action' method of class `<service>', but uses a
+     service that provides OBJ and is running.
 
  - procedure: for-each-service proc
      Call PROC, a procedure taking one argument, once for each
@@ -609,9 +609,9 @@ also specifies some more initial values for the slots:
              #:requires '()
              #:start (...)
              #:stop (...)
-             #:extra-actions (make-extra-actions
-                               (reload-modules (...))
-                               (restart (...)))))
+             #:actions (make-actions
+                        (reload-modules (...))
+                        (restart (...)))))
 
 
 File: dmd.info,  Node: The dmd and unknown services,  Prev: Service Examples,  Up: Services
@@ -620,8 +620,8 @@ The `dmd' and `unknown' services
 ================================
 
    The service `dmd' is special, because it is used to control dmd
-itself.  It provides the following extra-actions (in addition to
-`enable', `disable' and `restart' which do not make sense here).
+itself.  It provides the following actions (in addition to `enable',
+`disable' and `restart' which do not make sense here).
 
 ``status''
      Displays which services are started and which ones are not.
@@ -1152,7 +1152,7 @@ Concept Index
 * Menu:
 
 * <service>, slots of:                   Slots of services.
-* Addition actions of services:          Slots of services.
+* Actions of services:                   Slots of services.
 * assertions:                            Errors.
 * canonical names of services:           Slots of services.
 * configuration file:                    Jump Start.
@@ -1165,7 +1165,6 @@ Concept Index
 * dmd:                                   deco and dmd.
 * dmd Invocation:                        Invoking dmd.
 * dmd service:                           The dmd and unknown services.
-* Extra actions of services:             Slots of services.
 * fallback service:                      The dmd and unknown services.
 * fallback services:                     Jump Start.
 * generating constructors:               Service De- and Constructors.
@@ -1187,6 +1186,7 @@ Concept Index
 * Scheme:                                Introduction.
 * security:                              Invoking dmd.
 * service:                               Services.
+* Service actions:                       Slots of services.
 * Service constructor:                   Slots of services.
 * Service destructor:                    Slots of services.
 * service manager:                       Introduction.
@@ -1208,6 +1208,8 @@ Procedure and Macro Index
 
 * Menu:
 
+* action <1>:                            Service Convenience.
+* action:                                Methods of services.
 * assert:                                Errors.
 * call/cc:                               Errors.
 * call/ec:                               Errors.
@@ -1217,14 +1219,12 @@ Procedure and Macro Index
 * copy-hashq-table:                      Others.
 * default-display-status:                Methods of services.
 * enter:                                 Runlevels.
-* extra-action <1>:                      Service Convenience.
-* extra-action:                          Methods of services.
 * find-running:                          Service Convenience.
 * for-each-service:                      Service Convenience.
 * local-output:                          Communication.
 * lookup-services:                       Service Convenience.
+* make-actions:                          Service Convenience.
 * make-childexec-constructor:            Service De- and Constructors.
-* make-extra-actions:                    Service Convenience.
 * make-kill-destructor:                  Service De- and Constructors.
 * make-system-constructor:               Service De- and Constructors.
 * make-system-destructor:                Service De- and Constructors.
@@ -1249,8 +1249,8 @@ Variable Index
 
 * Menu:
 
+* actions (slot of <service>):           Slots of services.
 * enabled? (slot of <service>):          Slots of services.
-* extra-actions (slot of <service>):     Slots of services.
 * last-respawns (slot of <service>):     Slots of services.
 * provides (slot of <service>):          Slots of services.
 * requires (slot of <service>):          Slots of services.
@@ -1277,36 +1277,36 @@ Type Index
 
 
 Tag Table:
-Node: Top208
-Node: Introduction1173
-Node: Jump Start2684
-Node: deco and dmd9823
-Ref: deco and dmd-Footnote-110724
-Node: Invoking dmd10835
-Node: Invoking deco12107
-Node: Services13366
-Node: Slots of services14238
-Node: Methods of services19229
-Node: Service Convenience21597
-Node: Service De- and Constructors23370
-Node: Service Examples24991
-Node: The dmd and unknown services25981
-Node: Runlevels27346
-Node: Misc Facilities27892
-Node: Errors28388
-Node: Communication29432
-Node: Others30766
-Node: Internals31145
-Node: Coding standards31894
-Node: Design decisions32453
-Node: Service Internals40209
-Node: Runlevel evolution40358
-Node: Runlevel assumptions40939
-Node: Runlevels - part one42848
-Node: Runlevels - part two46455
-Node: Concept Index49605
-Node: Procedure and Macro Index52540
-Node: Variable Index54624
-Node: Type Index55436
+Node: Top204
+Node: Introduction1169
+Node: Jump Start2680
+Node: deco and dmd9819
+Ref: deco and dmd-Footnote-110714
+Node: Invoking dmd10825
+Node: Invoking deco12097
+Node: Services13356
+Node: Slots of services14228
+Node: Methods of services19207
+Node: Service Convenience21570
+Node: Service De- and Constructors23323
+Node: Service Examples24944
+Node: The dmd and unknown services25908
+Node: Runlevels27267
+Node: Misc Facilities27813
+Node: Errors28309
+Node: Communication29353
+Node: Others30687
+Node: Internals31066
+Node: Coding standards31815
+Node: Design decisions32374
+Node: Service Internals40130
+Node: Runlevel evolution40279
+Node: Runlevel assumptions40860
+Node: Runlevels - part one42769
+Node: Runlevels - part two46376
+Node: Concept Index49526
+Node: Procedure and Macro Index52461
+Node: Variable Index54545
+Node: Type Index55357
 
 End Tag Table

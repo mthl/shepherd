@@ -97,38 +97,57 @@
 
 ;; TODO
 ;;  - We could look for non-running services first on `start' etc.
-;;  - We also should do `unknown-extra-action' (if service is known)
+;;  - We also should do `unknown-action' (if service is known)
 ;;    - If doing this, we should enable the service to handle it
-;; - Make this the `default unknown service'
+;;  - Make this the `default unknown service'
+;;  - Messages if nothing found.
 
-(define (look-for-service service)
-  (call/ec
-   (lambda (return)
-     (for-each-service
-      (lambda (s)
-	(and (similar? (symbol->string service)
-		       (symbol->string (canonical-name s)))
-	     (begin
-	       (format #t "Did you mean ~a maybe?" (canonical-name s))
-	       (newline)
-	       (return #t))))))))
+;; Suggest a service that satisfies PRED?, if given, and has a name
+;; similar to SERVICE-SYMBOL.
+(define look-for-service
+  (case-lambda
+   ((service-symbol) (look-for-service service-symbol (lambda (x) #t)))
+   ((service-symbol pred?)
+    (call/ec
+     (lambda (return)
+       (for-each-service
+	(lambda (s)
+	  (and (pred? s)
+	       (similar? (symbol->string service-symbol)
+			 (symbol->string (canonical-name s)))
+	       (begin
+		 (format #t "Did you mean ~a maybe?" (canonical-name s))
+		 (newline)
+		 (return #t)))))
+       #f)))))
+
+;; The classical compose.
+(define (compose f g)
+  (lambda (x)
+    (f (g x)))
 
 (define unknown-service
   (make <service>
     #:provides '(unknown)
-    #:extra-actions (make-extra-actions
-		     (start "Called if user wants to start an unknown service."
-		      (lambda (running service . args)
-			(look-for-service service)
-			running))
-		     (stop "Called if user wants to stop an unknown service."
-		      (lambda (running service . args)
-			(look-for-service service)
-			running))
-		     (extra-action "Called if user frobs an unknown service."
-		      (lambda (running service action . args)
-			(look-for-service service)
-			running)))))
+    #:actions (make-actions
+	       (start
+		"Called if user wants to start an unknown service."
+		(lambda (running service-sym . args)
+		  (or (look-for-service service-sym (compose not running?))
+		      (look-for-service service-sym))
+		  running))
+	       (stop
+		"Called if user wants to stop an unknown service."
+		(lambda (running service-sym . args)
+		  (or (look-for-service service-sym running?)
+		      (look-for-service service-sym))
+		  running))
+	       (action
+		"Called if user frobs an unknown service."
+		(lambda (running service-sym the-action . args)
+		  (or (look-for-service service-sym running?)
+		      (look-for-service service-sym))
+		  running)))))
 
 (register-services unknown-service)
 (start unknown-service)

@@ -2,19 +2,21 @@
 
 ** What is `dmd'?
 
-It is a service manager.  That is, on systems which are similar to
-Unix (e.g. GNU/Linux), it is a replacement for the part of the `init'
-program that manages runlevels and such.  On the GNU system, it is a
-replacement for `/sbin/init', but not for `/hurd/init'.
+The dmd program is a ``Daemon managing Daemons'' (or maybe a
+``Daemons-managing Daemon''?), i.e. a service manager, that is written
+in Guile, the extension language of the GNU project.  It provides a
+replacement for the service-managing capabillities of SysV-init (or
+any other init) with a both powerfull and beautiful dependency-based
+system with a convenient interface.  It is intended for use on
+GNU/Hurd, but it is supposed to work on every POSIX-like system where
+Guile is available.  In particular, it has been tested on GNU/Linux.
 
 ** Requirements
 
 This program requires Guile (the GNU Ubiquitous Intelligent Language
-for Extension), version 1.6.  It uses GOOPS, but as GOOPS is part of
-Guile, a normal Guile installation is sufficient.
-
-It is intended for use on GNU/Linux and GNU, but is likely to also
-work elsewhere.
+for Extension), version 1.6.x.  It uses GOOPS, but as GOOPS is part of
+Guile, a normal Guile installation is sufficient.  It also uses
+readline, though it does not really depend on it.
 
 ** Getting started
 
@@ -34,7 +36,8 @@ read the Texinfo manual for details.
 Detailed instructions on installing dmd are available in the file
 `INSTALL'.  A list of user-visible changes between releases can be
 found in the file `NEWS'.  Detailed information about changes on the
-source code level are listed in `ChangeLog'.
+source code level are listed in `ChangeLog'.  Open issues on which I
+would like to receive comments are explained in the file `QUESTIONS'.
 
 A list of people who can be considered maintainers of this software is
 available in the file `AUTHORS'.  A list of people who have been
@@ -49,12 +52,10 @@ file generated from it) for details.
 
 ** Bugs and Limitations
 
-There is no localization done yet.
+There is no localization done yet.  Code from the user configuration
+is allowed to mess up everything.  Runlevels do not work yet.  It is
+hard to setup currently.  A few bugs are already marked in the source
+code.
 
-Code from the user configuration is allowed to mess up everything.
-
-Runlevels do not work yet.
-
-It is hard to setup currently.
-
-Send bug reports to <wolfgang@pro-linux.de>.
+Send bug reports to  <wolfgang@pro-linux.de>
+              or to  <wolfgang.jaehrling@wt-ausbilder.de>.

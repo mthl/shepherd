@@ -1,3 +1,16 @@
+Version -0.5
+
+	* dmd: `--socket=-' instead of `--socket=none'.
+	* Renamed `extra-action' to plain `action'.
+	* The result of user-defined stop code is ignored now.
+	* New action for all services: `dmd-status'.
+	* Distribution contains file `QUESTIONS'.
+	* Improved the `unknown' service implementation in `examples/'.
+	* Number of args given to actions is verified.
+	* Made docstrings for actions optional.
+	* Renamed `{en,dis}able-persistency' to `{,no-}persistency'.
+	* Can pass file name to dmd action `persistency'.
+
 Version -0.6
 
 	* New action `doc' for displaying documentation.

@@ -278,8 +278,8 @@ controlling the services is @dfn{dmd}, while the user interface tool
 is called @dfn{deco}, the @dfn{DaEmon COntroller}@footnote{Some people
 might argue that it actually is short for ``decoration'', indicating
 that it is useless. :-)}.  To perform an action, like stopping a
-service or calling an extra-action of a service, you use the deco
-program.  It will communicate with dmd over a Unix Domain Socket.
+service or calling an action of a service, you use the deco program.
+It will communicate with dmd over a Unix Domain Socket.
 
 Thus, you start dmd once, and then always use deco whenever you want
 to do something service-related.  Since deco passes its current
@@ -503,15 +503,14 @@ service at a later point.  The default value is a procedure that
 returns @code{#f} and performs no further actions.
 
 @item
-@vindex extra-actions (slot of <service>)
-@cindex Addition actions of services
-@cindex Extra actions of services
-@code{extra-actions} specifies the additional actions that can be
-performed on a service when it is running.  A typical example for this
-is the @code{restart} action.  The macro @code{make-extra-actions}
-@ref{Service Convenience} is provided to abstract the actual data
-representation format for this slot.  (It actually is a hash
-currently.)
+@vindex actions (slot of <service>)
+@cindex Actions of services
+@cindex Service actions
+@code{actions} specifies the additional actions that can be performed
+on a service when it is running.  A typical example for this is the
+@code{restart} action.  The macro @code{make-actions} @ref{Service
+Convenience} is provided to abstract the actual data representation
+format for this slot.  (It actually is a hash currently.)
 
 @item
 @vindex enabled? (slot of <service>)
@@ -576,10 +575,10 @@ succeed, though.  Otherwise, the behaviour is very similar to the
 value, thus @code{#f} if the service was stopped.
 @end deffn
 
-@deffn {method} extra-action (obj <service>) action . args
-Calls the extra-action @var{action} (a symbol) of the service
-@var{obj}, with the specified @var{args}, which are dependend on the
-particular extra-action.
+@deffn {method} action (obj <service>) the-action . args
+Calls the action @var{the-action} (a symbol) of the service @var{obj},
+with the specified @var{args}, which have a meaning depending on the
+particular action.
 @end deffn
 
 @deffn {method} conflicts-with (obj <service>)
@@ -611,9 +610,9 @@ terminates.
 
 @deffn {method} default-display-status (obj <service>)
 Display status information about @var{obj}.  This method is called
-when the user performs the extra-action @code{status} on @var{obj},
-but there is no specific implementation given for it.  It is also
-called when @code{detailed-status} is applied on @code{dmd}.
+when the user performs the action @code{status} on @var{obj}, but
+there is no specific implementation given for it.  It is also called
+when @code{detailed-status} is applied on @code{dmd}.
 @end deffn
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -635,12 +634,12 @@ Return a list of all registered services which provide the symbol
 @var{name}.
 @end deffn
 
-@deffn {macro} make-extra-actions (name proc) ...
-This macro is used to create a value for the @code{extra-actions} slot
-of a service object @ref{Slots of services}.  Each @var{name} is a
-symbol and each @var{proc} the corresponding procedure that will be
-called to perform the action.  A @var{proc} has one argument, which
-will be the current value of the @code{running} slot of the service.
+@deffn {macro} make-actions (name proc) ...
+This macro is used to create a value for the @code{actions} slot of a
+service object @ref{Slots of services}.  Each @var{name} is a symbol
+and each @var{proc} the corresponding procedure that will be called to
+perform the action.  A @var{proc} has one argument, which will be the
+current value of the @code{running} slot of the service.
 @end deffn
 
 @deffn {method} start (obj <symbol>)
@@ -651,9 +650,9 @@ Start a registered service providing @var{obj}.
 Stop a registered service providing @var{obj}.
 @end deffn
 
-@deffn {method} extra-action (obj <symbol>) action . args
-The same as the @code{extra-action} method of class @code{<service>},
-but uses a service that provides @var{obj} and is running.
+@deffn {method} action (obj <symbol>) the-action . args
+The same as the @code{action} method of class @code{<service>}, but
+uses a service that provides @var{obj} and is running.
 @end deffn
 
 @deffn {procedure} for-each-service proc
@@ -738,9 +737,9 @@ also specifies some more initial values for the slots:
         #:requires '()
         #:start (...)
         #:stop (...)
-        #:extra-actions (make-extra-actions
-                          (reload-modules (...))
-                          (restart (...)))))
+        #:actions (make-actions
+                   (reload-modules (...))
+                   (restart (...)))))
 @end lisp
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -751,7 +750,7 @@ also specifies some more initial values for the slots:
 @cindex dmd service
 @cindex special services
 The service @code{dmd} is special, because it is used to control dmd
-itself.  It provides the following extra-actions (in addition to
+itself.  It provides the following actions (in addition to
 @code{enable}, @code{disable} and @code{restart} which do not make
 sense here).
 

@@ -1,5 +1,5 @@
 ;; args.scm -- Command line argument handling.
-;; Copyright (C) 2002 Wolfgang Jährling <wolfgang@pro-linux.de>
+;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
 ;; This is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -226,7 +226,7 @@ Mail bug reports to <" bug-address ">.
 			;; It is of the form `--option=parameter'.
 			(set! param (string-drop name (1+ index)))
 			(set! name (string-take name index))))
-		 ;; Find the right one.
+		 ;; Find the right one (as it might be abbreviated).
 		 (set! target-option (find-long-option name))
 		 (and (boolean? target-option)
 		      (begin
@@ -241,7 +241,8 @@ Mail bug reports to <" bug-address ">.
 		      (not (optional-arg? target-option))
 		      (not param)
 		      (not (null? (cdr ptr)))
-		      (not (string-prefix? "-" (cadr ptr)))
+		      (or (not (string-prefix? "-" (cadr ptr)))
+			  (string=? "-" (cadr ptr)))
 		      (begin
 			;; If we reach this point, it means that we
 			;; need a parameter, we have none, there is
@@ -265,7 +266,8 @@ Mail bug reports to <" bug-address ">.
 		       (if (= (string-length arg) 2)
 			   ;; Take next argument as param.
 			   (if (or (null? (cdr ptr))
-				   (string-prefix? "-" (cadr ptr)))
+				   (and (string-prefix? "-" (cadr ptr))
+					(not (string=? "-" (cadr ptr)))))
 			       (or (optional-arg? target-option)
 				   (begin
 				     (local-output

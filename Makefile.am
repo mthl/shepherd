@@ -1,5 +1,5 @@
 # Makefile.am -- How to build and install dmd.
-# Copyright (C) 2002 Wolfgang Jährling <wolfgang@pro-linux.de>
+# Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 #
 # This is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ info_TEXINFOS = dmd.texi
 SUBDIRS = examples utils
 
 # Things not automatically included in the distribution.
-EXTRA_DIST = $(dmd_data) $(templates)
+EXTRA_DIST = $(dmd_data) $(templates) QUESTIONS
 
 # Create the directory for the sockets.
 install-data-local:

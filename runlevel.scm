@@ -25,6 +25,9 @@
 ;; current into the desired state.  I have an idea how to implement it
 ;; though.  See the Texinfo manual for details.
 
+;; FIXME: Hmm... just a thought: It might be _much_ easier to
+;; implement if the selectors return what they want to start and stop.
+
 ;; The actual code below is not finished.
 
 ;; An abstract runlevel.

@@ -2,7 +2,7 @@ dnl Process this file with autoconf to procude a configure script.
 
 dnl Initialization
 AC_INIT(dmd.scm)
-AM_INIT_AUTOMAKE(dmd,-0.6)
+AM_INIT_AUTOMAKE(dmd,-0.5)
 
 dnl Checks for programs.
 GUILE_PROGS
