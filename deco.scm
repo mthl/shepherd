@@ -1,5 +1,5 @@
 ;; deco.scm -- The `DaEmon COntrol' program.
-;; Copyright (C) 2002 Wolfgang Jährling <wolfgang@pro-linux.de>
+;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
 ;; This is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@
 (define program-name "deco")
 
 (use-modules (ice-9 syncase)  ;; R5RS macros.
-	     (ice-9 rdelim)   ;; Line-based I/O.
 	     (oop goops)      ;; OO support.
 	     (srfi srfi-1)    ;; List library.
 	     (srfi srfi-13))  ;; String library.
@@ -83,10 +82,9 @@
       (letrec ((next-line (lambda (line)
 			    (if (string=? line terminating-string)
 				(quit)
-				(begin
-				  (display line)
-				  (newline)
-				  (next-line (receive-data receiver)))))))
+			      (begin
+				(display line)
+				(next-line (receive-data receiver)))))))
 	(next-line (receive-data receiver))))))
 
 (main (cdr (command-line)))

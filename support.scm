@@ -25,7 +25,14 @@
 	 ((_ ARG ...)
 	  (RESULT ...)))))))
 
-;; An obvious alias.
+;; For parts of the code specific to dmd.
+(if (string=? program-name "dmd")
+    (define-syntax-rule (begin-dmd EXPR ...)
+      (begin EXPR ...))
+    (define-syntax-rule (begin-dmd EXPR ...)
+      (begin #f)))
+
+;; An obvious alias.  We currently do not use this, though.
 (define call/cc call-with-current-continuation)
 
 ;; Implement `call-with-escape-continuation' with `catch' and `throw'.
@@ -35,10 +42,10 @@
 	 (escape (lambda (value)
 		   (throw catch-sym value))))
     (catch catch-sym
-	   (lambda ()
-	     (proc escape))
-	   (lambda (sym value)
-	     value))))
+      (lambda ()
+	(proc escape))
+      (lambda (sym value)
+	value))))
 
 ;; Report the caught error.
 ;; FIXME: There are better ways to do this.
@@ -64,13 +71,14 @@
 	     (make-hash-table size)
 	     table))
 
-;; Ignore a system error in case it occurs.
-(define-syntax-rule (without-system-error EXPR ...)
+;; Evaluate `EXPR ...' until a system error occurs, then skip the
+;; remaining code.
+(define-syntax-rule (catch-system-error EXPR ...)
   (catch 'system-error
-	 (lambda ()
-	   EXPR ...)
-	 (lambda (key . args)
-	   #f)))
+    (lambda ()
+      EXPR ...)
+    (lambda (key . args)
+      #f)))
 
 
 
@@ -80,63 +88,13 @@
   (lambda (str)
     str))
 
-(define real-output-port (current-output-port))
-(define void-output-port (%make-void-port "w"))
-(define log-output-port #f)
-
-(define (be-silent)
-  (set-current-output-port void-output-port))
-
-(define (be-verbose)
-  (set-current-output-port real-output-port))
-
-(define extra-output-sender #f)
-(define extra-output-sender-enabled #t)
-;; FIXME: That may be ``good enough'', but should be fixed anyway.
-(define terminating-string "!§&§&§&§&!") ;; Unlikely to appear in output.
-
-(define (open-extra-sender file)
-  (without-system-error
-   (set! extra-output-sender (make <sender> file))))
-
-(define (close-extra-sender)
-  (without-system-error
-   (send-data extra-output-sender terminating-string)
-   (set! extra-output-sender #f)))
-
-(define (start-logging file)
-  (set! log-output-port (open-file file "wl"))) ;; Line-buffered port.
-
-(define (stop-logging)
-  (set! log-output-port #f))
-
-(define-syntax-rule (without-extra-output EXPR ...)
-  (catch #t
-	 (lambda ()
-	   (set! extra-output-sender-enabled #f)
-	   EXPR ...
-	   (set! extra-output-sender-enabled #t))
-	 (lambda (key . args)
-	   (set! extra-output-sender-enabled #f)
-	   (apply throw (cons key args)))))
-
 ;; Display some text and a newline.  Need to use lambda.  *sigh*
 (define local-output
   (lambda (format-string . args)
-    (let ((text (apply format #f (l10n format-string) args)))
-      (write-line text)
-      (and log-output-port
-	   (write-line (string-append (strftime "%Y-%m-%d %H:%M:%S "
-						(localtime (current-time)))
-				      text)
-		       log-output-port))
-      (and extra-output-sender
-	   extra-output-sender-enabled
-	   (without-system-error
-	    (send-data extra-output-sender text))))))
+    (write-line (apply format #f (l10n format-string) args))))
 
 (define (display-version)
-  (local-output "~a -- ~a" banner copyright))
+  (local-output "~a ~a -- ~a" program-name Version copyright))
 
 
 
@@ -147,13 +105,13 @@
 (define default-logfile
   (if (zero? (getuid))
       (string-append Prefix-dir "/var/log/dmd.log")
-      (string-append user-homedir "/.dmd.log")))
+    (string-append user-homedir "/.dmd.log")))
 
 ;; Configuration file.
 (define default-config-file
   (if (zero? (getuid))
       (string-append Prefix-dir "/etc/dmdconf.scm")
-      (string-append user-homedir "/.dmdconf.scm")))
+    (string-append user-homedir "/.dmdconf.scm")))
 
 ;; The directory where the socket resides.
 (define default-socket-dir
@@ -173,23 +131,23 @@
 (define default-persistency-state-file
   (if (zero? (getuid))
       (string-append Prefix-dir "/var/lib/misc/dmd-state")
-      (string-append user-homedir "/.dmd-state")))
+    (string-append user-homedir "/.dmd-state")))
 
 ;; Check if the directory DIR exists and create it if it is the
-;; default directory, but does not exist.  If INSECURE? is `#f', also
+;; default directory, but does not exist.  If INSECURE is false, also
 ;; checks for the permissions of the directory.
-(define (verify-dir dir insecure?)
+(define (verify-dir dir insecure)
   (and (string=? dir default-socket-dir)
        ;; If it exists already, this is fine, thus ignore errors.
-       (without-system-error
+       (catch-system-error
 	(mkdir default-socket-dir #o700)))
 
   ;; Check for permissions.
-  (and (not insecure?)
-       (let ((dir-stat (stat dir)))
-	 (and (not (and (= (stat:uid dir-stat) (getuid))
-			(= (stat:perms dir-stat) #o700)))
-	      (begin
-		(local-output "Socket directory setup is insecure.")
-		(quit 1))))))
+  (or insecure
+      (let ((dir-stat (stat dir)))
+	(and (not (and (= (stat:uid dir-stat) (getuid))
+		       (= (stat:perms dir-stat) #o700)))
+	     (begin
+	       (local-output "Socket directory setup is insecure.")
+	       (quit 1))))))
 

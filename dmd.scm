@@ -20,9 +20,11 @@
 
 (use-modules (ice-9 syncase)  ;; R5RS macros.
 	     (ice-9 rdelim)   ;; Line-based I/O.
+	     (ice-9 readline) ;; Readline (for interactive use).
 	     (oop goops)      ;; OO support.
 	     (srfi srfi-1)    ;; List library.
-	     (srfi srfi-13))  ;; String library.
+	     (srfi srfi-13)   ;; String library.
+	     (srfi srfi-16))  ;; `case-lambda'.
 
 (debug-enable 'backtrace)
 
@@ -95,12 +97,24 @@
 		  (make <option>
 		    #:long "socket" #:short #\s
 		    #:takes-arg? #t #:optional-arg? #f #:arg-name "FILE"
-		    #:description "get commands from socket FILE or from stdin"
+		    #:description
+		    "get commands from socket FILE or from stdin (`none')"
 		    #:action (lambda (file)
 			       (set! socket-file
-				     (if (string=? file "none")
-					 #f
-					 file)))))
+				     (if (not (string=? file "none"))
+					 file
+				       ;; We will read commands
+				       ;; from stdin, thus we
+				       ;; enable readline if it is
+				       ;; a non-dumb terminal.
+				       (and (isatty? (current-input-port))
+					    (not (string=? (getenv "TERM")
+							   "dumb"))
+					    (begin
+					      (activate-readline)
+					      ;; Finally, indicate that
+					      ;; we use no socket.
+					      #f)))))))
     ;; We do this early so that we can abort early if necessary.
     (and socket-file
 	 (verify-dir (dirname socket-file) insecure))
@@ -112,85 +126,94 @@
     ;; Start the dmd service.
     (start dmd-service)
     ;; This _must_ succeed.  (We could also put the `catch' around
-    ;; `main', but it is often useful to get the backtrace.)
+    ;; `main', but it is often useful to get the backtrace, and
+    ;; `caught-error' does not do this yet.)
     (catch #t
-	   (lambda ()
-	     (load config-file))
-	   (lambda (key . args)
-	     (caught-error key args)
-	     (quit 1)))
+      (lambda ()
+	(load config-file))
+      (lambda (key . args)
+	(caught-error key args)
+	(quit 1)))
     ;; Start what was started last time.
     (and persistency
 	 (catch 'system-error
-		(lambda ()
-		  (start-in-order (read (open-input-file
-					 persistency-state-file))))
-		(lambda (key . args)
-		  (apply local-output (cadr args) (caddr args))
-		  (quit 1))))
+	   (lambda ()
+	     (start-in-order (read (open-input-file
+				    persistency-state-file))))
+	   (lambda (key . args)
+	     (apply local-output (cadr args) (caddr args))
+	     (quit 1))))
 
     (if (not socket-file)
 	;; Get commands from the standard input port.
-	(while #t (process-command
-		   (apply list
-			  "." #f ;; Use current dir, no socket output.
-			  (string-tokenize (read-line)))))
-	;; Process the data arriving at a socket.
-	(let ((command-source (make <receiver> socket-file))
-	      (greeting #f))
-	  (letrec
-	      ((next-command
-		(lambda ()
-		  ;; Get number of messages first.
-		  (set! greeting (receive-data command-source))
-		  (letrec
-		      ((next-message
-			(lambda (messages-left msg-list)
-			  (and (not messages-left)
-			       (begin ;; Not a valid number.
-				 (local-output "Invalid data received.")
-				 (set! messages-left 0)))
-			  (if (zero? messages-left)
-			      (process-command (reverse! msg-list))
-			      (next-message (- messages-left 1)
-					    (cons (receive-data command-source)
-						  msg-list))))))
-		    (next-message (string->number greeting)
-				  '()))
-		  (next-command))))
-	    (next-command))))))
+	(begin
+	  (call/ec (lambda (done)
+		     (while #t (process-command
+				(apply list
+				       ;; Use current dir, no socket output.
+				       "." #f
+				       (string-tokenize
+					(let ((line (read-line)))
+					  (if (eof-object? line)
+					      (done #t)
+					    line))))))))
+	  ;; Exit on `C-d'.
+	  (stop dmd-service))
+      ;; Process the data arriving at a socket.
+      (let ((command-source (make <receiver> socket-file))
+	    (greeting #f))
+	(letrec
+	    ((next-command
+	      (lambda ()
+		;; Get number of messages first.
+		(set! greeting (receive-data command-source))
+		(letrec
+		    ((next-message
+		      (lambda (messages-left msg-list)
+			(and (not messages-left)
+			     (begin ;; Not a valid number.
+			       (local-output "Invalid data received.")
+			       (set! messages-left 0)))
+			(if (zero? messages-left)
+			    (process-command (reverse! msg-list))
+			  (next-message (- messages-left 1)
+					(cons (receive-data command-source)
+					      msg-list))))))
+		  (next-message (string->number greeting)
+				'()))
+		(next-command))))
+	  (next-command))))))
 
 ;; Interpret COMMAND, a command sent by the user, represented as a
 ;; list of strings.
 (define (process-command command)
   (if (< (length command) 4) ;; At least dir, socket, action and service.
       (local-output "Invalid command.")
-      (let ((dir (car command))
-	    (file (cadr command))
-	    (action (string->symbol (caddr command)))
-	    (service (string->symbol (cadddr command)))
-	    (args (cddddr command)))
-	(chdir dir)
-	(and file
-	     (open-extra-sender file))
-	;; We have to catch `quit' so that we can send the
-	;; terminator line to deco before we actually quit.
-	(catch 'quit
-	       (lambda ()
-		 (case action
-		   ((start) (apply start service args))
-		   ((stop) (apply stop service args))
-		   ((enforce) (apply enforce service args))
-		   ((list-actions) (display-extra-actions service))
-		   ;; `enable' and `disable' have the semantics of
-		   ;; `extra-action', thus they are handled there.
-		   (else (apply extra-action
-				(cons* service action args)))))
-	       (lambda (key)
-		 (and file
-		      (close-extra-sender))
-		 (quit)))
-	(and file
-	     (close-extra-sender)))))
+    (let ((dir (car command))
+	  (file (cadr command))
+	  (action (string->symbol (caddr command)))
+	  (service (string->symbol (cadddr command)))
+	  (args (cddddr command)))
+      (chdir dir)
+      (and file
+	   (open-extra-sender file))
+      ;; We have to catch `quit' so that we can send the terminator
+      ;; line to deco before we actually quit.
+      (catch 'quit
+	(lambda ()
+	  (case action
+	    ((start) (apply start service args))
+	    ((stop) (apply stop service args))
+	    ((enforce) (apply enforce service args))
+	    ;; `doc', `enable' and `disable' have the semantics
+	    ;; of `extra-action', thus they are handled there.
+	    (else (apply extra-action
+			 (cons* service action args)))))
+	(lambda (key)
+	  (and file
+	       (close-extra-sender))
+	  (quit)))
+      (and file
+	   (close-extra-sender)))))
 
 (main (cdr (command-line)))

@@ -20,7 +20,7 @@ work elsewhere.
 
 Despite the fact that this program is written in an interpreted
 language, you can install this program like all programs that use
-autoconf, but the recommended way is:
+autoconf, but the recommended way in this case is:
 
   ./configure --prefix= --datadir=/usr/share
   make

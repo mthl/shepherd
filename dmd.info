@@ -11,7 +11,7 @@ File: dmd.info,  Node: Top,  Next: Introduction,  Up: (dir)
 dmd Manual
 **********
 
-   Copyright (C) 2002 Wolfgang Ja"hrling
+   Copyright (C) 2002, 2003 Wolfgang Ja"hrling
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -780,12 +780,30 @@ testing.
 
 * Menu:
 
+* Coding standards::    How to properly hack dmd.
 * Design decisions::    Why dmd is what it is.
 * Service Internals::   How services actually work.
 * Runlevel evolution::  Learning from past mistakes.
 
 
-File: dmd.info,  Node: Design decisions,  Next: Service Internals,  Up: Internals
+File: dmd.info,  Node: Coding standards,  Next: Design decisions,  Up: Internals
+
+Coding standards
+================
+
+   About formatting: Use common sense and GNU Emacs (which actually is
+the same, of course), and you almost can't get the formatting wrong.
+Notable exceptions: Indent `if' like it is done in ELisp, and `catch'
+also deserves a better indenting.  This can be achieved by putting this
+in your `~/.emacs':
+
+     (put 'if 'scheme-indent-function 2)
+     (put 'catch 'scheme-indent-function 1)
+
+   This section will be extended in the future...
+
+
+File: dmd.info,  Node: Design decisions,  Next: Service Internals,  Prev: Coding standards,  Up: Internals
 
 Design decisions
 ================
@@ -891,12 +909,11 @@ cannot be started.  There are several possibilities to deal with this:
      recalculating what needs to be done whenever starting a service
      fails, also marking that particular service as unstartable, except
      if it fails to start because a dependency could not be resolved
-     (or maybe even then?).  This is even more complicated (and somehow
-     smells for `call/cc', don't you think?).  Instead of implementing
-     this and thereby producing code that (a) nobody understands, (b)
-     certainly has a lot of bugs, (c) will be unmaintainable and (d)
-     causes users to panic because they won't understand what will
-     happen, I decided to do the following instead:
+     (or maybe even then?).  This is even more complicated.  Instead of
+     implementing this and thereby producing code that (a) nobody
+     understands, (b) certainly has a lot of bugs, (c) will be
+     unmaintainable and (d) causes users to panic because they won't
+     understand what will happen, I decided to do the following instead:
 
    * Just report the error, and let the user fix it (in this case, fix
      the configuration of A) or work around it (in this case, disable A
@@ -938,8 +955,7 @@ all this weird dependency stuff is really that funny.
 
 * Runlevel assumptions::    What runlevels should be like
 * Runlevels - part one::    The first attempts of making it work
-* Runlevels - part two::    A more promising attempt
-* Runlevels - part three::  It should work... somehow...
+* Runlevels - part two::    It should work... somehow...
 
 
 File: dmd.info,  Node: Runlevel assumptions,  Next: Runlevels - part one,  Up: Runlevel evolution
@@ -986,14 +1002,8 @@ File: dmd.info,  Node: Runlevels - part one,  Next: Runlevels - part two,  Prev:
 Runlevels, part one
 -------------------
 
-
-File: dmd.info,  Node: Runlevels - part two,  Next: Runlevels - part three,  Prev: Runlevels - part one,  Up: Runlevel evolution
-
-Runlevels, part two
--------------------
-
-   I came up with the following algorithm (here in Pseudo-Scheme), which
-is possibly slightly buggy, but should give you the idea:
+   I came up with the following method (here in Pseudo-Scheme), which is
+possibly slightly buggy, but should give you the idea:
 
      ;; Beginning with the canonical names in CURRENT-SERVICES, start and
      ;; stop services until getting into a state where everything requested
@@ -1072,10 +1082,10 @@ D.  But if we have a list like this, we cannot fix it:
    Thus, we cannot do it this way.
 
 
-File: dmd.info,  Node: Runlevels - part three,  Prev: Runlevels - part two,  Up: Runlevel evolution
+File: dmd.info,  Node: Runlevels - part two,  Prev: Runlevels - part one,  Up: Runlevel evolution
 
-Runlevels, part three
----------------------
+Runlevels, part two
+-------------------
 
    Let's look again at the table at the end of part two:
 
@@ -1119,7 +1129,7 @@ two or more services.  In every combination we try, exactly one of them
 must be used (and somehow we should take into account which services
 are running already).  This also reduces the amount of possible
 combinations a lot.  So what remains after that are the services we
-might need for fulfilling dependencies.  For them, we could to try all
+might need for fulfilling dependencies.  For them, we could try all
 combinations (2^n), making sure that we always try subsets before any
 of their supersets to avoid starting unneeded services.  We should take
 into account which services are already running as well.
@@ -1268,35 +1278,35 @@ Type Index
 
 Tag Table:
 Node: Top208
-Node: Introduction1167
-Node: Jump Start2678
-Node: deco and dmd9817
-Ref: deco and dmd-Footnote-110718
-Node: Invoking dmd10829
-Node: Invoking deco12101
-Node: Services13360
-Node: Slots of services14232
-Node: Methods of services19223
-Node: Service Convenience21591
-Node: Service De- and Constructors23364
-Node: Service Examples24985
-Node: The dmd and unknown services25975
-Node: Runlevels27340
-Node: Misc Facilities27886
-Node: Errors28382
-Node: Communication29426
-Node: Others30760
-Node: Internals31139
-Node: Design decisions31838
-Node: Service Internals39627
-Node: Runlevel evolution39776
-Node: Runlevel assumptions40410
-Node: Runlevels - part one42319
-Node: Runlevels - part two42490
-Node: Runlevels - part three46102
-Node: Concept Index49261
-Node: Procedure and Macro Index52196
-Node: Variable Index54280
-Node: Type Index55092
+Node: Introduction1173
+Node: Jump Start2684
+Node: deco and dmd9823
+Ref: deco and dmd-Footnote-110724
+Node: Invoking dmd10835
+Node: Invoking deco12107
+Node: Services13366
+Node: Slots of services14238
+Node: Methods of services19229
+Node: Service Convenience21597
+Node: Service De- and Constructors23370
+Node: Service Examples24991
+Node: The dmd and unknown services25981
+Node: Runlevels27346
+Node: Misc Facilities27892
+Node: Errors28388
+Node: Communication29432
+Node: Others30766
+Node: Internals31145
+Node: Coding standards31894
+Node: Design decisions32453
+Node: Service Internals40209
+Node: Runlevel evolution40358
+Node: Runlevel assumptions40939
+Node: Runlevels - part one42848
+Node: Runlevels - part two46455
+Node: Concept Index49605
+Node: Procedure and Macro Index52540
+Node: Variable Index54624
+Node: Type Index55436
 
 End Tag Table

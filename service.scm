@@ -49,13 +49,17 @@
   (stop #:init-keyword #:stop
 	#:init-value (lambda (running . args) #f))
   ;; Additional actions that can be performed with the service.  This
-  ;; is a hash with a procedure as the value for every action symbol.
+  ;; is a hash with a pair ``(procedure . docstring)'' as the value
+  ;; for every action symbol, but users should not rely on this.
   (extra-actions #:init-keyword #:extra-actions
 		 #:init-form (make-extra-actions))
   ;; If this is `#f', it means that the service is not running
   ;; currently.  Otherwise, it is the value that was returned by the
   ;; procedure in the `start' slot when the service was started.
   (running #:init-value #f)
+  ;; A description of the service.
+  (docstring #:init-keyword #:docstring
+	     #:init-value "[No description].")
   ;; A service can be disabled if it is respawning too fast; it is
   ;; also possible to enable or disable it manually.
   (enabled? #:init-value #t
@@ -105,18 +109,16 @@
 (define-method (start (obj <service>) . args)
   (cond ((running? obj)
 	 (local-output "Service ~a is already running."
-		       (canonical-name obj))
-	 #f) ;; FIXME: Is that the right thing?
+		       (canonical-name obj)))
 	((not (enabled? obj))
 	 (local-output "Service ~a is currently disabled."
-		       (canonical-name obj))
-	 #f)
+		       (canonical-name obj)))
 	((let ((conflicts (conflicts-with-running obj)))
 	   (or (null? conflicts)
 	       (local-output "Service ~a conflicts with running services ~a."
 			     (canonical-name obj) conflicts))
 	   (not (null? conflicts)))
-	 #f)
+	 #f) ;; Dummy.
 	(else
 	 ;; It is not running and does not conflict with anything
 	 ;; that's running, so we can go on and launch it.
@@ -133,18 +135,18 @@
 	       (local-output "Service ~a depends on ~a."
 			     (canonical-name obj)
 			     problem)
-	       ;; Start the service itself.
-	       (slot-set! obj 'running (catch #t
-					       (lambda ()
-						 (apply (slot-ref obj 'start)
-							args))
-					       (lambda (key . args)
-						 (caught-error key args)
-						 #f))))
+	     ;; Start the service itself.
+	     (slot-set! obj 'running (catch #t
+				       (lambda ()
+					 (apply (slot-ref obj 'start)
+						args))
+				       (lambda (key . args)
+					 (caught-error key args)
+					 #f))))
 	   ;; Status message.
 	   (local-output (if (running? obj)
 			     (l10n "Service ~a has been started.")
-			     (l10n "Service ~a could not be started."))
+			   (l10n "Service ~a could not be started."))
 			 (canonical-name obj)))))
   (slot-ref obj 'running))
 
@@ -153,49 +155,51 @@
 (define-method (stop (obj <service>) . args)
   (if (not (running? obj))
       (local-output "Service ~a is not running." (canonical-name obj))
-      (if (slot-ref obj 'stop-delay?)
-	  (begin
-	    (slot-set! obj 'waiting-for-termination? #t)
-	    (local-output "Service ~a pending to be stopped."
-			  (canonical-name obj)))
-	  (begin
-	    ;; Stop services that depend on it.
-	    (for-each-service
-	     (lambda (serv)
-	       (and (running? serv)
-		    (for-each (lambda (sym)
-				(and (memq sym (provided-by obj))
-				     (stop serv)))
-			      (required-by serv)))))
-	    ;; If it is a respawnable service, we have to pretend that
-	    ;; it is already stopped, because killing it in the
-	    ;; destructor would respawn it immediatelly otherwise.
-	    (and (respawn? obj)
-		 (slot-set! obj 'running #f))
-	    ;; Stop the service itself.
-	    (slot-set! obj 'running (catch #t
-					   (lambda ()
-					     (apply (slot-ref obj 'stop)
-						    (slot-ref obj 'running)
-						    args))
-					   (lambda (key . args)
-					     ;; Special case: `dmd' may quit.
-					     (and (eq? dmd-service obj)
-						  (eq? key 'quit)
-						  (apply quit args))
-					     (caught-error key args)
-					     ;; Don't change anything.
-					     (slot-ref obj 'running))))
-	    ;; Status message.
-	    (let ((name (canonical-name obj)))
-	      (if (running? obj)
-		  (local-output "Service ~a could not be stopped." name)
-		  (local-output "Service ~a has been stopped." name))))))
+    (if (slot-ref obj 'stop-delay?)
+	(begin
+	  (slot-set! obj 'waiting-for-termination? #t)
+	  (local-output "Service ~a pending to be stopped."
+			(canonical-name obj)))
+      (begin
+	;; Stop services that depend on it.
+	(for-each-service
+	 (lambda (serv)
+	   (and (running? serv)
+		(for-each (lambda (sym)
+			    (and (memq sym (provided-by obj))
+				 (stop serv)))
+			  (required-by serv)))))
+	;; If it is a respawnable service, we have to pretend that it
+	;; is already stopped, because killing it in the destructor
+	;; would respawn it immediatelly otherwise.
+	(and (respawn? obj)
+	     (slot-set! obj 'running #f))
+	;; Stop the service itself.
+	(slot-set! obj 'running (catch #t
+				  (lambda ()
+				    (apply (slot-ref obj 'stop)
+					   (slot-ref obj 'running)
+					   args))
+				  (lambda (key . args)
+				    ;; Special case: `dmd' may quit.
+				    (and (eq? dmd-service obj)
+					 (eq? key 'quit)
+					 (apply quit args))
+				    (caught-error key args)
+				    ;; Don't change anything.
+				    (slot-ref obj 'running))))
+	;; Status message.
+	(let ((name (canonical-name obj)))
+	  (if (running? obj)
+	      (local-output "Service ~a could not be stopped." name)
+	    (local-output "Service ~a has been stopped." name))))))
   (slot-ref obj 'running))
 
 ;; Call extra-action ACTION with ARGS.
 (define-method (extra-action (obj <service>) action . args)
-  (define (default-action running)
+  (define (default-action running . args)
+    ;; All actions which are handled here might be called even if the
+    ;; service is not running, so they have to take this into account.
     (case action
       ;; Restarting is done in the obvious way.
       ((restart)
@@ -210,24 +214,61 @@
 		     (canonical-name obj)
 		     action))))
 
+  ;; Return the CAR of OBJ if it is a pair, OBJ otherwise.
+  (define (car-if-pair obj)
+    (if (pair? obj)
+	(car obj)
+      obj))
+
   ;; Calling default-action will be allowed even when the service is
   ;; not running, as it provides generally useful functionality and
   ;; information.
-  (let ((proc (hashq-ref (slot-ref obj 'extra-actions)
-			 action
-			 default-action)))
+  (let ((proc (car-if-pair (hashq-ref (slot-ref obj 'extra-actions)
+				      action
+				      default-action))))
     (if (and (not (eq? proc default-action))
 	     (not (running? obj)))
 	(local-output "Service ~a is not running." (canonical-name obj))
-	(catch #t
-	       (lambda ()
-		 (apply proc (slot-ref obj 'running) args))
-	       (lambda (key . args)
-		 ;; Special case: `dmd' may quit.
-		 (and (eq? dmd-service obj)
-		      (eq? key 'quit)
-		      (apply quit args))
-		 (caught-error key args))))))
+      (catch #t
+	(lambda ()
+	  (apply proc (slot-ref obj 'running) args))
+	(lambda (key . args)
+	  ;; Special case: `dmd' may quit.
+	  (and (eq? dmd-service obj)
+	       (eq? key 'quit)
+	       (apply quit args))
+	  (caught-error key args))))))
+
+;; Display documentation about the service.
+(define-method (doc (obj <service>) . args)
+  (if (null? args)
+      ;; No further argument given -> Normal level of detail.
+      (local-output (slot-ref obj 'docstring))
+    (case (string->symbol (car args)) ;; Does not work with strings.
+      ((full)
+       ;; FIXME
+       (local-output (slot-ref obj 'docstring)))
+      ((short)
+       ;; FIXME
+       (local-output (slot-ref obj 'docstring)))
+      ((action)
+       ;; Display documentation of given extra-actions.
+       (for-each
+	(lambda (action)
+	  (local-output "~a: ~a"
+			action
+			;; FIXME BUG: This should break if action does
+			;; not exist.  Use cdr-if-pair instead.
+			(cdr (hashq-ref (slot-ref obj 'extra-actions)
+					(string->symbol action)))))
+	(cdr args)))
+      ((list-actions)
+       (local-output "~a ~a"
+		     (canonical-name obj)
+		     (extra-action-list obj)))
+      (else
+       ;; FIXME: Implement doc-help.
+       (local-output "Unknown keyword.  Try `doc dmd help'.")))))
 
 ;; Return a list of canonical names of the services that conflict with
 ;; OBJ.
@@ -240,11 +281,9 @@
 			  (lookup-services sym)))
 	      (provided-by obj))
     ;; Clean up the result.
-    (set! conflicts
-	  (delete! (canonical-name obj)
-		   (delete-duplicates! conflicts eq?)
-		   eq?))
-    conflicts))
+    (delete! (canonical-name obj)
+	     (delete-duplicates! conflicts eq?)
+	     eq?)))
 
 ;; Check if this service provides a symbol that is already provided
 ;; by any other running services.  If so, return the canonical names
@@ -275,22 +314,22 @@
 		(canonical-name obj))
   (if (running? obj)
       (local-output "  It is started.")
-      (local-output "  It is stopped."))
+    (local-output "  It is stopped."))
   (if (enabled? obj)
       (local-output "  It is enabled.")
-      (local-output "  It is disabled."))
+    (local-output "  It is disabled."))
   (local-output "  Provides ~a." (provided-by obj))
   (local-output "  Requires ~a." (required-by obj))
   (local-output "  Conflicts with ~a." (conflicts-with obj))
   (if (respawn? obj)
       (local-output "  Will be respawned.")
-      (local-output "  Will not be respawned.")))
+    (local-output "  Will not be respawned.")))
 
 ;; Return whether OBJ requires something that is not yet running.
 (define-method (depends-resolved? (obj <service>))
   (call/ec (lambda (return)
 	     (for-each (lambda (dep)
-			 (or (find-running (lookup-services dep))
+			 (or (first-running (lookup-services dep))
 			     (return #f)))
 		       (required-by obj))
 	     #t)))
@@ -300,86 +339,79 @@
 ;; Try to start service NAME with PROC.  Used by `start' and `enforce'.
 (define (launch-service name proc args)
   (let* ((possibilities (lookup-services name))
-	 (which (find-running possibilities)))
+	 (which (first-running possibilities)))
     (if (null? possibilities)
 	(local-output "No service provides ~a." name)
-	(or which
-	    ;; None running yet, start one.
-	    (set! which
-		  (call/ec (lambda (return)
-			     (for-each (lambda (service)
-					 (and (apply proc service args)
-					      (return service)))
-				       possibilities)
-			     #f)))))
+      (or which
+	  ;; None running yet, start one.
+	  (set! which
+		(call/ec (lambda (return)
+			   (for-each (lambda (service)
+				       (and (apply proc service args)
+					    (return service)))
+				     possibilities)
+			   #f)))))
     (or which
-	(let ((unknown (find-running (lookup-services 'unknown))))
+	(let ((unknown (first-running (lookup-services 'unknown))))
 	  (if (and unknown
 		   (defines-extra-action? unknown 'start))
 	      (apply extra-action unknown 'start name args)
-	      (local-output "Providing ~a impossible." name))))
+	    (local-output "Providing ~a impossible." name))))
     (and which #t)))
 
-;; Starting via symbol.
+;; Starting by name.
 (define-method (start (obj <symbol>) . args)
   (launch-service obj start args))
 
-;; Enforcing via symbol.
+;; Enforcing by name
 (define-method (enforce (obj <symbol>) . args)
   (launch-service obj enforce args))
 
-;; Stopping via symbol.
+;; Stopping by name.
 (define-method (stop (obj <symbol>) . args)
-  (let ((which (find-running (lookup-services obj))))
+  (let ((which (first-running (lookup-services obj))))
     (if (not which)
-	(let ((unknown (find-running (lookup-services 'unknown))))
+	(let ((unknown (first-running (lookup-services 'unknown))))
 	  (if (and unknown
 		   (defines-extra-action? unknown 'stop))
 	      (apply extra-action (car unknown) 'stop obj args)
-	      (local-output "No service currently providing ~a." obj)))
-	(apply stop which args))))
+	    (local-output "No service currently providing ~a." obj)))
+      (apply stop which args))))
 
-;; Perform extra-action ACTION via symbol.
+;; Perform extra-action ACTION by name.
 (define-method (extra-action (obj <symbol>) action . args)
-  (let ((which
+  (let ((which-services
 	 ;; This is a list because we might apply the action on
 	 ;; multiple services.
-	 (list (find-running (lookup-services obj)))))
-    (and (not (car which))
+	 (list (first-running (lookup-services obj)))))
+    (and (not (car which-services))
 	 ;; None running, thus apply on all which provide it.
-	 (set! which (lookup-services obj)))
-    (if (null? which)
-	(let ((unknown (find-running (lookup-services 'unknown))))
+	 (set! which-services (lookup-services obj)))
+    (if (null? which-services)
+	(let ((unknown (first-running (lookup-services 'unknown))))
 	  (if (and unknown
 		   (defines-extra-action? unknown 'extra-action))
-	      (apply extra-action (car unknown) 'extra-action action args)
-	      (local-output "No service at all providing ~a." obj)))
-	(for-each (case action
-		    ((enable) enable)
-		    ((disable) disable)
-		    (else (lambda (serv)
-			    (apply extra-action serv action args))))
-		  which))))
-
-;; Display the names of all extra-actions of services providing OBJ.
-(define-method (display-extra-actions (obj <symbol>))
-  (if (null? (lookup-services obj))
-      (local-output "No service at all providing ~a." obj)
-      (for-each (lambda (serv)
-		  (local-output "~a ~a"
-				(canonical-name serv)
-				(extra-action-list serv)))
-		(lookup-services obj))))
+	      (apply extra-action unknown 'extra-action action args)
+	    (local-output "No service at all providing ~a." obj)))
+      (for-each (lambda (s)
+		  (apply (case action
+			   ((enable) enable)
+			   ((disable) disable)
+			   ((doc) doc)
+			   (else
+			    (lambda (s . further-args)
+			      (apply extra-action s action further-args))))
+			 s
+			 args))
+		which-services))))
 
 
-
-;;; Convenience facillities.
 
 ;; Check if any of SERVICES is running.  If this is the case, return
 ;; it.  If none, return `#f'.  Only the first one found will be
 ;; returned; this is because this is mainly intended to be applied on
 ;; the return value of `lookup-services'.
-(define (find-running services)
+(define (first-running services)
   (call/ec (lambda (return)
 	     (for-each (lambda (serv)
 			 (and (running? serv)
@@ -387,21 +419,27 @@
 		       services)
 	     #f)))
 
+;; FIXME: They ignore arguments currently, but they should not.
+
 ;; Produce a constructor that execs PROGRAM with ARGS in a child
 ;; process and returns its pid.
-(define (make-childexec-constructor program . args)
+(define (make-forkexec-constructor program . args)
   (lambda args
     (let ((pid (primitive-fork)))
       (if (zero? pid)
-          (apply execlp program program args)
-        pid))))
+	  (apply execlp program program args)
+	pid))))
 
 ;; Produce a destructor that sends SIGNAL to the process with the pid
-;; given as argument.
-(define (make-kill-destructor signal)
-  (lambda (pid . args)
-    (kill pid signal)
-    #f))
+;; given as argument, where SIGNAL defaults to `SIGTERM'.
+(define make-kill-destructor
+  (case-lambda
+   (()
+    (make-kill-destructor SIGTERM))
+   ((signal)
+    (lambda (pid . args)
+      (kill pid signal)
+      #f))))
 
 ;; Produce a constructor that executes a command.
 (define (make-system-constructor . command)
@@ -418,19 +456,20 @@
 (define (make-init.d-service name . stuff)
   (let ((cmd (string-append "/etc/init.d/" name)))
     (apply make <service>
-           #:provides (list (string->symbol name))
-           #:start (make-system-constructor cmd " start")
-           #:stop (make-system-destructor cmd " stop")
-           stuff)))
+	   #:provides (list (string->symbol name))
+	   #:start (make-system-constructor cmd " start")
+	   #:stop (make-system-destructor cmd " stop")
+	   stuff)))
 
 ;; Conveniently create a hash table containing the extra-actions of a
 ;; <service> object.
-(define-syntax-rule (make-extra-actions (NAME PROC) ...)
-  (let* ((actions-assoc (list (cons 'NAME PROC) ...))
-	 (actions (make-hash-table (length actions-assoc))))
-    (for-each (lambda (action-pair)
-		(hashq-set! actions (car action-pair) (cdr action-pair)))
-	      actions-assoc)
+(define-syntax-rule (make-extra-actions (NAME DOC PROC) ...)
+  (let ((actions (make-hash-table (length (list 'NAME ...)))))
+    (for-each (lambda (name proc doc)
+		(hashq-set! actions name (cons proc doc)))
+	      (list 'NAME ...)
+	      (list PROC ...)
+	      (list DOC ...))
     actions))
 
 ;; A group of services which can be started and stopped together.  Not
@@ -500,22 +539,22 @@
 			  (slot-set! serv 'last-respawns
 				     (cdr (slot-ref serv 'last-respawns)))
 			  (start serv))
-			;; We have just been waiting for the
-			;; termination.  The `running' slot has
-			;; already been set to `#f' by `stop'.
-			(begin
-			  (local-output "Service ~a terminated."
-					(canonical-name serv))
-			  (slot-set! serv 'waiting-for-termination? #f)))
-		    (begin
-		      (local-output "Service ~a has been disabled."
-				    (canonical-name serv))
-		      (local-output "  (Respawning too fast.)")
-		      (slot-set! serv 'enabled? #f)))
+		      ;; We have just been waiting for the
+		      ;; termination.  The `running' slot has already
+		      ;; been set to `#f' by `stop'.
+		      (begin
+			(local-output "Service ~a terminated."
+				      (canonical-name serv))
+			(slot-set! serv 'waiting-for-termination? #f)))
+		  (begin
+		    (local-output "Service ~a has been disabled."
+				  (canonical-name serv))
+		    (local-output "  (Respawning too fast.)")
+		    (slot-set! serv 'enabled? #f)))
 		(return #t)))))))
 
   (without-extra-output
-   (without-system-error
+   (catch-system-error
     (call/ec handler))))
 
 ;; Install it as the handler.
@@ -528,9 +567,11 @@
     (assert (list-of-symbols? (provided-by new)))
     (assert (list-of-symbols? (required-by new)))
     (assert (boolean? (respawn? new)))
+    ;; Canonical name actually must be canonical.
+    (assert (null? (lookup-services (canonical-name new))))
     ;; FIXME: Verify consistency: Check that there are no circular
-    ;; dependencies, ensure that names are canonical(!), check for
-    ;; bogus conflicts/dependencies, whatever else makes sense.
+    ;; dependencies, check for bogus conflicts/dependencies, whatever
+    ;; else makes sense.
 
     ;; Insert into the hash table.
     (for-each (lambda (name)

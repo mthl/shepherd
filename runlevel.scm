@@ -43,7 +43,8 @@
 				   services)))))
       services))
 
-  ;; Return the canonical names of SERVICES, but with dependencies added.
+  ;; Return the canonical names of SERVICES, but with dependencies
+  ;; added.
   (define (canonical-with-dependencies services)
     ;; FIXME: Hmmm... conflicting services..?  If A and B both provide
     ;; X and Y, and C depends on X, D depends on Y, we might fail very

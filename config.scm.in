@@ -3,6 +3,5 @@
 (define Version "%VERSION%")
 (define Prefix-dir "%PREFIX%")
 
-(define banner (string-append program-name " " Version))
 (define copyright "Copyright (C) 2002, 2003 Wolfgang Jährling")
 (define bug-address "wolfgang@pro-linux.de")

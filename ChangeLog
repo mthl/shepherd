@@ -1,16 +1,169 @@
+2003-04-08  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* service.scm (extra-action.<symbol>): Prevent arguments from
+	getting lost for the `doc' action.
+	(doc.<service>): Make it work at all by using symbols instead of
+	strings in the `case' structure.
+
+2003-04-07  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* examples/_unknown.scm (differs-in-case?): Renamed to ...
+	(differs-only-in-case?): ... this.  New procedure.  All callers
+	changed.
+
+	* service.scm (<service>): Every value in the `extra-actions' hash
+	now consists of a pair with the procedure in the CAR and the
+	docstring in the CDR.
+	(extra-action.<service>): Adopted to new structure of the
+	`extra-actions' slot.
+	(make-extra-actions): Likewise.
+	(doc.<service>): Display docstring on request.
+
+	* support.scm (split-case): Removed.
+	* service.scm (doc.<service>): Don't use `split-case' anymore.
+
+2003-03-28  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* service.scm (make-childexec-constructor): Renamed to ...
+	(make-forkexec-constructor): ... this.  New procedure.
+
+	(make-kill-destructor): Default to SIGTERM.
+	* dmd.scm: Use module `(srfi srfi-16)'.
+
+2003-03-25  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* comm.scm (terminatimg-string): Moved out of dmd specific code,
+	as it is also used by deco.
+
 2003-03-23  Wolfgang Jährling  <wolfgang@pro-linux.de>
 
-	* service.scm (make-childexec-constructor): Accept arguments, but
-	ignore them for now.
+	* examples/_unknown.scm (look-for-service): New procedure.
+	(unknown-service): New extra-actions `stop' and `extra-action'.
+	Let `start' use `look-for-service'.
+
+	* service.scm (register-services): Verfify that canonical names
+	are actually canonical.
+
+	(make-childexec-constructor): Accept arguments, but ignore them.
 	(make-kill-destructor): Likewise.
 	(make-system-constructor): Likewise.
 	(make-system-destructor): Likewise.
 	(make-init.d-service): Updated to use the new names of the
 	procedures.  This should have been done *much* earlier.
 
+	(extra-action.<symbol>): Actually make the ``unknown service''
+	feature work.
+
+2003-03-15  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* dmd.scm: Use module `(ice-9 readline)'.
+	(main): Enable readline if we read commands from stdin
+	and it is a non-dumb terminal.  Exit on `C-d'.
+
+2003-03-12  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* service.scm (conflicts-with.<service>): Cleaned up.
+	(find-running): Renamed to ...
+	(first-running): ... this.  New procedure.  All callers changed.
+
+2003-03-09  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* configure.in: Check for version of Guile being at least 1.5.x.
+
+2003-03-08  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* examples/_unknown.scm: New file.
+	(lacks-char-from?): New procedure.
+	(differs-by-missing-char?): New procedure.
+	(differs-by-switched-chars?): New procedure.
+	(differs-by-one-char?): New procedure.
+	(differs-in-case?): New procedure.
+	(similar?): New procedure.
+	(unknown): New service.
+	* examples/Makefile.am (EXTRA_DIST): Add the new file.
+
+2003-03-02  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* support.scm (without-system-error): Renamed to ...
+	(catch-system-error): ... this.  New macro.  All callers changed.
+	(local-output): Don't send data to deco.
+	(extra-output-sender-enabled): Removed.
+	(without-extra-output): Removed (new implementation in comm.scm).
+	* comm.scm (without-extra-output): New macro.
+	(dmd-output-port): Send data to deco.  Buffer the output for the
+	logfile line-wise.
+	* deco.scm (main): Don't display additional newlines.
+
+	* support.scm (extra-output-sender): Moved to ...
+	* comm.scm (extra-output-sender): ... here.
+	* support.scm (open-extra-sender): Moved to ...
+	* comm.scm (open-extra-sender): ... here.
+	* support.scm (close-extra-sender): Moved to ...
+	* comm.scm (close-extra-sender): ... here.
+	* support.scm (terminating-string): Moved to ...
+	* comm.scm (terminating-string): ... here.
+
+2003-02-25  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* support.scm (display-version): Display stuff directly.
+	* config.scm.in (banner): Removed.
+
+	* support.scm (local-output): Don't do logging here anymore.
+	(real-output-port, void-output-port): Removed.
+	(log-output-port): Moved to ...
+	* comm.scm (log-output-port): ... here.  Conditional for dmd.
+	(dmd-output-port): Do logging here now.
+
+	* support.scm (without-extra-output): When catching an error, set
+	`extra-output-sender-enabled' to `#t', not to `#f'.
+
+2003-02-23  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* support.scm (begin-dmd): New macro.
+	* comm.scm (dmd-output-port): Define only for dmd, not for deco.
+	(original-output-port): Likewise.
+	(silent): Likewise.
+	(be-silent, be-verbose): Likewise.
+
+	* support.scm (verify-dir): Code cleanup.
+
+	* service.scm (start.<service>): Simplified.  The different cond
+	clauses don't need to give a return value anyway, so these got
+	removed.
+
+	* self.scm (cd): New extra-action for dmd.
+
+2003-02-22  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* support.scm (be-silent, be-verbose): Removed.
+	* comm.scm (original-output-port): New variable.
+	(dmd-output-port): New variable.  Use it as current output port.
+	(silent): New variable.
+	(be-silent, be-verbose): New procedures.
+
+2003-02-21  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* dmd.scm (process-command): Don't handle `list-actions' here.
+	* service.scm (extra-action.<service>): Don't handle `doc' here.
+	(extra-action.<symbol>): Handle both of them here instead.
+	(doc.<service>): New method.
+	(display-extra-actions.<symbol>): Removed.
+	* support.scm (split-case): New macro.
+
 2003-02-20  Wolfgang Jährling  <wolfgang@pro-linux.de>
 
-	* NEWS: Forked off version -0.6
+	* self.scm (dmd-service): Added docstrings for the service and all
+	its extra-actions.
+	* service.scm (make-extra-actions): Accept docstring argument.  It
+	gets ignored for now.  Also, made code more readable by using the
+	extended `for-each' from SRFI-1.
+	(<service>): New slot `docstring'.
+	(extra-action.<service>): Default action takes arguments, new
+	handled action `doc'.
+
+2003-02-20  Wolfgang Jährling  <wolfgang@pro-linux.de>
+
+	* NEWS: Forked off version -0.7
 
 2003-02-17  Wolfgang Jährling  <wolfgang@pro-linux.de>
 

@@ -35,8 +35,8 @@
 	       #:init-form (l10n "undocumented option"))
   ;; Specifies whether the procedure in the `action' slot takes an
   ;; argument.  If this is the case, it will be called with the
-  ;; argument specified on the command line.  If there was none
-  ;; specified, the procedure will be called with `#f'.
+  ;; argument specified on the command line (If there was none
+  ;; specified, the procedure will be called with `#f').
   (takes-arg? #:init-keyword #:takes-arg?
 	      #:getter takes-arg?
 	      #:init-value #f)
@@ -63,7 +63,7 @@
 		 (if (optional-arg? obj) "[" "")
 		 (if (takes-arg? obj)
 		     (string-append "=" (slot-ref obj 'arg-name))
-		     "")
+		   "")
 		 (if (optional-arg? obj) "]" "")))
 
 (define-method (display-doc (obj <option>))
@@ -104,7 +104,7 @@
 			     (and (string-prefix? name (long option))
 				  (if abbrev-for
 				      (set! abbrev-for #t)
-				      (set! abbrev-for option))))
+				    (set! abbrev-for option))))
 			   options)
 		 abbrev-for))))
 
@@ -153,10 +153,10 @@
 						  (arg-name opt)
 						  (if opt-arg? "]" "")
 						  "]")))
-					 (set! no-arg
-					       (string-append
-						no-arg
-						(string (short opt)))))))
+				       (set! no-arg
+					     (string-append
+					      no-arg
+					      (string (short opt)))))))
 			      (for-each add-text options)
 			      (set! no-arg (string-append no-arg "]"))
 			      (display no-arg)
@@ -206,7 +206,7 @@ Mail bug reports to <" bug-address ">.
 	     (apply (action option)
 		    (if (takes-arg? option)
 			(cons param '())
-			'())))
+		      '())))
 
 	   (cond
 	    ;; Long option.
@@ -216,41 +216,41 @@ Mail bug reports to <" bug-address ">.
 		 (begin
 		   (for-each no-option (cdr ptr))
 		   (set! ptr (cons #f '())))
-		 ;; Normal case.
-		 (let* ((name (string-drop arg 2))
-			(index (string-index name #\=))
-			(param #f)
-			(target-option #f))
-		   (and index
-			(begin
-			  ;; It is of the form `--option=parameter'.
-			  (set! param (string-drop name (1+ index)))
-			  (set! name (string-take name index))))
-		   ;; Find the right one.
-		   (set! target-option (find-long-option name))
-		   (and (boolean? target-option)
-			(begin
-			  (local-output
-			   (if target-option
-			       (l10n "Option `--~a' is ambigous.")
-			       (l10n "Unknown option: `--~a'."))
-			   name)
-			  (local-output "Try `--help'.")
-			  (quit 1)))
-		   (and (takes-arg? target-option)
-			(not (optional-arg? target-option))
-			(not param)
-			(not (null? (cdr ptr)))
-			(not (string-prefix? "-" (cadr ptr)))
-			(begin
-			  ;; If we reach this point, it means that we
-			  ;; need a parameter, we have none, there is
-			  ;; another argument and it does not look like
-			  ;; an option.  In this case, we obviously use
-			  ;; that as parameter.
-			  (set! ptr (cdr ptr))
-			  (set! param (car ptr))))
-		   (apply-option target-option param))))
+	       ;; Normal case.
+	       (let* ((name (string-drop arg 2))
+		      (index (string-index name #\=))
+		      (param #f)
+		      (target-option #f))
+		 (and index
+		      (begin
+			;; It is of the form `--option=parameter'.
+			(set! param (string-drop name (1+ index)))
+			(set! name (string-take name index))))
+		 ;; Find the right one.
+		 (set! target-option (find-long-option name))
+		 (and (boolean? target-option)
+		      (begin
+			(local-output
+			 (if target-option
+			     (l10n "Option `--~a' is ambigous.")
+			   (l10n "Unknown option: `--~a'."))
+			 name)
+			(local-output "Try `--help'.")
+			(quit 1)))
+		 (and (takes-arg? target-option)
+		      (not (optional-arg? target-option))
+		      (not param)
+		      (not (null? (cdr ptr)))
+		      (not (string-prefix? "-" (cadr ptr)))
+		      (begin
+			;; If we reach this point, it means that we
+			;; need a parameter, we have none, there is
+			;; another argument and it does not look like
+			;; an option.  In this case, we obviously use
+			;; that as parameter.
+			(set! ptr (cdr ptr))
+			(set! param (car ptr))))
+		 (apply-option target-option param))))
 	    ;; Short option.
 	    ((string-prefix? "-" arg)
 	     (let* ((opt-char (string-ref arg 1))
@@ -260,29 +260,29 @@ Mail bug reports to <" bug-address ">.
 		   (begin
 		     (local-output "Unknown option: `-~a'." opt-char)
 		     (quit 1))
-		   (if (takes-arg? target-option)
-		       (begin
-			 (if (= (string-length arg) 2)
-			     ;; Take next argument as param.
-			     (if (or (null? (cdr ptr))
-				     (string-prefix? "-" (cadr ptr)))
-				 (or (optional-arg? target-option)
-				     (begin
-				       (local-output
-					"Argument required by `-~a'." opt-char)
-				       (quit 1)))
-				 (begin
-				   (set! ptr (cdr ptr))
-				   (set! param (car ptr))))
-			     ;; Parameter is the rest of this argument.
-			     (set! param (string-drop arg 2)))
-			 (apply-option target-option param))
-		       ;; Does not take a parameter, thus the
-		       ;; following chars are also options without
-		       ;; parameter.
-		       (for-each (lambda (c)
-				   (apply-option (find-short-option c) #f))
-				 (string->list (string-drop arg 1)))))))
+		 (if (takes-arg? target-option)
+		     (begin
+		       (if (= (string-length arg) 2)
+			   ;; Take next argument as param.
+			   (if (or (null? (cdr ptr))
+				   (string-prefix? "-" (cadr ptr)))
+			       (or (optional-arg? target-option)
+				   (begin
+				     (local-output
+				      "Argument required by `-~a'." opt-char)
+				     (quit 1)))
+			     (begin
+			       (set! ptr (cdr ptr))
+			       (set! param (car ptr))))
+			 ;; Parameter is the rest of this argument.
+			 (set! param (string-drop arg 2)))
+		       (apply-option target-option param))
+		   ;; Does not take a parameter, thus the
+		   ;; following chars are also options without
+		   ;; parameter.
+		   (for-each (lambda (c)
+			       (apply-option (find-short-option c) #f))
+			     (string->list (string-drop arg 1)))))))
 	    ;; Not interpreted as option.
 	    (else
 	     (no-option arg)))

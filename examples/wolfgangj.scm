@@ -1,5 +1,5 @@
 ;; wolfgangj.scm -- Personal dmd configuration of Wolfgang Jährling.
-;; Copyright (C) 2002 Wolfgang Jährling <wolfgang@pro-linux.de>
+;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
 ;; This is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@
 
 ;; Add a new terminal to the list of registered services.
 (define (add-new-term)
-  (set! term-counter (1+ term-counter))
+  (set! term-counter (+ term-counter 1))
   (register-services (make-term term-counter)))
 
 (register-services
@@ -97,11 +97,11 @@
    #:extra-actions (make-extra-actions
 		    (dial
 		     (lambda (running)
-		       ((make-system-constructor inet-dial))
+		       (system inet-dial)
 		       #t))
 		    (hangup
 		     (lambda (running)
-		       ((make-system-constructor inet-hangup))
+		       (system inet-hangup)
 		       #t))))
  (make <service>
    #:provides '(local-net)
@@ -126,7 +126,7 @@
 
 ;; Setup internet, a mailer and a few terms.
 (for-each start
-	  (append! '(term inet mailer-daemon)
-		   (map (lambda (x)
-			  (symbol-append 'term- (number->symbol x)))
-			(iota default-terms 1))))
+	  (append '(term inet mailer-daemon)
+		  (map (lambda (x)
+			 (symbol-append 'term- (number->symbol x)))
+		       (iota default-terms 1))))

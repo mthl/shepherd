@@ -1,5 +1,5 @@
 ;; self.scm -- Definition of the `dmd' service.
-;; Copyright (C) 2002 Wolfgang Jährling <wolfgang@pro-linux.de>
+;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
 ;; This is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -18,14 +18,15 @@
 
 (define dmd-service
   (make <service>
+    #:docstring "The dmd service is used to operate on dmd itself."
     #:provides '(dmd)
     #:requires '()
     #:respawn #f
-    #:start (lambda ()
+    #:start (lambda args
 	      (and (isatty? (current-output-port))
 		   (display-version))
 	      #t)
-    #:stop (lambda (unused)
+    #:stop (lambda (unused . args)
 	     (local-output "Exiting dmd...")
 	     ;; Prevent that we try to stop ourself again.
 	     (slot-set! dmd-service 'running #f)
@@ -44,63 +45,84 @@
 		    (write-line running-services
 				(open-output-file persistency-state-file))))
 	     (quit))
-    ;; All extra-actions need to take care that they do not invoke any
-    ;; user-defined code without catching `quit', since they are
-    ;; allowed to quit.
-    #:extra-actions (make-extra-actions
-		     ;; Display status.
-		     (status
-		      (lambda (running)
-			(let ((started '()) (stopped '()))
-			  (for-each-service
-			   (lambda (service)
-			     (if (running? service)
-				 (set! started (cons (canonical-name service)
-						     started))
-				 (set! stopped (cons (canonical-name service)
-						     stopped)))))
-			  (local-output "Started: ~a" started)
-			  (local-output "Stopped: ~a" stopped))))
-		     ;; Look at every service in detail.
-		     (detailed-status
-		      (lambda (running)
-			(for-each-service default-display-status)))
-		     ;; Load a configuration file.
-		     (load
-		      (lambda (running file-name)
-			(local-output "Loading ~a." file-name)
-			;; Every extra-action is protected anyway, so
-			;; no need for a `catch' here.
-			(load file-name)))
-		     ;; Disable output.
-		     (silent
-		      (lambda (running)
-			(be-silent)))
-		     ;; Enable output.
-		     (verbose
-		      (lambda (running)
-			(be-verbose)))
-		     ;; Go into background.  This should be called
-		     ;; before respawnable services are started, as
-		     ;; otherwise we would not get the SIGCHLD signals
-		     ;; when they terminate.
-		     (daemonize
-		      (lambda (running)
-			(be-silent)
-			(if (zero? (primitive-fork))
-			    #t
-			    (quit))))
-		     (enable-persistency
-		      (lambda (running)
-			(set! persistency #t)))
-		     (disable-persistency
-		      (lambda (running)
-			(set! persistency #f)))
-		     ;; Restart it - that does not make sense, but
-		     ;; we're better off by implementing it due to the
-		     ;; default action.
-		     (restart
-		      (lambda (running)
-			(local-output "You must be kidding."))))))
+    ;; All extra-actions here need to take care that they do not
+    ;; invoke any user-defined code without catching `quit', since
+    ;; they are allowed to quit, while user-supplied code shouldn't
+    ;; be.
+    #:extra-actions
+    (make-extra-actions
+     ;; Display status.
+     (status
+      "Display the status of dmd.  I.e. which services are running and
+which ones are not."
+      (lambda (running)
+	(let ((started '()) (stopped '()))
+	  (for-each-service
+	   (lambda (service)
+	     (if (running? service)
+		 (set! started (cons (canonical-name service)
+				     started))
+	       (set! stopped (cons (canonical-name service)
+				   stopped)))))
+	  (local-output "Started: ~a" started)
+	  (local-output "Stopped: ~a" stopped))))
+     ;; Look at every service in detail.
+     (detailed-status
+      "Display detailed information about all services."
+      (lambda (running)
+	(for-each-service default-display-status)))
+     ;; Load a configuration file.
+     (load
+      "Load the Scheme code from FILE into dmd.  This is potentially
+dangerous.  You have been warned."
+      (lambda (running file-name)
+	(local-output "Loading ~a." file-name)
+	;; Every extra-action is protected anyway, so
+	;; no need for a `catch' here.
+	(load file-name)))
+     ;; Disable output.
+     (silent
+      "Disable the displaying of information on standard output."
+      (lambda (running)
+	(be-silent)))
+     ;; Enable output.
+     (verbose
+      "Enable the displaying of information on standard output."
+      (lambda (running)
+	(be-verbose)))
+     ;; Go into the background.
+     (daemonize
+      "Go into the background.  Be careful, this means that a new
+process will be created, so dmd will not get SIGCHLD signals anymore
+if previously spawned childs terminate.  Therefore, this action should
+usually only be used (if at all) *before* childs get spawned for which
+we want to receive these signals."
+      (lambda (running)
+	(be-silent)
+	(if (zero? (primitive-fork))
+	    #t
+	  (quit))))
+     (enable-persistency
+      "Safe the current state of running and non-running services.
+This status gets written into a file on termination, so that we can
+restore the status on next startup."
+      (lambda (running)
+	(set! persistency #t)))
+     (disable-persistency
+      "Don't safe state in a file on exit."
+      (lambda (running)
+	(set! persistency #f)))
+     (cd
+      "Change the working directory of dmd.  This only makes sense
+when in interactive mode, i.e. with `--socket=none'."
+      (lambda (running dir . args)
+	(chdir dir)))
+     ;; Restart it - that does not make sense, but
+     ;; we're better off by implementing it due to the
+     ;; default action.
+     (restart
+      "This does not work for dmd."
+      (lambda (running)
+	(local-output "You must be kidding."))))))
 
 (register-services dmd-service)

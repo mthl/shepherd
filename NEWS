@@ -1,3 +1,13 @@
+Version -0.6
+
+	* New action `doc' for displaying documentation.
+	* `list-actions' is a sub-action of `doc' now.
+	* New action `cd' for dmd, useful with `--socket=none'.
+	* Distribution contains example for an `unknown' service.
+	* At configure time, dmd checks for a Guile installation.
+	* Enable readline on `--socket=none' and non-dumb terminal.
+	* Startup time finally became completely unacceptable. :-)
+
 Version -0.7
 
 	* Can fork into background via dmd extra-action `daemonize'.

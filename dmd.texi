@@ -4,7 +4,7 @@
 @settitle dmd Manual
 
 @include version.texi
-@set YEARS 2002
+@set YEARS 2002, 2003
 
 @dircategory System software
 @direntry
@@ -332,7 +332,6 @@ otherwise.
 
 @item -p [@var{file}]
 @itemx --persistency[=@var{file}]
-Undocumented
 @c FIXME-CRITICAL
 
 @item -S
@@ -937,10 +936,29 @@ a bit ahead of what I release, as I only want to publish code that got
 some testing.
 
 @menu
+* Coding standards::    How to properly hack dmd.
 * Design decisions::    Why dmd is what it is.
 * Service Internals::   How services actually work.
 * Runlevel evolution::  Learning from past mistakes.
 @end menu
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Coding standards
+@section Coding standards
+
+About formatting: Use common sense and GNU Emacs (which actually is
+the same, of course), and you almost can't get the formatting wrong.
+Notable exceptions: Indent @code{if} like it is done in ELisp, and
+@code{catch} also deserves a better indenting.  This can be achieved
+by putting this in your @code{~/.emacs}:
+
+@lisp
+(put 'if 'scheme-indent-function 2)
+(put 'catch 'scheme-indent-function 1)
+@end lisp
+
+This section will be extended in the future...
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -1052,12 +1070,11 @@ try to get there by starting (and stopping!) services, recalculating
 what needs to be done whenever starting a service fails, also marking
 that particular service as unstartable, except if it fails to start
 because a dependency could not be resolved (or maybe even then?).
-This is even more complicated (and somehow smells for @code{call/cc},
-don't you think?).  Instead of implementing this and thereby producing
-code that (a) nobody understands, (b) certainly has a lot of bugs, (c)
-will be unmaintainable and (d) causes users to panic because they
-won't understand what will happen, I decided to do the following
-instead:
+This is even more complicated.  Instead of implementing this and
+thereby producing code that (a) nobody understands, (b) certainly has
+a lot of bugs, (c) will be unmaintainable and (d) causes users to
+panic because they won't understand what will happen, I decided to do
+the following instead:
 
 @item
 Just report the error, and let the user fix it (in this case, fix the
@@ -1098,8 +1115,7 @@ all this weird dependency stuff is really that funny.
 @menu
 * Runlevel assumptions::    What runlevels should be like
 * Runlevels - part one::    The first attempts of making it work
-* Runlevels - part two::    A more promising attempt
-* Runlevels - part three::  It should work... somehow...
+* Runlevels - part two::    It should work... somehow...
 @end menu
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -1145,15 +1161,8 @@ dmd) would become harder than necessary.
 @node Runlevels - part one
 @subsection Runlevels, part one
 
-@c FIXME-CRITICAL
-
-@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-@node Runlevels - part two
-@subsection Runlevels, part two
-
-I came up with the following algorithm (here in Pseudo-Scheme), which
-is possibly slightly buggy, but should give you the idea:
+I came up with the following method (here in Pseudo-Scheme), which is
+possibly slightly buggy, but should give you the idea:
 
 @lisp
 ;; Beginning with the canonical names in CURRENT-SERVICES, start and
@@ -1243,8 +1252,8 @@ Thus, we cannot do it this way.
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-@node Runlevels - part three
-@subsection Runlevels, part three
+@node Runlevels - part two
+@subsection Runlevels, part two
 
 Let's look again at the table at the end of part two:
 
@@ -1291,7 +1300,7 @@ them must be used (and somehow we should take into account which
 services are running already).  This also reduces the amount of
 possible combinations a lot.  So what remains after that are the
 services we might need for fulfilling dependencies.  For them, we
-could to try all combinations (2^n), making sure that we always try
+could try all combinations (2^n), making sure that we always try
 subsets before any of their supersets to avoid starting unneeded
 services.  We should take into account which services are already
 running as well.
