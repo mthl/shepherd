@@ -1,0 +1,30 @@
+;; Announcement: dmd -0.7                           -*- scheme -*-
+
+(define about-this-release
+  "This is the second public release of dmd, the `Daemon managing
+Daemons' (or `Daemons-managing Daemon'?).  This version adds many
+convenient features and is thus a huge step forward, but still it is
+experimental software and you should expect it to break.")
+
+(define about-the-software
+  "The dmd program is a service manager, i.e. on the GNU system (which
+is the primary target), it replaces /sbin/init completely, on systems
+which are similar to Unix (e.g. GNU/Linux) it replaces the part of
+/sbin/init that is responsible for switching runlevels (/etc/rc?.d and
+/etc/init.d come to mind), respawning services (/etc/inittab comes to
+mind) and similar things.")
+
+(get-it-from "<http://www.8ung.at/shell/dmd--0.7.tar.gz>")
+
+(define requirements
+  "It is written for Guile 1.6.  That is all you need.  Using it with
+Guile 1.4 will require small modifications, but better don't bother.")
+
+(define future-directions
+  "Various things will be added in the future, including runlevels, an
+update-rc.d implementation for Debian, support for existing SysV Init
+infrastructure, internationalization, evaluating configuration code in
+a sandbox, a graphical interface frontend and many others.")
+
+;; Cheers,
+;; GNU/Wolfgang
