@@ -1,0 +1,25 @@
+Announcement: dmd -0.5
+=-=-=-=-=-=-=-=-=-=-=-
+
+About this release:
+This version (code named "sunflower-seeds-talking-with-pizza-crums")
+is a cleanup-release.  Not only the maintainability of the code has
+been optimized, the consistency of the user-visible parts has also
+been improved (since they have been completely reviewed).  Now we are
+well prepaired for some more significant changes.  Note that dmd is
+still in a rather early alpha stage of development.
+
+About the software:
+The dmd program is a "Daemon managing Daemons" (or "Daemons-managing
+Daemon"?), i.e. a service manager, that is entirely written in Guile,
+the extension language of the GNU project.  It provides a replacement
+for the service-managing capabillities of SysV-init (or any other
+init) with a both powerfull and beautiful dependency-based system with
+a convenient interface.  It is intended for use on GNU/Hurd, but it is
+supposed to work on every POSIX-like system where Guile is available.
+In particular, it has been tested on GNU/Linux.
+
+Get it from <http://www.8ung.at/shell/dmd--0.5.tar.gz>.
+
+Cheers,
+GNU/Wolfgang
