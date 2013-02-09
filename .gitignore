@@ -12,3 +12,12 @@
 /utils/Makefile
 /autom4te.cache
 /Makefile
+/INSTALL
+/aclocal.m4
+/*-sh
+Makefile.in
+Makefile
+*~
+,*
+/missing
+/texinfo.tex
