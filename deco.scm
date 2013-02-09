@@ -22,8 +22,6 @@
 	     (srfi srfi-1)    ;; List library.
 	     (srfi srfi-13))  ;; String library.
 
-(debug-enable 'backtrace)
-
 (load "config.scm")
 (load "support.scm")
 (load "args.scm")

@@ -25,8 +25,6 @@
 	     (srfi srfi-13)   ;; String library.
 	     (srfi srfi-16))  ;; `case-lambda'.
 
-(debug-enable 'backtrace)
-
 (load "config.scm")
 (load "support.scm")
 (load "service.scm")
