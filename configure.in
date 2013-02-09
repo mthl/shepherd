@@ -2,16 +2,15 @@ dnl Process this file with autoconf to procude a configure script.
 
 dnl Initialization
 AC_INIT(dmd.scm)
-AM_INIT_AUTOMAKE(dmd,-0.5)
+AM_INIT_AUTOMAKE(dmd,-0.4)
 
 dnl Checks for programs.
 GUILE_PROGS
 
-AC_MSG_CHECKING(whether it is at least guile 1.5.x)
+AC_MSG_CHECKING([whether it is Guile 2.0])
 GUILE_CHECK(version_ok,
-(or (>= (string->number (major-version)) 2)
-    (and (>= (string->number (major-version)) 1)
-         (>= (string->number (minor-version)) 5))
+(or (and (>= (string->number (major-version)) 2)
+         (>= (string->number (major-version)) 0))
     (quit 1))
 )
 if test $version_ok = 0; then
