@@ -1,4 +1,5 @@
 ;; comm.scm -- Communication between processes and general output.
+;; Copyright (C) 2013 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
 ;; This is free software; you can redistribute it and/or modify
@@ -15,6 +16,29 @@
 ;; along with this program; see the file COPYING. If not, write to
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA  02111-1307, USA.
+
+(define-module (dmd comm)
+  #:use-module (oop goops)
+  #:use-module (dmd support)
+  #:use-module (srfi srfi-1)
+  #:export (<sender>
+            send-data
+            <receiver>
+            receive-data
+            terminating-string
+
+            original-output-port
+            log-output-port
+            start-logging
+            stop-logging
+
+            be-silent
+            be-verbose
+
+            open-extra-sender
+            close-extra-sender
+            without-extra-output
+            dmd-output-port))
 
 ;; This file encapsulates the exact semantics of the communication
 ;; between deco and dmd.  It also does the other output stuff.

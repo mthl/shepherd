@@ -1,4 +1,5 @@
 ;; args.scm -- Command line argument handling.
+;; Copyright (C) 2013 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
 ;; This is free software; you can redistribute it and/or modify
@@ -15,6 +16,13 @@
 ;; along with this program; see the file COPYING. If not, write to
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA  02111-1307, USA.
+
+(define-module (dmd args)
+  #:use-module (oop goops)
+  #:use-module (dmd support)
+  #:use-module (dmd config)
+  #:export (<option>
+            process-args))
 
 ;; This does mostly the same as getopt-long, except for that it is
 ;; able to recognize abbreviations for long options, as long as they
@@ -88,7 +96,8 @@
 ;; Interpret command line arguments ARGS according to OPTIONS, passing
 ;; non-option arguments to DEFAULT.  Uses `program-name' and
 ;; `bug-address', which must be defined elsewhere.
-(define (process-args args args-syntax args-desc default . options)
+(define (process-args program-name args args-syntax args-desc
+                      default . options)
   ;; If this returns `#f', it means no option that can be abbreviated
   ;; as NAME (or has exactly this name) was found.  If the return
   ;; value is an option, it is exactly that or an abbreviation for it.
@@ -128,7 +137,7 @@
 		 #:long "version"
 		 #:description "display version information and exit"
 		 #:action (lambda ()
-			    (display-version)
+			    (display-version program-name)
 			    (quit)))
 	       (make <option>
 		 #:long "usage"

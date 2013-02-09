@@ -1,4 +1,5 @@
 ;; dmd.scm -- Daemon managing Daemons (or Daemons-managing Daemon?)
+;; Copyright (C) 2013 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
 ;; This is free software; you can redistribute it and/or modify
@@ -16,27 +17,23 @@
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA  02111-1307, USA.
 
+(define-module (dmd)
+  #:use-module (ice-9 rdelim)   ;; Line-based I/O.
+  #:use-module (ice-9 readline) ;; Readline (for interactive use).
+  #:use-module (oop goops)      ;; Defining classes and methods.
+  #:use-module (srfi srfi-1)    ;; List library.
+  #:use-module (dmd config)
+  #:use-module (dmd support)
+  #:use-module (dmd service)
+  #:use-module (dmd runlevel)
+  #:use-module (dmd args)
+  #:use-module (dmd comm)
+  #:export (program-name
+            main))
+
 (define program-name "dmd")
 
-(use-modules (ice-9 rdelim)   ;; Line-based I/O.
-	     (ice-9 readline) ;; Readline (for interactive use).
-	     (oop goops)      ;; Defining classes and methods.
-	     (srfi srfi-1)    ;; List library.
-	     (srfi srfi-13)   ;; String library.
-	     (srfi srfi-16))  ;; `case-lambda'.
-
-(load "config.scm")
-(load "support.scm")
-(load "service.scm")
-(load "runlevel.scm")
-(load "self.scm")
-(load "args.scm")
-(load "comm.scm")
-
 
-
-(define persistency #f)
-(define persistency-state-file default-persistency-state-file)
 
 ;; Main program.
 (define (main args)
@@ -46,7 +43,7 @@
 	(silent #f)
 	(logfile default-logfile))
     ;; Process command line arguments.
-    (process-args args
+    (process-args program-name args
 		  ""
 		  "This is a service manager for Unix and GNU."
 		  not ;; Fail on unknown args.
@@ -138,7 +135,7 @@
 	     (start-in-order (read (open-input-file
 				    persistency-state-file))))
 	   (lambda (key . args)
-	     (apply local-output (cadr args) (caddr args))
+	     (apply format #f (gettext (cadr args)) (caddr args))
 	     (quit 1))))
 
     (if (not socket-file)

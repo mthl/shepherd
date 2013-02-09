@@ -1,4 +1,5 @@
 ;; support.scm -- Various general support facilities, shared by deco and dmd.
+;; Copyright (C) 2013 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
 ;; This is free software; you can redistribute it and/or modify
@@ -16,17 +17,41 @@
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA  02111-1307, USA.
 
+(define-module (dmd support)
+  #:use-module (dmd config)
+  #:export (begin-dmd
+            call/ec
+            caught-error
+            assert
+            label
+            opt-lambda
+            can-apply?
+            copy-hashq-table
+
+            catch-system-error
+            l10n
+            local-output
+            display-version
+
+            user-homedir
+            default-logfile
+            default-config-file
+            default-socket-dir
+            default-socket-file
+            default-deco-socket-file
+            default-persistency-state-file
+
+            persistency
+            persistency-state-file
+
+            verify-dir))
+
 ;; For parts of the code specific to dmd.
 (define-syntax begin-dmd
   (lambda (s)
     (syntax-case s ()
       ((_ expr ...)
-       (if (string=? program-name "dmd")
-           #'(begin expr ...)
-           #'#f)))))
-
-;; An obvious alias.  We currently do not use this, though.
-(define call/cc call-with-current-continuation)
+       #'(begin expr ...)))))
 
 ;; Implement `call-with-escape-continuation' with `catch' and `throw'.
 ;; FIXME: Multiple return values.
@@ -120,18 +145,16 @@
 
 
 
-;; Localized version of STR.  Need to use lambda.  *sigh*
-;; FIXME: Implement.
-(define l10n
-  (lambda (str)
-    str))
+;; Localized version of STR.
+(define l10n gettext)
 
-;; Display some text and a newline.  Need to use lambda.  *sigh*
-(define local-output
-  (lambda (format-string . args)
-    (write-line (apply format #f (l10n format-string) args))))
+;; Display some text and a newline.
+(define-syntax-rule (local-output format-string args ...)
+  (begin
+    (format #f (gettext format-string) args ...)
+    (newline)))
 
-(define (display-version)
+(define* (display-version #:optional (program-name "dmd"))
   (local-output "~a ~a -- ~a" program-name Version copyright))
 
 
@@ -170,6 +193,10 @@
   (if (zero? (getuid))
       (string-append Prefix-dir "/var/lib/misc/dmd-state")
     (string-append user-homedir "/.dmd-state")))
+
+;; Global variables set from (dmd).
+(define persistency #f)
+(define persistency-state-file default-persistency-state-file)
 
 ;; Check if the directory DIR exists and create it if it is the
 ;; default directory, but does not exist.  If INSECURE is false, also

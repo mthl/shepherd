@@ -18,20 +18,30 @@
 
 # The main programs.
 bin_SCRIPTS = dmd deco
-templates = dmd.in deco.in config.scm.in
+templates = dmd.in deco.in modules/dmd/config.scm.in
 
 # The source files.
 dmddir = ${datadir}/dmd
-dmd_data = args.scm deco.scm dmd.scm self.scm service.scm \
-           support.scm runlevel.scm deco.scm comm.scm
-dmd_DATA = $(dmd_data) config.scm
+dmd_DATA =					\
+  modules/deco.scm				\
+  modules/dmd.scm
+
+dmdsubdir = $(dmddir)/dmd
+dmdsub_DATA =					\
+  modules/dmd/args.scm				\
+  modules/dmd/service.scm			\
+  modules/dmd/support.scm			\
+  modules/dmd/runlevel.scm			\
+  modules/dmd/comm.scm
+nodist_dmdsub_DATA =				\
+  modules/dmd/config.scm
 
 # Documentation.
 info_TEXINFOS = dmd.texi
 SUBDIRS = examples utils
 
 # Things not automatically included in the distribution.
-EXTRA_DIST = $(dmd_data) $(templates) QUESTIONS
+EXTRA_DIST = $(templates) QUESTIONS
 
 # Create the directory for the sockets.
 install-data-local:
@@ -40,6 +50,7 @@ install-data-local:
 
 # Generate main programs and insert dir names into config.scm.
 %: %.in Makefile
+	$(MKDIR_P) "`dirname $@`"
 	sed $< >$@ \
 	  -e 's,%DMDDIR%,${dmddir},g' \
 	  -e 's,%PREFIX%,${prefix},g' \

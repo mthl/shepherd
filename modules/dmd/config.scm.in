@@ -1,5 +1,11 @@
 ;; config.scm.in -- Making information accessible in -*- scheme -*- code.
 
+(define-module (dmd config)
+  #:export (Version
+            Prefix-dir
+            copyright
+            bug-address))
+
 (define Version "%VERSION%")
 (define Prefix-dir "%PREFIX%")
 

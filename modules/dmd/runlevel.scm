@@ -1,4 +1,5 @@
 ;; runlevel.scm -- Different kinds of runlevels.
+;; Copyright (C) 2013 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
 ;; This is free software; you can redistribute it and/or modify
@@ -15,6 +16,24 @@
 ;; along with this program; see the file COPYING. If not, write to
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA  02111-1307, USA.
+
+(define-module (dmd runlevel)
+  #:use-module (oop goops)
+  #:use-module (srfi srfi-1)
+  #:use-module (dmd support)
+  #:use-module (dmd service)
+  #:export (<runlevel>
+            enter
+            enter-selector
+            leave-selector
+
+            <runlevel-exact>
+            <runlevel-changes>
+
+            current-runlevel
+            register-runlevels
+
+            start-in-order))
 
 ;; How runlevels (should) work: A runlevel has a enter-selector and a
 ;; leave-selector, which are called when the runlevels are entered or
@@ -65,16 +84,16 @@
 		  (set! result (cons name result))
 		  (for-each add
 			    (canon (required-by
-				    (car (loopkup-services name))))))))
+				    (car (lookup-services name))))))))
 	(for-each add (canon services)))
       (delete-duplicates! result)))
 
-  (let ((current-services (compute-current-services))
-	(destination-services
-	 ;; Find out what to run.
-	 (enter-selector obj
-			 (leave-selector current-runlevel
-					 current-services))))
+  (let* ((current-services (compute-current-services))
+         (destination-services
+          ;; Find out what to run.
+          (enter-selector obj
+                          (leave-selector current-runlevel
+                                          current-services))))
     (set! current-runlevel obj)
     ;; We don't have the guarantee that `next-services' consists of
     ;; only canonical names, thus it is a bit harder.  We first have

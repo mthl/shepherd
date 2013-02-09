@@ -1,2 +1,2 @@
 #! /bin/sh
-exec guile -s %DMDDIR%/dmd.scm "$@"
+exec guile -L "%DMDDIR%" -s "%DMDDIR%/dmd.scm" "$@"

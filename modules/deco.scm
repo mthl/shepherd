@@ -1,4 +1,5 @@
 ;; deco.scm -- The `DaEmon COntrol' program.
+;; Copyright (C) 2013 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
 ;; This is free software; you can redistribute it and/or modify
@@ -16,16 +17,17 @@
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA  02111-1307, USA.
 
+(define-module (deco)
+  #:use-module (oop goops)
+  #:use-module (srfi srfi-1)
+  #:use-module (dmd config)
+  #:use-module (dmd support)
+  #:use-module (dmd args)
+  #:use-module (dmd comm)
+  #:export (program-name
+            main))
+
 (define program-name "deco")
-
-(use-modules (oop goops)      ;; OO support.
-	     (srfi srfi-1)    ;; List library.
-	     (srfi srfi-13))  ;; String library.
-
-(load "config.scm")
-(load "support.scm")
-(load "args.scm")
-(load "comm.scm")
 
 
 
@@ -34,7 +36,7 @@
   (let ((socket-file default-socket-file)
 	(deco-socket-file default-deco-socket-file)
 	(command-args '()))
-    (process-args args
+    (process-args program-name args
 		  "ACTION SERVICE [ARG...]"
 		  (string-append
 		   "Apply ACTION (start, stop, status, etc.) on SERVICE"
