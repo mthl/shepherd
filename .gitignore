@@ -1,0 +1,14 @@
+/configure
+/dmd.info
+/stamp-vti
+/version.texi
+/config.cache
+/config.log
+/config.scm
+/config.status
+/deco
+/dmd
+/examples/Makefile
+/utils/Makefile
+/autom4te.cache
+/Makefile
