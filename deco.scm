@@ -18,8 +18,7 @@
 
 (define program-name "deco")
 
-(use-modules (ice-9 syncase)  ;; R5RS macros.
-	     (oop goops)      ;; OO support.
+(use-modules (oop goops)      ;; OO support.
 	     (srfi srfi-1)    ;; List library.
 	     (srfi srfi-13))  ;; String library.
 

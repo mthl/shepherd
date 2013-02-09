@@ -88,7 +88,7 @@
 		  ;; We try to be clever: When there is a service that
 		  ;; provides this symbol already running, we use that
 		  ;; one.
-		  (let ((possibilities))
+		  (let ((possibilities #f))
 		    #f)) ;; FIXME
 		next-services)
       #f))) ;; FIXME

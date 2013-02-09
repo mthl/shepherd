@@ -18,8 +18,7 @@
 
 (define program-name "dmd")
 
-(use-modules (ice-9 syncase)  ;; R5RS macros.
-	     (ice-9 rdelim)   ;; Line-based I/O.
+(use-modules (ice-9 rdelim)   ;; Line-based I/O.
 	     (ice-9 readline) ;; Readline (for interactive use).
 	     (oop goops)      ;; Defining classes and methods.
 	     (srfi srfi-1)    ;; List library.

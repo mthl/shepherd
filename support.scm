@@ -16,21 +16,14 @@
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA  02111-1307, USA.
 
-;; Define simple macros in a more readable way.
-(define-syntax define-syntax-rule
-  (syntax-rules ()
-    ((_ (NAME ARG ...) (RESULT ...))
-     (define-syntax NAME
-       (syntax-rules ()
-	 ((_ ARG ...)
-	  (RESULT ...)))))))
-
 ;; For parts of the code specific to dmd.
-(if (string=? program-name "dmd")
-    (define-syntax-rule (begin-dmd EXPR ...)
-      (begin EXPR ...))
-    (define-syntax-rule (begin-dmd EXPR ...)
-      (begin #f)))
+(define-syntax begin-dmd
+  (lambda (s)
+    (syntax-case s ()
+      ((_ expr ...)
+       (if (string=? program-name "dmd")
+           #'(begin expr ...)
+           #'#f)))))
 
 ;; An obvious alias.  We currently do not use this, though.
 (define call/cc call-with-current-continuation)
