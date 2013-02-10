@@ -11,13 +11,12 @@
 /examples/Makefile
 /utils/Makefile
 /autom4te.cache
-/Makefile
-/INSTALL
-/aclocal.m4
-/*-sh
+/build-aux/*
 Makefile.in
 Makefile
 *~
 ,*
 /missing
 /texinfo.tex
+/INSTALL
+/aclocal.m4

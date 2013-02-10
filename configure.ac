@@ -1,8 +1,13 @@
 dnl Process this file with autoconf to procude a configure script.
 
+AC_PREREQ(2.68)
+
 dnl Initialization
-AC_INIT([modules/dmd.scm])
-AM_INIT_AUTOMAKE(dmd,-0.4)
+AC_INIT([GNU dmd], [-0.4], [bug-guix@gnu.org])
+AC_CONFIG_SRCDIR([modules/dmd.scm])
+AC_CONFIG_AUX_DIR([build-aux])
+
+AM_INIT_AUTOMAKE([1.11 gnu silent-rules])
 
 AC_PROG_MKDIR_P
 
@@ -25,11 +30,5 @@ if test $recent_version = no; then
   AC_MSG_WARN(your guile is probably too old to run dmd)
 fi
 
-dnl Checks for libraries.
-
-dnl Checks for header files.
-
-dnl Checks for library functions
-
 dnl Finish.
-AC_OUTPUT(Makefile examples/Makefile utils/Makefile)
+AC_OUTPUT([Makefile examples/Makefile utils/Makefile])
