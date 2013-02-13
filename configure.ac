@@ -27,8 +27,14 @@ else
 fi
 AC_MSG_RESULT($recent_version)
 if test $recent_version = no; then
-  AC_MSG_WARN(your guile is probably too old to run dmd)
+  AC_MSG_WARN(your Guile is probably too old to run dmd)
 fi
+
+AC_PATH_PROG([GUILD], [guild])
+if test "x$GUILD" = "x"; then
+   AC_MSG_ERROR(['guild' binary not found; please check your Guile 2.x installation.])
+fi
+AC_SUBST([GUILD])
 
 dnl Finish.
 AC_OUTPUT([Makefile examples/Makefile utils/Makefile])

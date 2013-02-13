@@ -20,3 +20,4 @@ Makefile
 /texinfo.tex
 /INSTALL
 /aclocal.m4
+*.go

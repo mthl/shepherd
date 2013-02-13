@@ -25,6 +25,7 @@ dmddir = ${datadir}/dmd
 dmd_DATA =					\
   modules/deco.scm				\
   modules/dmd.scm
+nodist_dmd_DATA = $(dmd_DATA:%.scm=%.go)
 
 dmdsubdir = $(dmddir)/dmd
 dmdsub_DATA =					\
@@ -34,7 +35,11 @@ dmdsub_DATA =					\
   modules/dmd/runlevel.scm			\
   modules/dmd/comm.scm
 nodist_dmdsub_DATA =				\
-  modules/dmd/config.scm
+  modules/dmd/config.scm			\
+  modules/dmd/config.go				\
+  $(dmdsub_DATA:%.scm=%.go)
+
+CLEANFILES = $(nodist_dmd_DATA) $(nodist_dmdsub_DATA)
 
 # Documentation.
 info_TEXINFOS = dmd.texi
@@ -55,3 +60,23 @@ install-data-local:
 	  -e 's,%DMDDIR%,${dmddir},g' \
 	  -e 's,%PREFIX%,${prefix},g' \
 	  -e 's,%VERSION%,@VERSION@,g'
+
+# XXX: Use the C locale for when Guile lacks
+# <http://git.sv.gnu.org/cgit/guile.git/commit/?h=stable-2.0&id=e2c6bf3866d1186c60bacfbd4fe5037087ee5e3f>.
+.scm.go:
+	$(MKDIR_P) "`dirname "$@"`"
+	LC_ALL=C					\
+	$(GUILD) compile -L "$(top_builddir)/modules"	\
+	  -L "$(top_srcdir)/modules"			\
+	  -Wformat -Wunbound-variable -Warity-mismatch	\
+	  -o "$@" "$<"
+
+SUFFIXES = .go
+
+# Make sure source files are installed first, so that the mtime of
+# installed compiled files is greater than that of installed source
+# files.  See
+# <http://lists.gnu.org/archive/html/guile-devel/2010-07/msg00125.html>
+# for details.
+dmd_install_go_files = install-nobase_nodist_guilemoduleDATA
+$(dmd_install_go_files): install-nobase_dist_guilemoduleDATA
