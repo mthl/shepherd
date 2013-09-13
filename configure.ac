@@ -10,6 +10,7 @@ AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([1.11 gnu silent-rules])
 
 AC_PROG_MKDIR_P
+AC_PROG_SED
 
 dnl Checks for programs.
 GUILE_PROGS

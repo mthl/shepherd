@@ -59,14 +59,14 @@ install-data-local:
 # Generate main programs.
 %: %.in Makefile
 	$(MKDIR_P) "`dirname $@`"
-	sed $< >$@ \
+	$(SED) $< >$@ \
 	  -e 's,%DMDDIR%,${dmddir},g' \
 	  -e 's,%PREFIX%,${prefix},g' \
 	  -e 's,%VERSION%,@VERSION@,g'
 
 modules/dmd/config.scm: modules/dmd/config.scm.in Makefile
 	$(MKDIR_P) "`dirname $@`"
-	sed $< >$@ \
+	$(SED) $< >$@ \
 	  -e 's,%DMDDIR%,${dmddir},g' \
 	  -e 's,%PREFIX%,${prefix},g' \
 	  -e 's,%VERSION%,@VERSION@,g'
