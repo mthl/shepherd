@@ -8,7 +8,7 @@
 
 @dircategory System software
 @direntry
-* dmd Manual: (dmd).    The manual of the dmd service manager.
+* dmd: (dmd).           The manual of the dmd service manager.
 @end direntry
 
 @titlepage
