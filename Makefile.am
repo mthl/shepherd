@@ -20,15 +20,18 @@
 bin_SCRIPTS = dmd deco
 templates = dmd.in deco.in modules/dmd/config.scm.in
 
+# Build this module first.
+BUILT_SOURCES = modules/dmd/config.scm
+
 # The source files.
 dmddir = ${datadir}/dmd
-dmd_DATA =					\
+dist_dmd_DATA =					\
   modules/deco.scm				\
   modules/dmd.scm
-nodist_dmd_DATA = $(dmd_DATA:%.scm=%.go)
+nodist_dmd_DATA = $(dist_dmd_DATA:%.scm=%.go)
 
 dmdsubdir = $(dmddir)/dmd
-dmdsub_DATA =					\
+dist_dmdsub_DATA =				\
   modules/dmd/args.scm				\
   modules/dmd/service.scm			\
   modules/dmd/support.scm			\
@@ -37,9 +40,9 @@ dmdsub_DATA =					\
 nodist_dmdsub_DATA =				\
   modules/dmd/config.scm			\
   modules/dmd/config.go				\
-  $(dmdsub_DATA:%.scm=%.go)
+  $(dist_dmdsub_DATA:%.scm=%.go)
 
-CLEANFILES = $(nodist_dmd_DATA) $(nodist_dmdsub_DATA)
+CLEANFILES = $(nodist_dmd_DATA) $(nodist_dmdsub_DATA) $(bin_SCRIPTS)
 
 # Documentation.
 info_TEXINFOS = dmd.texi
@@ -53,8 +56,15 @@ install-data-local:
 	mkdir -p $(DESTDIR)/${prefix}/var/run/dmd
 	chmod 777 $(DESTDIR)/${prefix}/var/run/dmd
 
-# Generate main programs and insert dir names into config.scm.
+# Generate main programs.
 %: %.in Makefile
+	$(MKDIR_P) "`dirname $@`"
+	sed $< >$@ \
+	  -e 's,%DMDDIR%,${dmddir},g' \
+	  -e 's,%PREFIX%,${prefix},g' \
+	  -e 's,%VERSION%,@VERSION@,g'
+
+modules/dmd/config.scm: modules/dmd/config.scm.in Makefile
 	$(MKDIR_P) "`dirname $@`"
 	sed $< >$@ \
 	  -e 's,%DMDDIR%,${dmddir},g' \
