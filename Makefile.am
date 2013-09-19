@@ -56,20 +56,20 @@ install-data-local:
 	mkdir -p $(DESTDIR)/${prefix}/var/run/dmd
 	chmod 777 $(DESTDIR)/${prefix}/var/run/dmd
 
+# 'sed' expression to instantiate templates.
+instantiate =					\
+  -e 's,%DMDDIR%,${dmddir},g'			\
+  -e 's,%PREFIX%,${prefix},g'			\
+  -e 's,%VERSION%,@VERSION@,g'
+
 # Generate main programs.
 %: %.in Makefile
 	$(MKDIR_P) "`dirname $@`"
-	$(SED) $< >$@ \
-	  -e 's,%DMDDIR%,${dmddir},g' \
-	  -e 's,%PREFIX%,${prefix},g' \
-	  -e 's,%VERSION%,@VERSION@,g'
+	$(SED) $(instantiate) < $< >$@
 
 modules/dmd/config.scm: modules/dmd/config.scm.in Makefile
 	$(MKDIR_P) "`dirname $@`"
-	$(SED) $< >$@ \
-	  -e 's,%DMDDIR%,${dmddir},g' \
-	  -e 's,%PREFIX%,${prefix},g' \
-	  -e 's,%VERSION%,@VERSION@,g'
+	$(SED) $(instantiate) < $< >$@
 
 # XXX: Use the C locale for when Guile lacks
 # <http://git.sv.gnu.org/cgit/guile.git/commit/?h=stable-2.0&id=e2c6bf3866d1186c60bacfbd4fe5037087ee5e3f>.
