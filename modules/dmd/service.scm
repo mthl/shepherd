@@ -60,6 +60,20 @@
 
             dmd-service))
 
+;; Conveniently create an actions object containing the actions for a
+;; <service> object.  The current structure is a list of actions,
+;; where every action has the format ``(name . (proc . doc))''.
+(define-syntax make-actions
+  (syntax-rules ()
+    ((_ (name docstring proc) rest ...)
+     (cons (cons 'name (cons proc docstring))
+           (make-actions rest ...)))
+    ((_ (name proc) rest ...)
+     (cons (cons 'name (cons proc "[No documentation.]"))
+           (make-actions rest ...)))
+    ((_)
+     '())))
+
 ;; Respawning CAR times in CDR seconds will disable the service.
 (define respawn-limit (cons 5 5))
 
@@ -546,24 +560,6 @@
 	   #:start (make-system-constructor cmd " start")
 	   #:stop (make-system-destructor cmd " stop")
 	   stuff)))
-
-;; Conveniently create an actions object containing the actions for a
-;; <service> object.  The current structure is a list of actions,
-;; where every action has the format ``(name . (proc . doc))''.
-(define-macro (make-actions . actions)
-  (if (null? actions)
-      ''()
-    `(cons (cons ',(caar actions)
-		 ;; The docstring in the middle is optional, which
-		 ;; makes this slightly more tricky.
-		 ,(case (length (car actions))
-		    ((2) `(cons ,(cadar actions)
-				"[No documentation.]"))
-		    ((3) `(cons ,(caddar actions)
-				,(cadar actions)))
-		    (else
-		     (error "Invalid syntax."))))
-	   (make-actions . ,(cdr actions)))))
 
 ;; A group of service-names which can be provided (i.e. services
 ;; providing them get started) and unprovided (same for stopping)
