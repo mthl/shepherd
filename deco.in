@@ -1,3 +1,3 @@
 #! /bin/sh
 export GUILE_LOAD_COMPILED_PATH="%DMDDIR%:$GUILE_LOAD_COMPILED_PATH"
-exec guile -L "%DMDDIR%" -s "%DMDDIR%/deco.scm" "$@"
+exec "%GUILE%" -L "%DMDDIR%" -s "%DMDDIR%/deco.scm" "$@"
