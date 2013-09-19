@@ -692,7 +692,7 @@ Similar to @code{make-system-constructor}, but returns @code{#f} if
 execution of the @var{command} was successful, @code{#t} if not.
 @end deffn
 
-@deffn {procedure} make-childexec-constructor program . args
+@deffn {procedure} make-forkexec-constructor program . args
 The returned procedure will fork a child process and execute
 @var{program} with the additional arguments @var{args}.  Note that you
 don't have to supply the program name as the first argument again,

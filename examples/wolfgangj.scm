@@ -56,8 +56,8 @@
     (make <service>
       #:provides (list sym)
       #:respawn? #t
-      #:start (make-childexec-constructor getty "38400"
-					  (cat "tty" (number->string num)))
+      #:start (make-forkexec-constructor getty "38400"
+                                         (cat "tty" (number->string num)))
       #:stop-delay? #t)))
 
 ;; Number of terminals created by default.
