@@ -3,11 +3,13 @@
 (define-module (dmd config)
   #:export (Version
             Prefix-dir
+            %localstatedir
             copyright
             bug-address))
 
 (define Version "%VERSION%")
 (define Prefix-dir "%PREFIX%")
+(define %localstatedir "%localstatedir%")
 
 (define copyright "Copyright (C) 2002, 2003 Wolfgang Jährling")
 (define bug-address "wolfgang@pro-linux.de")

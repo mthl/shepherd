@@ -165,8 +165,8 @@
 ;; Logfile.
 (define default-logfile
   (if (zero? (getuid))
-      (string-append Prefix-dir "/var/log/dmd.log")
-    (string-append user-homedir "/.dmd.log")))
+      (string-append %localstatedir "/dmd.log")
+      (string-append user-homedir "/.dmd.log")))
 
 ;; Configuration file.
 (define default-config-file

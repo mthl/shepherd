@@ -60,6 +60,7 @@ install-data-local:
 instantiate =					\
   -e 's,%DMDDIR%,${dmddir},g'			\
   -e 's,%PREFIX%,${prefix},g'			\
+  -e 's,%localstatedir%,${localstatedir},g'	\
   -e 's,%VERSION%,@VERSION@,g'			\
   -e 's,%GUILE%,$(GUILE),g'
 
