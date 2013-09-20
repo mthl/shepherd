@@ -1,3 +1,10 @@
+Version -0.4
+
+	* Awaken from a 10-year nap.
+	* Ported to Guile 2.0.
+	* Modules are modules instead of being loaded.
+	* Build system fixes, cleanups, and upgrades.
+
 Version -0.5
 
 	* dmd: `--socket=-' instead of `--socket=none'.
