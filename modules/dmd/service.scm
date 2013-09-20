@@ -530,8 +530,12 @@
   (lambda args
     (let ((pid (primitive-fork)))
       (if (zero? pid)
-	  (apply execlp program program child-args)
-	pid))))
+          (begin
+            ;; Become the leader of a new session and session group.
+            ;; Programs such as 'mingetty' expect this.
+            (setsid)
+            (apply execlp program program child-args))
+          pid))))
 
 ;; Produce a destructor that sends SIGNAL to the process with the pid
 ;; given as argument, where SIGNAL defaults to `SIGTERM'.
