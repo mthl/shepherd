@@ -151,7 +151,7 @@
 ;; Display some text and a newline.
 (define-syntax-rule (local-output format-string args ...)
   (begin
-    (format #f (gettext format-string) args ...)
+    (format #t (gettext format-string) args ...)
     (newline)))
 
 (define* (display-version #:optional (program-name "dmd"))
