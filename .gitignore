@@ -21,3 +21,4 @@ Makefile
 /INSTALL
 /aclocal.m4
 *.go
+/modules/dmd/config.scm
