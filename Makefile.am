@@ -57,11 +57,12 @@ install-data-local:
 	chmod 777 $(DESTDIR)/${prefix}/var/run/dmd
 
 # 'sed' expression to instantiate templates.
-instantiate =					\
-  -e 's,%DMDDIR%,${dmddir},g'			\
-  -e 's,%PREFIX%,${prefix},g'			\
-  -e 's,%localstatedir%,${localstatedir},g'	\
-  -e 's,%VERSION%,@VERSION@,g'			\
+instantiate =						\
+  -e 's,%DMDDIR%,${dmddir},g'				\
+  -e 's,%PREFIX%,${prefix},g'				\
+  -e 's,%localstatedir%,${localstatedir},g'		\
+  -e 's,%VERSION%,@VERSION@,g'				\
+  -e 's,%PACKAGE_BUGREPORT%,@PACKAGE_BUGREPORT@,g'	\
   -e 's,%GUILE%,$(GUILE),g'
 
 # Generate main programs.

@@ -12,4 +12,4 @@
 (define %localstatedir "%localstatedir%")
 
 (define copyright "Copyright (C) 2002, 2003 Wolfgang Jährling")
-(define bug-address "wolfgang@pro-linux.de")
+(define bug-address "%PACKAGE_BUGREPORT%")
