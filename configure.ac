@@ -7,7 +7,8 @@ AC_INIT([GNU dmd], [-0.4], [bug-guix@gnu.org])
 AC_CONFIG_SRCDIR([modules/dmd.scm])
 AC_CONFIG_AUX_DIR([build-aux])
 
-AM_INIT_AUTOMAKE([1.11 gnu silent-rules])
+dnl We're fine with GNU make constructs, hence '-Wno-portability'.
+AM_INIT_AUTOMAKE([1.11 gnu silent-rules -Wall -Wno-portability])
 
 AC_PROG_MKDIR_P
 AC_PROG_SED
