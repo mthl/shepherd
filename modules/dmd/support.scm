@@ -153,9 +153,7 @@
 
 ;; The directory where the socket resides.
 (define default-socket-dir
-  (string-append Prefix-dir
-		 "/var/run/dmd/"
-		 (passwd:name (getpwuid (getuid)))))
+  (string-append %localstatedir "/run/dmd"))
 
 ;; Unix domain socket for receiving commands in dmd.
 (define default-socket-file
@@ -168,8 +166,8 @@
 ;; Saving the state on exit.
 (define default-persistency-state-file
   (if (zero? (getuid))
-      (string-append Prefix-dir "/var/lib/misc/dmd-state")
-    (string-append user-homedir "/.dmd-state")))
+      (string-append %localstatedir "/lib/misc/dmd-state")
+      (string-append user-homedir "/.dmd-state")))
 
 ;; Global variables set from (dmd).
 (define persistency #f)
