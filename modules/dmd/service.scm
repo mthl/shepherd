@@ -540,7 +540,7 @@
 ;; Produce a destructor that sends SIGNAL to the process with the pid
 ;; given as argument, where SIGNAL defaults to `SIGTERM'.
 (define make-kill-destructor
-  (opt-lambda () ((signal SIGTERM))
+  (lambda* (#:optional (signal SIGTERM))
     (lambda (pid . args)
       (kill pid signal)
       #f)))
@@ -793,7 +793,7 @@ we want to receive these signals."
 This status gets written into a file on termination, so that we can
 restore the status on next startup.  Optionally, you can pass a file
 name as argument that will be used to store the status."
-      (opt-lambda (running) ((file #f))
+      (lambda* (running #:optional (file #f))
 	(set! persistency #t)
 	(and file
 	     (set! persistency-state-file file))))

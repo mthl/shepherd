@@ -24,7 +24,6 @@
             caught-error
             assert
             label
-            opt-lambda
             can-apply?
             copy-hashq-table
 
@@ -92,28 +91,6 @@
   (lambda args
     (letrec ((NAME PROC))
       (apply NAME args))))
-
-;; Lambda with optional arguments, call this like:
-;; (opt-lambda (req1 req2)
-;;             ((opt1 default1) (opt2 default2))
-;;    body)
-(define-macro (opt-lambda required optional . body)
-  `(label opt-lambda-rec
-     (lambda args
-       (assert (>= (length args) (length ',required)))
-       (if (< (length args) (+ (length ',required)
-                               (length ',optional)))
-           (apply opt-lambda-rec
-                  (append args
-                          (map cadr
-                               (list-tail ',optional
-                                          (- (length args)
-                                             (length ',optional))))))
-         (apply (lambda ,(append required
-                                 (map car optional))
-                  ,@body)
-                args)))))
-
 
 ;; Check whether a list of NUM-ARGS arguments can successfully be
 ;; applied to PROC.
