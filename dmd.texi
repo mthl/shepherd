@@ -21,10 +21,10 @@
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-@ifinfo
+@ifnottex
 @node Top
 @top dmd Manual
-@end ifinfo
+@end ifnottex
 
 Copyright @copyright{} @value{YEARS} Wolfgang J@"ahrling
 
