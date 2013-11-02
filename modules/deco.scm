@@ -33,6 +33,8 @@
 
 ;; Main program.
 (define (main args)
+  (false-if-exception (setlocale LC_ALL ""))
+
   (let ((socket-file default-socket-file)
 	(deco-socket-file default-deco-socket-file)
 	(command-args '()))
