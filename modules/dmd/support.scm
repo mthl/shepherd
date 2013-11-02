@@ -132,7 +132,7 @@
     (newline)))
 
 (define* (display-version #:optional (program-name "dmd"))
-  (local-output "~a ~a -- ~a" program-name Version copyright))
+  (local-output "~a (~a) ~a" program-name package-name Version))
 
 
 
