@@ -1,3 +1,7 @@
-#! /bin/sh
-export GUILE_LOAD_COMPILED_PATH="%DMDDIR%:$GUILE_LOAD_COMPILED_PATH"
-exec "%GUILE%" -L "%DMDDIR%" -s "%DMDDIR%/dmd.scm" "$@"
+#!%GUILE% --no-auto-compile
+-*- scheme -*-
+!#
+
+(set! %load-path (cons "%DMDDIR%" %load-path))
+(set! %load-compiled-path (cons "%DMDDIR%" %load-compiled-path))
+(apply (@ (dmd) main) (cdr (command-line)))
