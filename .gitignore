@@ -22,3 +22,16 @@ Makefile
 /aclocal.m4
 *.go
 /modules/dmd/config.scm
+/dmd.aux
+/dmd.cp
+/dmd.cps
+/dmd.fn
+/dmd.fns
+/dmd.ky
+/dmd.log
+/dmd.pg
+/dmd.toc
+/dmd.tp
+/dmd.tps
+/dmd.vr
+/dmd.vrs
