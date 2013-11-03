@@ -64,6 +64,7 @@ instantiate =						\
   -e 's,%VERSION%,@VERSION@,g'				\
   -e 's,%PACKAGE_BUGREPORT%,@PACKAGE_BUGREPORT@,g'	\
   -e 's,%PACKAGE_NAME%,@PACKAGE_NAME@,g'		\
+  -e 's,%PACKAGE_URL%,@PACKAGE_URL@,g'			\
   -e 's,%GUILE%,$(GUILE),g'
 
 # Generate main programs.

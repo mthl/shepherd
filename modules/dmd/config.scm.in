@@ -6,7 +6,8 @@
             %localstatedir
             copyright
             bug-address
-            package-name))
+            package-name
+            package-url))
 
 (define Version "%VERSION%")
 (define Prefix-dir "%PREFIX%")
@@ -15,3 +16,4 @@
 (define copyright "Copyright (C) 2002, 2003 Wolfgang Jährling")
 (define bug-address "%PACKAGE_BUGREPORT%")
 (define package-name "%PACKAGE_NAME%")
+(define package-url "%PACKAGE_URL%")

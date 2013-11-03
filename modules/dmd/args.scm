@@ -202,7 +202,9 @@
 Mandatory or optional arguments to long options are also mandatory or
 optional to the corresponding short options.
 
-Mail bug reports to <" bug-address ">.
+Report bugs to: " bug-address ".
+" package-name " general home page: <" package-url ">
+General help using GNU software: <http://www.gnu.org/gethelp/>
 "))
 			    (quit)))
 	       options))
