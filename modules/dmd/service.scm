@@ -20,10 +20,12 @@
 (define-module (dmd service)
   #:use-module (oop goops)
   #:use-module (srfi srfi-1)
+  #:use-module (srfi srfi-26)
   #:use-module (ice-9 format)
   #:use-module (dmd support)
   #:use-module (dmd comm)
   #:use-module (dmd config)
+  #:use-module (dmd system)
   #:export (<service>
             canonical-name
             running?
@@ -702,6 +704,24 @@
 
 ;; The `dmd' service.
 
+(define (shutdown-services)
+  "Shut down all the currently running services; update the persistent state
+file when persistence is enabled."
+  (let ((running-services '()))
+    (for-each-service
+     (lambda (service)
+       (when (running? service)
+         (stop service)
+         (when persistency
+           (set! running-services
+                 (cons (canonical-name service)
+                       running-services))))))
+
+    (when persistency
+      (call-with-output-file persistency-state-file
+        (lambda (p)
+          (format p "~{~a ~}~%" running-services))))))
+
 (define dmd-service
   (make <service>
     #:docstring "The dmd service is used to operate on dmd itself."
@@ -716,20 +736,7 @@
 	     (local-output "Exiting dmd...")
 	     ;; Prevent that we try to stop ourself again.
 	     (slot-set! dmd-service 'running #f)
-	     ;; Shutdown everything.
-	     (let ((running-services '()))
-	       (for-each-service
-		(lambda (service)
-		  (when (running? service)
-                    (stop service)
-                    (when persistency
-                      (set! running-services
-                            (cons (canonical-name service)
-                                  running-services))))))
-	       (when persistency
-                 (call-with-output-file persistency-state-file
-                   (lambda (p)
-                     (format p "~{~a ~}~%" running-services)))))
+             (shutdown-services)
 	     (quit))
     ;; All actions here need to take care that they do not invoke any
     ;; user-defined code without catching `quit', since they are
@@ -756,6 +763,22 @@ which ones are not."
       "Display detailed information about all services."
       (lambda (running)
 	(for-each-service dmd-status)))
+     ;; Halt.
+     (halt
+      "Halt the system."
+      (lambda (running)
+        (local-output "Halting...")
+        (catch 'quit
+          (cut stop dmd-service)
+          (cut halt))))
+     ;; Power off.
+     (power-off
+      "Halt the system and turn it off."
+      (lambda (running)
+        (local-output "Shutting down...")
+        (catch 'quit
+          (cut stop dmd-service)
+          (cut power-off))))
      ;; Load a configuration file.
      (load
       "Load the Scheme code from FILE into dmd.  This is potentially
