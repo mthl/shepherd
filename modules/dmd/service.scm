@@ -786,7 +786,7 @@ we want to receive these signals."
 	(be-silent)
 	(if (zero? (primitive-fork))
 	    #t
-	  (quit))))
+            (primitive-exit 0))))
      (persistency
       "Safe the current state of running and non-running services.
 This status gets written into a file on termination, so that we can

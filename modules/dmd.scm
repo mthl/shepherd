@@ -25,6 +25,7 @@
   #:use-module (dmd config)
   #:use-module (dmd support)
   #:use-module (dmd service)
+  #:use-module (dmd system)
   #:use-module (dmd runlevel)
   #:use-module (dmd args)
   #:use-module (dmd comm)
@@ -214,9 +215,14 @@
 	    ;; handled there.
 	    (else (apply action service-symbol the-action args))))
 	(lambda (key)
-	  (and file
-	       (close-extra-sender))
-	  (quit)))
+	  (when file
+            (close-extra-sender))
+
+          ;; Most likely we're receiving 'quit' from the 'stop' method of
+          ;; DMD-SERVICE.  So, if we're running as 'root', just reboot.
+          (if (zero? (getuid))
+              (reboot)
+              (quit))))
       (and file
 	   (close-extra-sender)))))
 
