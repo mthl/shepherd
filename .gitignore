@@ -35,3 +35,4 @@ Makefile
 /dmd.tps
 /dmd.vr
 /dmd.vrs
+/modules/dmd/system.scm

@@ -1,0 +1,48 @@
+;; system.scm -- Low-level operating system interface.
+;; Copyright (C) 2013 Ludovic Courtès <ludo@gnu.org>
+;;
+;; This file is part of GNU dmd.
+;;
+;; GNU dmd is free software; you can redistribute it and/or modify it
+;; under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 3 of the License, or (at
+;; your option) any later version.
+;;
+;; GNU dmd is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with GNU dmd.  If not, see <http://www.gnu.org/licenses/>.
+
+(define-module (dmd system)
+  #:use-module (system foreign)
+  #:export (reboot
+            halt
+            power-off))
+
+;; The <sys/reboot.h> constants.
+(define RB_AUTOBOOT @RB_AUTOBOOT@)
+(define RB_HALT_SYSTEM @RB_HALT_SYSTEM@)
+(define RB_POWER_OFF @RB_POWER_OFF@)
+
+(define %libc-reboot
+  ;; libc's 'reboot' function as declared in <sys/reboot.h>.
+  (let* ((ptr  (dynamic-func "reboot" (dynamic-link)))
+         (proc (pointer->procedure int ptr (list unsigned-int))))
+    (lambda (howto)
+      ;; FIXME: Retrieve errno.
+      (zero? (proc howto)))))
+
+(define (reboot)
+  "Perform a hard reset of the system now.  Return #f on failure."
+  (%libc-reboot RB_AUTOBOOT))
+
+(define (halt)
+  "Halt the system.  Return #f on failure."
+  (%libc-reboot RB_HALT_SYSTEM))
+
+(define (power-off)
+  "Stop system and switch power off if possible.  Return #f on failure."
+  (%libc-reboot RB_POWER_OFF))

@@ -18,7 +18,10 @@
 
 # The main programs.
 bin_SCRIPTS = dmd deco
-templates = dmd.in deco.in modules/dmd/config.scm.in
+templates =					\
+  dmd.in deco.in				\
+  modules/dmd/config.scm.in			\
+  modules/dmd/system.scm.in
 
 # Build this module first.
 BUILT_SOURCES = modules/dmd/config.scm
@@ -40,6 +43,8 @@ dist_dmdsub_DATA =				\
 nodist_dmdsub_DATA =				\
   modules/dmd/config.scm			\
   modules/dmd/config.go				\
+  modules/dmd/system.scm			\
+  modules/dmd/system.go				\
   $(dist_dmdsub_DATA:%.scm=%.go)
 
 CLEANFILES = $(nodist_dmd_DATA) $(nodist_dmdsub_DATA) $(bin_SCRIPTS)
