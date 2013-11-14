@@ -709,8 +709,8 @@
     #:requires '()
     #:respawn #f
     #:start (lambda args
-	      (and (isatty? (current-output-port))
-		   (display-version))
+	      (when (isatty? (current-output-port))
+                (display-version))
 	      #t)
     #:stop (lambda (unused . args)
 	     (local-output "Exiting dmd...")
@@ -720,17 +720,16 @@
 	     (let ((running-services '()))
 	       (for-each-service
 		(lambda (service)
-		  (and (running? service)
-		       (begin
-			 (stop service)
-			 (and persistency
-			      (set! running-services
-				    (cons (canonical-name service)
-					  running-services)))))))
-	       (and persistency
-                    (call-with-output-file persistency-state-file
-                      (lambda (p)
-                        (format p "~{~a ~}~%" running-services)))))
+		  (when (running? service)
+                    (stop service)
+                    (when persistency
+                      (set! running-services
+                            (cons (canonical-name service)
+                                  running-services))))))
+	       (when persistency
+                 (call-with-output-file persistency-state-file
+                   (lambda (p)
+                     (format p "~{~a ~}~%" running-services)))))
 	     (quit))
     ;; All actions here need to take care that they do not invoke any
     ;; user-defined code without catching `quit', since they are
@@ -748,8 +747,8 @@ which ones are not."
 	     (if (running? service)
 		 (set! started (cons (canonical-name service)
 				     started))
-	       (set! stopped (cons (canonical-name service)
-				   stopped)))))
+                 (set! stopped (cons (canonical-name service)
+                                     stopped)))))
 	  (local-output "Started: ~a" started)
 	  (local-output "Stopped: ~a" stopped))))
      ;; Look at every service in detail.
@@ -795,8 +794,8 @@ restore the status on next startup.  Optionally, you can pass a file
 name as argument that will be used to store the status."
       (lambda* (running #:optional (file #f))
 	(set! persistency #t)
-	(and file
-	     (set! persistency-state-file file))))
+	(when file
+          (set! persistency-state-file file))))
      (no-persistency
       "Don't safe state in a file on exit."
       (lambda (running)
