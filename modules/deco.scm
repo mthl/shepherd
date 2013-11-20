@@ -67,7 +67,13 @@
 		    #:description "use FILE to receive responses"
 		    #:action (lambda (file)
 			       (set! deco-socket-file file))))
-    (assert (not (< (length command-args) 2))) ;; FIXME: Error message.
+
+    ;; Make sure we got at least two arguments.
+    (when (< (length command-args) 2)
+      (format (current-error-port)
+              (l10n "Usage: deco ACTION SERVICE OPTIONS...~%"))
+      (exit 1))
+
     (set! command-args (reverse command-args))
     (let ((sender (make <sender> socket-file))
 	  (receiver (make <receiver> deco-socket-file)))
