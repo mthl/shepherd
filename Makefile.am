@@ -72,7 +72,8 @@ instantiate =						\
   -e 's,%PACKAGE_URL%,@PACKAGE_URL@,g'			\
   -e 's,%GUILE%,$(GUILE),g'
 
-# Generate main programs.
+# Instantiate templates.
+
 %: %.in Makefile
 	$(MKDIR_P) "`dirname $@`"
 	$(SED) $(instantiate) < $< >$@
@@ -80,6 +81,18 @@ instantiate =						\
 modules/dmd/config.scm: modules/dmd/config.scm.in Makefile
 	$(MKDIR_P) "`dirname $@`"
 	$(SED) $(instantiate) < $< >$@
+
+# Instantiate commands.
+
+deco: deco.in Makefile
+	$(MKDIR_P) "`dirname $@`"
+	$(SED) $(instantiate) < $< >$@
+	chmod +x "$@"
+
+dmd: dmd.in Makefile
+	$(MKDIR_P) "`dirname $@`"
+	$(SED) $(instantiate) < $< >$@
+	chmod +x "$@"
 
 # XXX: Use the C locale for when Guile lacks
 # <http://git.sv.gnu.org/cgit/guile.git/commit/?h=stable-2.0&id=e2c6bf3866d1186c60bacfbd4fe5037087ee5e3f>.
