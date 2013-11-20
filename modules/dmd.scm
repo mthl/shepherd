@@ -221,7 +221,9 @@
           ;; Most likely we're receiving 'quit' from the 'stop' method of
           ;; DMD-SERVICE.  So, if we're running as 'root', just reboot.
           (if (zero? (getuid))
-              (reboot)
+              (begin
+                (local-output "Rebooting...")
+                (reboot))
               (quit))))
       (and file
 	   (close-extra-sender)))))

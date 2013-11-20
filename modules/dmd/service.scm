@@ -767,18 +767,20 @@ which ones are not."
      (halt
       "Halt the system."
       (lambda (running)
-        (local-output "Halting...")
         (catch 'quit
           (cut stop dmd-service)
-          (cut halt))))
+          (lambda (key)
+            (local-output "Halting...")
+            (halt)))))
      ;; Power off.
      (power-off
       "Halt the system and turn it off."
       (lambda (running)
-        (local-output "Shutting down...")
         (catch 'quit
           (cut stop dmd-service)
-          (cut power-off))))
+          (lambda (key)
+            (local-output "Shutting down...")
+            (power-off)))))
      ;; Load a configuration file.
      (load
       "Load the Scheme code from FILE into dmd.  This is potentially
