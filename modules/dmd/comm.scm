@@ -137,12 +137,13 @@ return the socket."
      ;; A string for output.
      (let ((buffer '())) ;; List of unwritten output strings.
        (lambda (str)
-	 ;; Standard output, display directly.
-	 (display str original-output-port)
-	 ;; Socket to deco, send directly.
-	 (when (%current-client-socket)
-           (catch-system-error
-            (display str (%current-client-socket))))
+         ;; When deco is connected, send it the output; otherwise, in the
+         ;; unlikely case nobody is listening, send to the standard output.
+         (if (%current-client-socket)
+             (catch-system-error
+              (display str (%current-client-socket)))
+             (display str original-output-port))
+
 	 ;; Logfile, buffer line-wise and output time for each
 	 ;; completed line.
 	 (if (not (string-index str #\newline))
