@@ -18,13 +18,23 @@
 ;; along with GNU dmd.  If not, see <http://www.gnu.org/licenses/>.
 
 (define-module (dmd comm)
-  #:use-module (oop goops)
   #:use-module (dmd support)
   #:use-module (srfi srfi-1)
-  #:export (<sender>
-            send-data
-            <receiver>
-            receive-data
+  #:use-module (srfi srfi-9)
+  #:use-module (oop goops)
+  #:use-module (ice-9 match)
+  #:export (open-connection
+
+            <dmd-command>
+            dmd-command?
+            dmd-command
+            dmd-command-directory
+            dmd-command-action
+            dmd-command-service
+            dmd-command-arguments
+
+            write-command
+            read-command
             terminating-string
 
             original-output-port
@@ -37,75 +47,55 @@
 
             open-extra-sender
             close-extra-sender
-            without-extra-output
             dmd-output-port))
 
-;; This file encapsulates the exact semantics of the communication
-;; between deco and dmd.  It also does the other output stuff.
-
-(define-class <sender> ()
-  target-file
-  socket)
-
-;; Pass only a file name to the `make' procedure.
-(define-method (initialize (obj <sender>) args)
-  (assert (= (length args) 1))
-  (slot-set! obj 'target-file (car args))
-  (slot-set! obj 'socket (socket PF_UNIX SOCK_DGRAM 0)))
-
-(define-method (send-data (obj <sender>) data)
-  (define (send-packet data)
-    (sendto (slot-ref obj 'socket)
-	    data
-	    AF_UNIX
-	    (slot-ref obj 'target-file)))
-
-  (send-packet (number->string (string-length data)))
-  (send-packet data))
-
 
+;; Command for dmd.
+(define-record-type <dmd-command>
+  (%dmd-command action service args directory)
+  dmd-command?
+  (action    dmd-command-action)                  ; symbol
+  (service   dmd-command-service)                 ; symbol
+  (args      dmd-command-arguments)               ; list of strings
+  (directory dmd-command-directory))              ; directory name
 
-(define-class <receiver> ()
-  socket)
+(define* (dmd-command action service
+                      #:key (arguments '()) (directory (getcwd)))
+  "Return a new command for ACTION on SERVICE."
+  (%dmd-command action service arguments directory))
 
-;; Pass only a file name to the `make' procedure.
-(define-method (initialize (obj <receiver>) args)
-  (assert (= (length args) 1))
-  (slot-set! obj 'socket (socket PF_UNIX SOCK_DGRAM 0))
-  ;; Make the socket available to us.
-  (catch-system-error (delete-file (car args)))
-  (bind (slot-ref obj 'socket) AF_UNIX (car args)))
+(define* (open-connection #:optional (file default-socket-file))
+  "Open a connection to the daemon, using the Unix-domain socket at FILE, and
+return the socket."
+  ;; The protocol is sexp-based and UTF-8-encoded.
+  (with-fluids ((%default-port-encoding "UTF-8"))
+    (let ((sock    (socket PF_UNIX SOCK_STREAM 0))
+          (address (make-socket-address PF_UNIX file)))
+      (connect sock address)
+      sock)))
 
-;; Get a message from the receiver.
-(define-method (receive-data (obj <receiver>))
-  (let ((sock (slot-ref obj 'socket))
-	(buf (make-string 10))
-	(len #f) (real-len #f))
-    ;; We need to do it this way for getting data from the socket while
-    ;; being able to process signals (in particular SIGCHLD in dmd and
-    ;; SIGINT in both deco and dmd) immediatelly.  At least until the
-    ;; implementation of `recv!' in Guile changes, this is necessary.
-    (define (select+recv)
-      (let retry ()
-	(catch 'system-error
-	  (lambda ()
-	    (select (list sock) '() '())
-	    (recv! sock buf))
-	  (lambda (key . args)
-	    ;; Usually this will be an interruption of select due to a
-	    ;; signal, but in any case we cannot do much else (except
-	    ;; for aborting maybe).
-	    (retry)))))
+(define (read-command port)
+  "Receive a command from PORT."
+  (match (read port)
+    (('dmd-command ('version 0 _ ...)
+                   ('action action)
+                   ('service service)
+                   ('arguments args ...)
+                   ('directory directory))
+     (dmd-command action service
+                  #:arguments args
+                  #:directory directory))))
 
-    ;; Get length of message, then the message itself.
-    (set! len (string->number (string-take buf (select+recv))))
-    (or len ;; Not a valid number.
-	(set! len 1024)) ;; The best we can do...
-    (set! buf (make-string len))
-    (set! real-len (select+recv))
-    (or (= real-len len)
-	(local-output "Invalid data received."))
-    buf))
+(define (write-command command port)
+  "Write COMMAND to PORT."
+  (match command
+    (($ <dmd-command> action service (arguments ...) directory)
+     (write `(dmd-command (version 0)             ; protocol version
+                          (action ,action)
+                          (service ,service)
+                          (arguments ,@arguments)
+                          (directory ,directory))
+            port))))
 
 
 
@@ -129,28 +119,9 @@
  (define (be-silent) (set! silent #t))
  (define (be-verbose) (set! silent #f))
 
- ;; Additional output destination, if any.
- (define extra-output-sender #f)
- (define (open-extra-sender file)
-   (catch 'system-error
-     (lambda ()
-       (set! extra-output-sender (make <sender> file)))
-     (lambda (key . args)
-       (local-output "Failed to open ~a." file))))
- (define (close-extra-sender)
-   (catch-system-error
-    (send-data extra-output-sender terminating-string)
-    (set! extra-output-sender #f)))
-
- (define-syntax-rule (without-extra-output EXPR ...)
-   (let ((sender extra-output-sender))
-     (dynamic-wind
-	 (lambda ()
-	   (set! extra-output-sender #f))
-	 (lambda ()
-	   EXPR ...)
-	 (lambda ()
-	   (set! extra-output-sender sender)))))
+ (define-public %current-client-socket
+   ;; Socket of the client currently talking to the daemon.
+   (make-parameter #f))
 
  ;; We provide our own output mechanism, because we have certain
  ;; special needs; most importantly, we want to send output to deco
@@ -169,9 +140,9 @@
 	 ;; Standard output, display directly.
 	 (display str original-output-port)
 	 ;; Socket to deco, send directly.
-	 (and extra-output-sender
-	      (catch-system-error
-	       (send-data extra-output-sender str)))
+	 (when (%current-client-socket)
+           (catch-system-error
+            (display str (%current-client-socket))))
 	 ;; Logfile, buffer line-wise and output time for each
 	 ;; completed line.
 	 (if (not (string-index str #\newline))

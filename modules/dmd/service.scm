@@ -649,9 +649,8 @@
 		    (slot-set! serv 'enabled? #f)))
 		(return #t)))))))
 
-  (without-extra-output
-   (catch-system-error
-    (call/ec handler))))
+  (catch-system-error
+   (call/ec handler)))
 
 ;; Install it as the handler.
 (sigaction SIGCHLD respawn-service)

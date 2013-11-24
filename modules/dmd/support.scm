@@ -37,7 +37,6 @@
             default-config-file
             default-socket-dir
             default-socket-file
-            default-deco-socket-file
             default-persistency-state-file
 
             persistency
@@ -157,11 +156,7 @@
 
 ;; Unix domain socket for receiving commands in dmd.
 (define default-socket-file
-  (string-append default-socket-dir "/default"))
-
-;; Where deco will receive responses.
-(define default-deco-socket-file
-  (string-append default-socket-dir "/deco"))
+  (string-append default-socket-dir "/socket"))
 
 ;; Saving the state on exit.
 (define default-persistency-state-file

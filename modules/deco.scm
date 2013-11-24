@@ -18,12 +18,14 @@
 ;; along with GNU dmd.  If not, see <http://www.gnu.org/licenses/>.
 
 (define-module (deco)
-  #:use-module (oop goops)
-  #:use-module (srfi srfi-1)
   #:use-module (dmd config)
   #:use-module (dmd support)
   #:use-module (dmd args)
   #:use-module (dmd comm)
+  #:use-module (oop goops)
+  #:use-module (ice-9 rdelim)
+  #:use-module (ice-9 match)
+  #:use-module (srfi srfi-1)
   #:export (program-name
             main))
 
@@ -36,7 +38,6 @@
   (false-if-exception (setlocale LC_ALL ""))
 
   (let ((socket-file default-socket-file)
-	(deco-socket-file default-deco-socket-file)
 	(command-args '()))
     (process-args program-name args
 		  "ACTION SERVICE [ARG...]"
@@ -60,13 +61,7 @@
 		    #:takes-arg? #t #:optional-arg? #f #:arg-name "FILE"
 		    #:description "send commands to FILE"
 		    #:action (lambda (file)
-			       (set! socket-file file)))
-		  (make <option>
-		    #:long "result-socket" #:short #\r
-		    #:takes-arg? #t #:optional-arg? #f #:arg-name "FILE"
-		    #:description "use FILE to receive responses"
-		    #:action (lambda (file)
-			       (set! deco-socket-file file))))
+			       (set! socket-file file))))
 
     ;; Make sure we got at least two arguments.
     (when (< (length command-args) 2)
@@ -75,22 +70,19 @@
       (exit 1))
 
     (set! command-args (reverse command-args))
-    (let ((sender (make <sender> socket-file))
-	  (receiver (make <receiver> deco-socket-file)))
-      ;; Send initial handshake.
-      (send-data sender (number->string (+ 2 (length command-args))))
-      (send-data sender (getcwd))
-      (send-data sender deco-socket-file)
+    (let ((sock (open-connection socket-file)))
       ;; Send the command.
-      (for-each (lambda (arg)
-		  (send-data sender arg))
-		command-args)
+      (match command-args
+        ((action service args ...)
+         (write-command (dmd-command (string->symbol action)
+                                     (string->symbol service)
+                                     #:arguments args)
+                        sock)))
+
       ;; Receive output.
-      (letrec ((next-line (lambda (line)
-			    (if (string=? line terminating-string)
-				(quit)
-			      (begin
-				(display line)
-				(next-line (receive-data receiver)))))))
-	(next-line (receive-data receiver))))))
+      (let loop ((line (read-line sock)))
+        (unless (eof-object? line)
+          (display line)
+          (newline)
+          (loop (read-line sock)))))))
 

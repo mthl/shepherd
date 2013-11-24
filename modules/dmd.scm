@@ -18,6 +18,7 @@
 ;; along with GNU dmd.  If not, see <http://www.gnu.org/licenses/>.
 
 (define-module (dmd)
+  #:use-module (ice-9 match)
   #:use-module (ice-9 rdelim)   ;; Line-based I/O.
   #:use-module (ice-9 readline) ;; Readline (for interactive use).
   #:use-module (oop goops)      ;; Defining classes and methods.
@@ -35,6 +36,16 @@
 (define program-name "dmd")
 
 
+
+(define (open-server-socket file-name)
+  "Open a socket at FILE-NAME, and listen for connections there."
+  (with-fluids ((%default-port-encoding "UTF-8"))
+    (let ((sock    (socket PF_UNIX SOCK_STREAM 0))
+          (address (make-socket-address AF_UNIX file-name)))
+      (false-if-exception (delete-file file-name))
+      (bind sock address)
+      (listen sock 10)
+      sock)))
 
 ;; Main program.
 (define (main . args)
@@ -157,74 +168,59 @@
 	  ;; Exit on `C-d'.
 	  (stop dmd-service))
       ;; Process the data arriving at a socket.
-      (let ((command-source (make <receiver> socket-file))
-	    (greeting #f))
-	(letrec
-	    ((next-command
-	      (lambda ()
-		;; Get number of messages first.
-		(set! greeting (receive-data command-source))
-		(letrec
-		    ((next-message
-		      (lambda (messages-left msg-list)
-			(and (not messages-left)
-			     (begin ;; Not a valid number.
-			       (local-output "Invalid data received.")
-			       (set! messages-left 0)))
-			(if (zero? messages-left)
-			    (process-command (reverse! msg-list))
-			  (next-message (- messages-left 1)
-					(cons (receive-data command-source)
-					      msg-list))))))
-		  (next-message (string->number greeting)
-				'()))
-		(next-command))))
+      (let ((sock (open-server-socket socket-file)))
+	(let next-command ()
+          (match (accept sock)
+            ((command-source . client-address)
+             (process-connection command-source)))
 	  (next-command))))))
 
-;; Interpret COMMAND, a command sent by the user, represented as a
-;; list of strings.
-(define (process-command command)
-  (if (< (length command) 4) ;; At least dir, socket, action and service.
-      (local-output "Invalid command.")
-    (let ((dir (car command))
-	  (file (cadr command))
-	  (the-action (string->symbol (caddr command)))
-	  (service-symbol (string->symbol (cadddr command)))
-	  (args (cddddr command)))
-      (chdir dir)
-      (and file
-	   (open-extra-sender file))
-      ;; We have to catch `quit' so that we can send the terminator
-      ;; line to deco before we actually quit.
-      (catch 'quit
-	(lambda ()
-	  (case the-action
-	    ((start) (apply start service-symbol args))
-	    ((stop) (apply stop service-symbol args))
-	    ((enforce) (apply enforce service-symbol args))
-	    ((dmd-status)
-	     (if (not (null? args))
-		 (local-output "Too many arguments.")
-	       (let ((target-services (lookup-running-or-providing
-				       service-symbol)))
-		 (if (null? target-services)
-		     (handle-unknown service-symbol 'action the-action args)
-		   (for-each dmd-status
-			     target-services)))))
-	    ;; Actions which have the semantics of `action' are
-	    ;; handled there.
-	    (else (apply action service-symbol the-action args))))
-	(lambda (key)
-	  (when file
-            (close-extra-sender))
+(define (process-connection sock)
+  "Process client connection SOCK, reading and processing commands."
+  (parameterize ((%current-client-socket sock))
+    (catch 'system-error
+      (lambda ()
+        (process-command (read-command sock))
+        ;; Currently we assume that one command per connection.
+        (false-if-exception (close sock)))
+      (lambda args
+        (false-if-exception (close sock))))))
 
-          ;; Most likely we're receiving 'quit' from the 'stop' method of
-          ;; DMD-SERVICE.  So, if we're running as 'root', just reboot.
-          (if (zero? (getuid))
-              (begin
-                (local-output "Rebooting...")
-                (reboot))
-              (quit))))
-      (and file
-	   (close-extra-sender)))))
+(define (process-command command)
+  "Interpret COMMAND, a command sent by the user, represented as a
+<dmd-command> object."
+  (match command
+    (($ <dmd-command> the-action service-symbol (args ...) dir)
+     (chdir dir)
+
+     ;; We have to catch `quit' so that we can send the terminator
+     ;; line to deco before we actually quit.
+     (catch 'quit
+       (lambda ()
+         (case the-action
+           ((start) (apply start service-symbol args))
+           ((stop) (apply stop service-symbol args))
+           ((enforce) (apply enforce service-symbol args))
+           ((dmd-status)
+            (if (not (null? args))
+                (local-output "Too many arguments.")
+                (let ((target-services (lookup-running-or-providing
+                                        service-symbol)))
+                  (if (null? target-services)
+                      (handle-unknown service-symbol 'action the-action args)
+                      (for-each dmd-status
+                                target-services)))))
+           ;; Actions which have the semantics of `action' are
+           ;; handled there.
+           (else (apply action service-symbol the-action args))))
+       (lambda (key)
+         ;; Most likely we're receiving 'quit' from the 'stop' method of
+         ;; DMD-SERVICE.  So, if we're running as 'root', just reboot.
+         (if (zero? (getuid))
+             (begin
+               (local-output "Rebooting...")
+               (reboot))
+             (quit)))))
+    (_
+     (local-output "Invalid command."))))
 
