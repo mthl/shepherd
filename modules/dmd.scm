@@ -37,7 +37,7 @@
 
 
 ;; Main program.
-(define (main args)
+(define (main . args)
   (false-if-exception (setlocale LC_ALL ""))
 
   (let ((config-file default-config-file)
@@ -228,4 +228,3 @@
       (and file
 	   (close-extra-sender)))))
 
-(main (cdr (command-line)))

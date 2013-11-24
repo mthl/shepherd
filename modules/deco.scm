@@ -32,7 +32,7 @@
 
 
 ;; Main program.
-(define (main args)
+(define (main . args)
   (false-if-exception (setlocale LC_ALL ""))
 
   (let ((socket-file default-socket-file)
@@ -94,4 +94,3 @@
 				(next-line (receive-data receiver)))))))
 	(next-line (receive-data receiver))))))
 
-(main (cdr (command-line)))
