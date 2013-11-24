@@ -19,6 +19,7 @@
 
 (define-module (dmd support)
   #:use-module (dmd config)
+  #:use-module (ice-9 match)
   #:export (begin-dmd
             call/ec
             caught-error
@@ -94,11 +95,12 @@
 ;; Check whether a list of NUM-ARGS arguments can successfully be
 ;; applied to PROC.
 (define (can-apply? proc num-args)
-  (apply-to-args (procedure-property proc 'arity)
-		 (lambda (required optional takes-rest)
-		   (and (>= num-args required)
-			(or takes-rest
-			    (<= num-args (+ required optional)))))))
+  (and (procedure? proc)
+       (match (procedure-minimum-arity proc)
+         ((required optional rest?)
+          (and (>= num-args required)
+               (or rest? (<= num-args (+ required optional)))))
+         (_ #t))))
 
 ;; Put the data from TABLE into a new hash-table of size SIZE.  Use
 ;; `eq?' when inserting.  This will be dropped as soon as stable Guile
