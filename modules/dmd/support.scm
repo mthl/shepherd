@@ -20,8 +20,7 @@
 (define-module (dmd support)
   #:use-module (dmd config)
   #:use-module (ice-9 match)
-  #:export (begin-dmd
-            call/ec
+  #:export (call/ec
             caught-error
             assert
             label
@@ -44,13 +43,6 @@
             persistency-state-file
 
             verify-dir))
-
-;; For parts of the code specific to dmd.
-(define-syntax begin-dmd
-  (lambda (s)
-    (syntax-case s ()
-      ((_ expr ...)
-       #'(begin expr ...)))))
 
 ;; Implement `call-with-escape-continuation' with `catch' and `throw'.
 ;; FIXME: Multiple return values.

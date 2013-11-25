@@ -36,16 +36,9 @@
             write-command
             read-command
 
-            original-output-port
-            log-output-port
             start-logging
             stop-logging
-
-            be-silent
-            be-verbose
-
-            open-extra-sender
-            close-extra-sender
+            %current-client-socket
             dmd-output-port))
 
 
@@ -98,84 +91,76 @@ return the socket."
 
 
 
-(begin-dmd
- ;; Create a `backup' of the original standard output.
- (define original-output-port (current-output-port))
+;; Port for logging.  This must always be a valid port, never `#f'.
+(define log-output-port (%make-void-port "w"))
+(define (start-logging file)
+  (set! log-output-port (open-file file "wl")))   ; line-buffered port
+(define (stop-logging)
+  (set! log-output-port (%make-void-port "w")))
 
- ;; Port for logging.  This must always be a valid port, never `#f'.
- (define log-output-port (%make-void-port "w"))
- (define (start-logging file)
-   (set! log-output-port (open-file file "wl"))) ;; Line-buffered port.
- (define (stop-logging)
-   (set! log-output-port (%make-void-port "w")))
+(define %current-client-socket
+  ;; Socket of the client currently talking to the daemon.
+  (make-parameter #f))
 
- ;; Whether we should be silent.
- (define silent #f)
- (define (be-silent) (set! silent #t))
- (define (be-verbose) (set! silent #f))
+;; We provide our own output mechanism, because we have certain
+;; special needs; most importantly, we want to send output to deco
+;; sometimes.
+(define (make-dmd-output-port original-output-port)
+  (make-soft-port
+   (vector
 
- (define-public %current-client-socket
-   ;; Socket of the client currently talking to the daemon.
-   (make-parameter #f))
+    ;; One character for output.
+    (lambda (char)
+      (display (string char)))
 
- ;; We provide our own output mechanism, because we have certain
- ;; special needs; most importantly, we want to send output to deco
- ;; sometimes.
- (define dmd-output-port
-   (make-soft-port
-    (vector
+    ;; A string for output.
+    (let ((buffer '())) ;; List of unwritten output strings.
+      (lambda (str)
+        ;; When deco is connected, send it the output; otherwise, in the
+        ;; unlikely case nobody is listening, send to the standard output.
+        (if (%current-client-socket)
+            (catch-system-error
+             (display str (%current-client-socket)))
+            (display str original-output-port))
 
-     ;; One character for output.
-     (lambda (char)
-       (display (string char)))
+        ;; Logfile, buffer line-wise and output time for each
+        ;; completed line.
+        (if (not (string-index str #\newline))
+            (set! buffer (cons str buffer))
+            (let* ((log (lambda (x)
+                          (display x log-output-port)))
+                   (init-line (lambda ()
+                                (log (strftime "%Y-%m-%d %H:%M:%S "
+                                               (localtime (current-time)))))))
+              (init-line)
+              (for-each log (reverse buffer))
+              (let* ((lines (string-split str #\newline))
+                     (last-line (car (take-right lines 1)))
+                     (is-first #t))
+                (for-each (lambda (line)
+                            (if is-first
+                                (set! is-first #f)
+                                (init-line))
+                            (log line)
+                            (log #\newline))
+                          (drop-right lines 1))
+                (set! buffer (if (string-null? last-line)
+                                 '()
+                                 (list last-line))))))))
 
-     ;; A string for output.
-     (let ((buffer '())) ;; List of unwritten output strings.
-       (lambda (str)
-         ;; When deco is connected, send it the output; otherwise, in the
-         ;; unlikely case nobody is listening, send to the standard output.
-         (if (%current-client-socket)
-             (catch-system-error
-              (display str (%current-client-socket)))
-             (display str original-output-port))
-
-	 ;; Logfile, buffer line-wise and output time for each
-	 ;; completed line.
-	 (if (not (string-index str #\newline))
-	     (set! buffer (cons str buffer))
-	   (let* ((log (lambda (x)
-			 (display x log-output-port)))
-		  (init-line (lambda ()
-			       (log (strftime "%Y-%m-%d %H:%M:%S "
-					      (localtime (current-time)))))))
-	     (init-line)
-	     (for-each log (reverse buffer))
-	     (let* ((lines (string-split str #\newline))
-		    (last-line (car (take-right lines 1)))
-		    (is-first #t))
-	       (for-each (lambda (line)
-			   (if is-first
-			       (set! is-first #f)
-			     (init-line))
-			   (log line)
-			   (log #\newline))
-			 (drop-right lines 1))
-	       (set! buffer (if (string-null? last-line)
-				'()
-			      (list last-line))))))))
-
-     ;; Flush output.
-     (lambda ()
+    ;; Flush output.
+    (lambda ()
       ;; FIXME: Do we need to do something?  Flush the logfile buffer?
-       #t)
+      #t)
 
-     ;; Get a character (unused).
-     #f
+    ;; Get a character (unused).
+    #f
 
-     ;; Close the port.
-     (lambda () #t))
+    ;; Close the port.
+    (lambda () #t))
 
-    ;; It's an output-only port.
-    "w"))
+   ;; It's an output-only port.
+   "w"))
 
- (set-current-output-port dmd-output-port))
+(define dmd-output-port
+  (make-dmd-output-port (current-output-port)))

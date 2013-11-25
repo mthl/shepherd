@@ -47,6 +47,7 @@
       (listen sock 10)
       sock)))
 
+
 ;; Main program.
 (define (main . args)
   (false-if-exception (setlocale LC_ALL ""))
@@ -54,7 +55,6 @@
   (let ((config-file default-config-file)
 	(socket-file default-socket-file)
 	(insecure #f)
-	(silent #f)
 	(logfile default-logfile))
     ;; Process command line arguments.
     (process-args program-name args
@@ -74,13 +74,15 @@
 		    #:takes-arg? #f
 		    #:description "synonym for --silent"
 		    #:action (lambda ()
-			       (set! silent #t)))
+                               ;; XXX: Currently has no effect.
+                               #t))
 		  (make <option>
 		    #:long "silent" #:short #\S
 		    #:takes-arg? #f
 		    #:description "don't do output to stdout"
 		    #:action (lambda ()
-			       (set! silent #t)))
+                               ;; XXX: Currently has no effect.
+                               #t))
 		  (make <option>
 		    ;; It might actually be desirable to have an
 		    ;; ``insecure'' setup in some circumstances, thus
@@ -128,9 +130,10 @@
 	 (verify-dir (dirname socket-file) insecure))
     ;; Enable logging as first action.
     (start-logging logfile)
-    ;; Make sure we don't write to stdout if not desired.
-    (and silent
-	 (be-silent))
+
+    ;; Send output to log and clients.
+    (set-current-output-port dmd-output-port)
+
     ;; Start the dmd service.
     (start dmd-service)
     ;; This _must_ succeed.  (We could also put the `catch' around

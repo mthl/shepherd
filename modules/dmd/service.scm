@@ -789,16 +789,6 @@ dangerous.  You have been warned."
 	;; Every action is protected anyway, so no need for a `catch'
 	;; here.  FIXME: What about `quit'?
 	(load file-name)))
-     ;; Disable output.
-     (silent
-      "Disable the displaying of information on standard output."
-      (lambda (running)
-	(be-silent)))
-     ;; Enable output.
-     (verbose
-      "Enable the displaying of information on standard output."
-      (lambda (running)
-	(be-verbose)))
      ;; Go into the background.
      (daemonize
       "Go into the background.  Be careful, this means that a new
@@ -807,7 +797,6 @@ if previously spawned childs terminate.  Therefore, this action should
 usually only be used (if at all) *before* childs get spawned for which
 we want to receive these signals."
       (lambda (running)
-	(be-silent)
 	(if (zero? (primitive-fork))
 	    #t
             (primitive-exit 0))))
