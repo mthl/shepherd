@@ -35,7 +35,6 @@
 
             write-command
             read-command
-            terminating-string
 
             original-output-port
             log-output-port
@@ -98,10 +97,6 @@ return the socket."
             port))))
 
 
-
-;; FIXME: That may be ``good enough'', but should be fixed anyway.
-;; For communication between deco and dmd.
-(define terminating-string "!§&§&§&§&!") ;; Unlikely to appear in output.
 
 (begin-dmd
  ;; Create a `backup' of the original standard output.
