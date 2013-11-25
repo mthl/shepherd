@@ -48,15 +48,6 @@
 		    ;; Collect unknown args.
 		    (set! command-args (cons arg command-args)))
 		  (make <option>
-		    ;; It might actually be desirable to have an
-		    ;; ``insecure'' setup in some circumstances, thus
-		    ;; we provide it as an option.
-		    #:long "insecure" #:short #\I
-		    #:takes-arg? #f
-		    #:description "don't ensure that the setup is secure"
-		    #:action (lambda ()
-			       (set! insecure? #t)))
-		  (make <option>
 		    #:long "socket" #:short #\s
 		    #:takes-arg? #t #:optional-arg? #f #:arg-name "FILE"
 		    #:description "send commands to FILE"
