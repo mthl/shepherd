@@ -94,9 +94,10 @@ dmd: dmd.in Makefile
 	$(SED) $(instantiate) < $< >$@
 	chmod +x "$@"
 
+# Make sure 'modules/dmd/{config,system.scm}' are built first.
 # XXX: Use the C locale for when Guile lacks
 # <http://git.sv.gnu.org/cgit/guile.git/commit/?h=stable-2.0&id=e2c6bf3866d1186c60bacfbd4fe5037087ee5e3f>.
-.scm.go:
+%.go: %.scm $(templates:%.in=%)
 	$(MKDIR_P) "`dirname "$@"`"
 	LC_ALL=C					\
 	$(GUILD) compile -L "$(top_builddir)/modules"	\
