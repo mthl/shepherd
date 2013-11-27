@@ -536,7 +536,14 @@
             ;; Become the leader of a new session and session group.
             ;; Programs such as 'mingetty' expect this.
             (setsid)
-            (apply execlp program program child-args))
+            (catch 'system-error
+              (lambda ()
+                (apply execlp program program child-args))
+              (lambda args
+                (format (current-error-port)
+                        "exec of ~s failed: ~a~%"
+                        program (strerror (system-error-errno args)))
+                (primitive-exit 1))))
           pid))))
 
 ;; Produce a destructor that sends SIGNAL to the process with the pid
