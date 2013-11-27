@@ -18,6 +18,7 @@
 
 (define-module (dmd system)
   #:use-module (system foreign)
+  #:use-module (rnrs bytevectors)
   #:export (reboot
             halt
             power-off))
@@ -31,9 +32,37 @@
   ;; libc's 'reboot' function as declared in <sys/reboot.h>.
   (let* ((ptr  (dynamic-func "reboot" (dynamic-link)))
          (proc (pointer->procedure int ptr (list unsigned-int))))
+    (define (howto->symbol howto)
+      (cond ((eqv? howto RB_AUTOBOOT) 'RB_AUTOBOOT)
+            ((eqv? howto RB_HALT_SYSTEM) 'RB_HALT_SYSTEM)
+            ((eqv? howto RB_POWER_OFF) 'RB_POWER_OFF)
+            (else howto)))
+
     (lambda (howto)
-      ;; FIXME: Retrieve errno.
-      (zero? (proc howto)))))
+      ;; Block asyncs during the call so 'errno' remains unchanged.
+      (let ((err (call-with-blocked-asyncs
+                  (lambda ()
+                    (or (zero? (proc howto))
+                        (errno))))))
+        (throw 'system-error "reboot" "~A: ~S"
+               (list (strerror err) (howto->symbol howto))
+               (list err))))))
+
+(define %libc-errno-pointer
+  ;; Glibc's 'errno' pointer.
+  (let ((errno-loc (dynamic-func "__errno_location" (dynamic-link))))
+    (and errno-loc
+         (let ((proc (pointer->procedure '* errno-loc '())))
+           (proc)))))
+
+(define (errno)
+  "Return the current errno."
+  ;; XXX: We assume that nothing changes 'errno' while we're doing all this.
+  ;; In particular, that means that no async must be running here.
+  (if %libc-errno-pointer
+      (let ((bv (pointer->bytevector %libc-errno-pointer (sizeof int))))
+        (bytevector-sint-ref bv 0 (native-endianness) (sizeof int)))
+      0))
 
 (define (reboot)
   "Perform a hard reset of the system now.  Return #f on failure."
