@@ -175,9 +175,13 @@ which has essential bindings pulled in."
         ;; Process the data arriving at a socket.
         (let ((sock (open-server-socket socket-file)))
           (let next-command ()
-            (match (accept sock)
+            ;; With Guile <= 2.0.9, we can get a system-error exception for
+            ;; EINTR, which happens anytime we receive a signal, such as
+            ;; SIGCHLD.  Thus, wrap the 'accept' call.
+            (match (catch-system-error (accept sock))
               ((command-source . client-address)
-               (process-connection command-source)))
+               (process-connection command-source))
+              (_ #f))
             (next-command))))))
 
 (define (process-connection sock)
@@ -186,7 +190,7 @@ which has essential bindings pulled in."
     (catch 'system-error
       (lambda ()
         (process-command (read-command sock))
-        ;; Currently we assume that one command per connection.
+        ;; Currently we assume one command per connection.
         (false-if-exception (close sock)))
       (lambda args
         (false-if-exception (close sock))))))
