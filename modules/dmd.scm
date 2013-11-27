@@ -157,26 +157,14 @@
 
     (if (not socket-file)
 	;; Get commands from the standard input port.
-	(begin
-	  (call/ec (lambda (done)
-		     (while #t (process-command
-				(apply list
-				       ;; Use current dir, no socket output.
-				       "." #f
-				       (string-tokenize
-					(let ((line (read-line)))
-					  (if (eof-object? line)
-					      (done #t)
-					    line))))))))
-	  ;; Exit on `C-d'.
-	  (stop dmd-service))
-      ;; Process the data arriving at a socket.
-      (let ((sock (open-server-socket socket-file)))
-	(let next-command ()
-          (match (accept sock)
-            ((command-source . client-address)
-             (process-connection command-source)))
-	  (next-command))))))
+        (process-textual-commands (current-input-port))
+        ;; Process the data arriving at a socket.
+        (let ((sock (open-server-socket socket-file)))
+          (let next-command ()
+            (match (accept sock)
+              ((command-source . client-address)
+               (process-connection command-source)))
+            (next-command))))))
 
 (define (process-connection sock)
   "Process client connection SOCK, reading and processing commands."
@@ -227,3 +215,21 @@
     (_
      (local-output "Invalid command."))))
 
+(define (process-textual-commands port)
+  "Process textual commands from PORT.  'Textual' means that they're as you
+would write them on the 'deco' command line."
+  (let loop ((line (read-line port)))
+    (if (eof-object? line)
+
+        ;; Exit on `C-d'.
+        (stop dmd-service)
+
+        (begin
+          (match (string-tokenize line)
+            ((action service arguments ...)
+             (process-command (dmd-command (string->symbol action)
+                                           (string->symbol service)
+                                           #:arguments arguments)))
+            (_
+             (local-output "invalid command line" line)))
+          (loop (read-line port))))))
