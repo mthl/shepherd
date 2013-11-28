@@ -807,7 +807,13 @@ dangerous.  You have been warned."
 	(local-output "Loading ~a." file-name)
 	;; Every action is protected anyway, so no need for a `catch'
 	;; here.  FIXME: What about `quit'?
-	(load file-name)))
+        (catch 'system-error
+          (lambda ()
+            (load-in-user-module file-name))
+          (lambda args
+            (local-output "Failed to load from '~a': ~a."
+                          file-name (strerror (system-error-errno args)))
+            #f))))
      ;; Go into the background.
      (daemonize
       "Go into the background.  Be careful, this means that a new

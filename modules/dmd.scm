@@ -47,16 +47,6 @@
       (listen sock 10)
       sock)))
 
-(define (make-dmd-user-module)
-  "Return a new module, for use when evaluating the user's configuration,
-which has essential bindings pulled in."
-  (let ((m (make-fresh-user-module)))
-    ;; The typical configuration file wants to do '(make <service> ...)', and
-    ;; '(register-services ...)', so provide the relevant bindings by default.
-    (module-use! m (resolve-interface '(oop goops)))
-    (module-use! m (resolve-interface '(dmd service)))
-    m))
-
 
 ;; Main program.
 (define (main . args)
@@ -65,8 +55,7 @@ which has essential bindings pulled in."
   (let ((config-file default-config-file)
 	(socket-file default-socket-file)
 	(insecure #f)
-	(logfile default-logfile)
-        (user-module (make-dmd-user-module)))
+	(logfile default-logfile))
     ;; Process command line arguments.
     (process-args program-name args
 		  ""
@@ -152,10 +141,7 @@ which has essential bindings pulled in."
     ;; `caught-error' does not do this yet.)
     (catch #t
       (lambda ()
-        (save-module-excursion
-         (lambda ()
-           (set-current-module user-module)
-           (primitive-load config-file))))
+        (load-in-user-module config-file))
       (lambda (key . args)
 	(caught-error key args)
 	(quit 1)))

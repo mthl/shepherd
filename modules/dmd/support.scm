@@ -39,6 +39,8 @@
             default-socket-file
             default-persistency-state-file
 
+            load-in-user-module
+
             persistency
             persistency-state-file
 
@@ -161,6 +163,24 @@
 ;; Global variables set from (dmd).
 (define persistency #f)
 (define persistency-state-file default-persistency-state-file)
+
+(define (make-dmd-user-module)
+  "Return a new module, for use when evaluating the user's configuration,
+which has essential bindings pulled in."
+  (let ((m (make-fresh-user-module)))
+    ;; The typical configuration file wants to do '(make <service> ...)', and
+    ;; '(register-services ...)', so provide the relevant bindings by default.
+    (module-use! m (resolve-interface '(oop goops)))
+    (module-use! m (resolve-interface '(dmd service)))
+    m))
+
+(define (load-in-user-module file)
+  "Load FILE in a fresh user module that has essential bindings pulled in."
+  (let ((user-module (make-dmd-user-module)))
+    (save-module-excursion
+     (lambda ()
+       (set-current-module user-module)
+       (primitive-load file)))))
 
 ;; Check if the directory DIR exists and create it if it is the
 ;; default directory, but does not exist.  If INSECURE is false, also
