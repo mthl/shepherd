@@ -21,6 +21,7 @@
   #:use-module (oop goops)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-26)
+  #:use-module (ice-9 match)
   #:use-module (ice-9 format)
   #:use-module (dmd support)
   #:use-module (dmd comm)
@@ -631,7 +632,10 @@
        (lambda (serv)
 	 (and (running? serv)
 	      (enabled? serv)
-	      (= pid (slot-ref serv 'running))
+              (match (slot-ref serv 'running)
+                ((? number? pid*)
+                 (= pid pid*))
+                (_ #f))
 	      ;; We found it.
 	      (begin
 		(slot-set! serv 'running #f)
