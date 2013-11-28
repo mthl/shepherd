@@ -200,14 +200,20 @@
 	       (local-output "Service ~a depends on ~a."
 			     (canonical-name obj)
 			     problem)
-	     ;; Start the service itself.
-	     (slot-set! obj 'running (catch #t
-				       (lambda ()
-					 (apply (slot-ref obj 'start)
-						args))
-				       (lambda (key . args)
-					 (caught-error key args)
-					 #f))))
+               (call-with-blocked-asyncs
+                (lambda ()
+                  ;; Start the service itself.  Asyncs are blocked so that if
+                  ;; the newly-started process dies immediately, the SIGCHLD
+                  ;; handler is invoked later, once we have set the 'running'
+                  ;; field.
+                  (slot-set! obj 'running (catch #t
+                                            (lambda ()
+                                              (apply (slot-ref obj 'start)
+                                                     args))
+                                            (lambda (key . args)
+                                              (caught-error key args)
+                                              #f))))))
+
 	   ;; Status message.
 	   (local-output (if (running? obj)
 			     (l10n "Service ~a has been started.")
@@ -622,16 +628,16 @@
     (let ((pid (car (waitpid WAIT_ANY))))
       (for-each-service
        (lambda (serv)
-	 (and (respawn? serv)
-	      (running? serv)
+	 (and (running? serv)
 	      (enabled? serv)
 	      (= pid (slot-ref serv 'running))
 	      ;; We found it.
 	      (begin
 		(slot-set! serv 'running #f)
-		(if (> (current-time)
-		       (+ (cdr respawn-limit)
-			  (car (slot-ref serv 'last-respawns))))
+		(if (and (respawn? serv)
+                         (> (current-time)
+                            (+ (cdr respawn-limit)
+                               (car (slot-ref serv 'last-respawns)))))
 		    (if (not (slot-ref serv 'waiting-for-termination?))
 			(begin
 			  ;; Everything is okay, start it.
@@ -642,18 +648,19 @@
 			  (slot-set! serv 'last-respawns
 				     (cdr (slot-ref serv 'last-respawns)))
 			  (start serv))
-		      ;; We have just been waiting for the
-		      ;; termination.  The `running' slot has already
-		      ;; been set to `#f' by `stop'.
-		      (begin
-			(local-output "Service ~a terminated."
-				      (canonical-name serv))
-			(slot-set! serv 'waiting-for-termination? #f)))
-		  (begin
-		    (local-output "Service ~a has been disabled."
-				  (canonical-name serv))
-		    (local-output "  (Respawning too fast.)")
-		    (slot-set! serv 'enabled? #f)))
+                        ;; We have just been waiting for the
+                        ;; termination.  The `running' slot has already
+                        ;; been set to `#f' by `stop'.
+                        (begin
+                          (local-output "Service ~a terminated."
+                                        (canonical-name serv))
+                          (slot-set! serv 'waiting-for-termination? #f)))
+                    (begin
+                      (local-output "Service ~a has been disabled."
+                                    (canonical-name serv))
+                      (when (respawn? serv)
+                        (local-output "  (Respawning too fast.)"))
+                      (slot-set! serv 'enabled? #f)))
 		(return #t)))))))
 
   (catch-system-error
