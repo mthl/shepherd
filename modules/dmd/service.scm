@@ -242,13 +242,13 @@
 			  (required-by serv)))))
 
 	(let ((running-value (slot-ref obj 'running)))
-	  ;; If it is a respawnable service, we have to pretend that
-	  ;; it is already stopped, because killing it in the
-	  ;; destructor would respawn it immediatelly otherwise.
-	  ;; However, the destructor must be called with the original
-	  ;; value of the `running' slot.
-	  (and (respawn? obj)
-	       (slot-set! obj 'running #f))
+	  ;; If it is a respawnable service, we have to pretend that it is
+	  ;; already stopped, because killing it in the destructor would
+	  ;; respawn it immediatelly otherwise.  Thus, always clear the
+	  ;; 'running' slot first, and then call the destructor with the
+	  ;; original value of that slot.
+	  (slot-set! obj 'running #f)
+
 	  ;; Stop the service itself.
 	  (catch #t
 	    (lambda ()
@@ -260,6 +260,7 @@
 	      (and (eq? dmd-service obj)
 		   (eq? key 'quit)
 		   (apply quit args))
+              (slot-set! obj 'running running-value)
 	      (caught-error key args))))
 	;; Status message.
 	(let ((name (canonical-name obj)))
