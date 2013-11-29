@@ -1,0 +1,7 @@
+#!%GUILE% --no-auto-compile
+-*- scheme -*-
+!#
+
+(set! %load-path (cons "%DMDDIR%" %load-path))
+(set! %load-compiled-path (cons "%DMDDIR%" %load-compiled-path))
+(apply (@ (halt) main) (cdr (command-line)))

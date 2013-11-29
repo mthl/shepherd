@@ -36,3 +36,5 @@ Makefile
 /dmd.vr
 /dmd.vrs
 /modules/dmd/system.scm
+/halt
+/reboot

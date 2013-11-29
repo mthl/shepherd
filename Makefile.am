@@ -18,8 +18,9 @@
 
 # The main programs.
 bin_SCRIPTS = dmd deco
+sbin_SCRIPTS = halt reboot
 templates =					\
-  dmd.in deco.in				\
+  dmd.in deco.in halt.in reboot.in		\
   modules/dmd/config.scm.in			\
   modules/dmd/system.scm.in
 
@@ -30,7 +31,9 @@ BUILT_SOURCES = modules/dmd/config.scm
 dmddir = ${datadir}/dmd
 dist_dmd_DATA =					\
   modules/deco.scm				\
-  modules/dmd.scm
+  modules/dmd.scm				\
+  modules/halt.scm				\
+  modules/reboot.scm
 nodist_dmd_DATA = $(dist_dmd_DATA:%.scm=%.go)
 
 dmdsubdir = $(dmddir)/dmd
@@ -76,25 +79,19 @@ instantiate =						\
 
 # Instantiate templates.
 
+# Emit a 'chmod +x' command only if $@ matches one of the scripts.
+maybe_executable =					\
+   $(subst $@,chmod +x $@,				\
+      $(findstring $@,$(bin_SCRIPTS) $(sbin_SCRIPTS)))
+
 %: %.in Makefile
 	$(MKDIR_P) "`dirname $@`"
 	$(SED) $(instantiate) < $< >$@
+	$(maybe_executable)
 
 modules/dmd/config.scm: modules/dmd/config.scm.in Makefile
 	$(MKDIR_P) "`dirname $@`"
 	$(SED) $(instantiate) < $< >$@
-
-# Instantiate commands.
-
-deco: deco.in Makefile
-	$(MKDIR_P) "`dirname $@`"
-	$(SED) $(instantiate) < $< >$@
-	chmod +x "$@"
-
-dmd: dmd.in Makefile
-	$(MKDIR_P) "`dirname $@`"
-	$(SED) $(instantiate) < $< >$@
-	chmod +x "$@"
 
 # Make sure 'modules/dmd/{config,system.scm}' are built first.
 # XXX: Use the C locale for when Guile lacks
