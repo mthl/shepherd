@@ -540,10 +540,18 @@
   (lambda args
     (let ((pid (primitive-fork)))
       (if (zero? pid)
-          (begin
+          (let ((max-fd (max-file-descriptors)))
             ;; Become the leader of a new session and session group.
             ;; Programs such as 'mingetty' expect this.
             (setsid)
+
+            ;; Close all the file descriptors except stdout and stderr.
+            (catch-system-error (close-fdes 0))
+            (let loop ((i 3))
+              (when (< i max-fd)
+                (catch-system-error (close-fdes i))
+                (loop (+ i 1))))
+
             (catch 'system-error
               (lambda ()
                 (apply execlp program program child-args))

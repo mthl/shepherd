@@ -39,8 +39,19 @@ if test "x$GUILD" = "x"; then
 fi
 AC_SUBST([GUILD])
 
+dnl
 dnl Low-level operating system interface.
+dnl
+
 AC_PROG_CC
+
+dnl In practice that value is fixed for all platforms in glibc, but better
+dnl check it.
+AC_MSG_CHECKING([the '_SC_OPEN_MAX' value])
+AC_COMPUTE_INT([_SC_OPEN_MAX], [_SC_OPEN_MAX], [#include <unistd.h>])
+AC_MSG_RESULT([$_SC_OPEN_MAX])
+AC_SUBST([_SC_OPEN_MAX])
+
 AC_MSG_CHECKING([<sys/reboot.h> constants])
 AC_COMPUTE_INT([RB_AUTOBOOT], [RB_AUTOBOOT], [#include <sys/reboot.h>])
 case "$host_os" in

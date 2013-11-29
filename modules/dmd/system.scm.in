@@ -21,7 +21,8 @@
   #:use-module (rnrs bytevectors)
   #:export (reboot
             halt
-            power-off))
+            power-off
+            max-file-descriptors))
 
 ;; The <sys/reboot.h> constants.
 (define RB_AUTOBOOT @RB_AUTOBOOT@)
@@ -75,3 +76,23 @@
 (define (power-off)
   "Stop system and switch power off if possible.  Return #f on failure."
   (%libc-reboot RB_POWER_OFF))
+
+
+(define _SC_OPEN_MAX @_SC_OPEN_MAX@)
+
+(define sysconf
+  (let* ((ptr  (dynamic-func "sysconf" (dynamic-link)))
+         (proc (pointer->procedure long ptr (list int))))
+    (lambda (name)
+      "Return the system configuration for NAME."
+      (let* ((result (proc name))
+             (err    (errno)))
+        (if (= -1 result)
+            (throw 'system-error "sysconf" "~A: ~S"
+                   (list (strerror err) name)
+                   (list err))
+            result)))))
+
+(define (max-file-descriptors)
+  "Return the maximum number of open file descriptors allowed."
+  (sysconf _SC_OPEN_MAX))
