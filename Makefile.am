@@ -56,10 +56,12 @@ SUBDIRS = examples utils
 # Things not automatically included in the distribution.
 EXTRA_DIST = $(templates) QUESTIONS
 
-# Create the directory for the sockets.
+# Create the socket directory (aka. 'default-socket-dir'.)  Make it
+# accessible only by its owner since otherwise 'dmd' suggests using
+# '--insecure'.  This is just a convenience, so allow it to fail.
 install-data-local:
-	mkdir -p $(DESTDIR)/${prefix}/var/run/dmd
-	chmod 777 $(DESTDIR)/${prefix}/var/run/dmd
+	-$(MKDIR_P) $(DESTDIR)$(localstatedir)/run/dmd
+	-chmod 700 $(DESTDIR)$(localstatedir)/run/dmd
 
 # 'sed' expression to instantiate templates.
 instantiate =						\
@@ -114,9 +116,3 @@ SUFFIXES = .go
 # for details.
 dmd_install_go_files = install-nobase_nodist_guilemoduleDATA
 $(dmd_install_go_files): install-nobase_dist_guilemoduleDATA
-
-# The socket's directory (aka. 'default-socket-dir') must be
-# accessible only by its owner (otherwise 'dmd' suggests using
-# '--insecure'.)
-install-data-hook:
-	chmod 700 $(DESTDIR)$(localstatedir)/run/dmd
