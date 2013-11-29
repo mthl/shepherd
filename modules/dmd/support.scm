@@ -1,6 +1,6 @@
 ;; support.scm -- Various general support facilities, shared by deco and dmd.
-;; Copyright (C) 2013 Ludovic Court�s <ludo@gnu.org>
-;; Copyright (C) 2002, 2003 Wolfgang J�hrling <wolfgang@pro-linux.de>
+;; Copyright (C) 2013 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
 ;; This file is part of GNU dmd.
 ;;
@@ -127,7 +127,12 @@
     (newline)))
 
 (define* (display-version #:optional (program-name "dmd"))
-  (local-output "~a (~a) ~a" program-name package-name Version))
+  (local-output "~a (~a) ~a" program-name package-name Version)
+  (local-output (l10n "Copyright (C) 2013 Ludovic Courtès
+Copyright (C) 2002, 2003 Wolfgang Jährling
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.")))
 
 
 
