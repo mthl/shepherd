@@ -4,7 +4,8 @@
 @settitle dmd Manual
 
 @include version.texi
-@set YEARS 2002, 2003
+@set OLD-YEARS 2002, 2003
+@set NEW-YEARS 2013
 
 @dircategory System software
 @direntry
@@ -17,6 +18,7 @@
 @subtitle Last updated @value{UPDATED}
 
 @author Wolfgang J@"ahrling
+@author Ludovic Court`es
 @end titlepage
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -26,7 +28,9 @@
 @top dmd Manual
 @end ifnottex
 
-Copyright @copyright{} @value{YEARS} Wolfgang J@"ahrling
+
+Copyright @copyright{} @value{OLD-YEARS} Wolfgang J@"ahrling@*
+Copyright @copyright{} @value{NEW-YEARS} Ludovic Court@`es
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -58,9 +62,14 @@ the dmd distribution.
 @cindex service manager
 This manual documents the @dfn{dmd} service manager.  It is used to
 start and stop system services (typically daemons).  It ensures that
-this will work - by automatically starting services that are needed
-for another service to run and avoiding that conflicting services are
-started at the same time.  It does so in a very flexible way.
+this will work---by automatically starting services that are needed for
+another service to run and avoiding that conflicting services are
+started at the same time.  It does so in a very flexible way.  dmd is
+the @dfn{init system} on the GNU system---the first user process that is
+started when the system boots, typically with PID 1, running as
+@code{root}, and taking care of system-wide services.  It is also a
+useful tool that assists unprivileged users in the management of their
+own daemons.
 
 As with all flexible software, it takes some work to learn how to use
 it.  To make it as easy as possible for you, this manual contains a
@@ -80,7 +89,8 @@ The name dmd stands for @dfn{Daemon Managing Daemons} (or
 This program is written in @dfn{Guile}, an implementation of the
 Scheme programming language, using the @dfn{GOOPS} extension for
 object-orientation, therefore Guile is also used as the language for
-the configuration.  When you want to make use of advanced features of
+the configuration (@pxref{guile,,, guile, GNU Guile Reference Manual}).
+When you want to make use of advanced features of
 dmd, you should know how to work with Guile and GOOPS, but it has been
 tried to make using basic features of dmd possible without knowing how
 to program in Scheme at all.
@@ -121,10 +131,9 @@ dmd -c /etc/dmdconf.scm.old
 As its name suggests, dmd is just a daemon that (usually) runs in the
 background, so you will not interact with it directly.  After it is
 started, dmd will listen on a socket special file, usually
-@code{/var/run/dmd/$USER/default}, for further commands.  You use the
-tool @dfn{deco} to send these commands to dmd.  Usage of deco is
-simple and straight forward: To start a service called @code{apache},
-you use:
+@code{/var/run/dmd/socket}, for further commands.  You use the tool
+@dfn{deco} to send these commands to dmd.  Usage of deco is simple and
+straightforward: To start a service called @code{apache}, you use:
 
 @example
 deco start apache
@@ -132,13 +141,13 @@ deco start apache
 
 When you do this, all its dependencies will get resolved.  For
 example, a webserver is quite likely to depend on working networking,
-thus it will depend on a service called @code{network}.  So if you
-want to start @code{apache}, and @code{network} is not yet running, it
+thus it will depend on a service called @code{networking}.  So if you
+want to start @code{apache}, and @code{networking} is not yet running, it
 will automatically be started as well.  In the same way, you can stop
 a service and all the services that depend on it will be stopped.
-Using the example above, if you stop @code{network}, the service
-@code{apache} will be stopped as well - Which makes perfectly sense,
-as it can not work without the network being up.  To actually stop a
+Using the example above, if you stop @code{networking}, the service
+@code{apache} will be stopped as well---which makes perfect sense,
+as it cannot work without the network being up.  To actually stop a
 service, you use the following, probably not very surprising, command:
 
 @example
@@ -220,8 +229,7 @@ itself.  It implements various actions.  For example, the
 @code{status} action displays which services are started and which
 ones are stopped, whereas @code{detailed-status} has the effect of
 applying the default implementation of @code{status} to all services
-one after another.  The @code{silent} and @code{verbose} actions
-disable and enable the output of dmd, respectively.  The @code{load}
+one after another.  The @code{load}
 action is unusual insofar as it shows a feature that is actually
 available to all services, but which we have not seen yet: It takes an
 additional argument.  You can use @code{load} to load arbitrary code
@@ -242,7 +250,7 @@ FIXME: Finish.  For now, look at the @code{examples/} subdirectory.
 ...
 @end example
 
-Ok, to summerize:
+Ok, to summarize:
 
 @itemize @bullet
 @item
@@ -954,16 +962,7 @@ some testing.
 
 About formatting: Use common sense and GNU Emacs (which actually is
 the same, of course), and you almost can't get the formatting wrong.
-Notable exceptions: Indent @code{if} like it is done in ELisp, and
-@code{catch} also deserves a better indenting.  This can be achieved
-by putting this in your @code{~/.emacs}:
-
-@lisp
-(put 'if 'scheme-indent-function 2)
-(put 'catch 'scheme-indent-function 1)
-@end lisp
-
-This section will be extended in the future...
+Formatting should be as in Guile and Guix, basically.
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
