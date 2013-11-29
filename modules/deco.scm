@@ -71,6 +71,7 @@
                         sock)))
 
       ;; Receive output.
+      (setvbuf sock _IOLBF)
       (let loop ((line (read-line sock)))
         (unless (eof-object? line)
           (display line)
