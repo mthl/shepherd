@@ -39,3 +39,6 @@ Makefile
 /halt
 /reboot
 /dmd.pdf
+/test-suite.log
+/tests/basic.log
+/tests/basic.trs
