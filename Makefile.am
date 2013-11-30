@@ -57,7 +57,7 @@ info_TEXINFOS = dmd.texi
 SUBDIRS = examples utils
 
 # Things not automatically included in the distribution.
-EXTRA_DIST = $(templates) QUESTIONS
+EXTRA_DIST = $(templates) QUESTIONS fdl-1.3.texi
 
 # Create the socket directory (aka. 'default-socket-dir'.)  Make it
 # accessible only by its owner since otherwise 'dmd' suggests using
