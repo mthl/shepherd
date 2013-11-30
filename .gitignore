@@ -38,3 +38,4 @@ Makefile
 /modules/dmd/system.scm
 /halt
 /reboot
+/dmd.pdf

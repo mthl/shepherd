@@ -1,36 +1,16 @@
 \input texinfo @c -*- texinfo -*-
 @c dmd.texi -- The documentation in Texinfo format.
+@documentencoding UTF-8
 @setfilename dmd.info
-@settitle dmd Manual
+@settitle GNU dmd Manual
 
 @include version.texi
 @set OLD-YEARS 2002, 2003
 @set NEW-YEARS 2013
 
-@dircategory System software
-@direntry
-* dmd: (dmd).           The manual of the dmd service manager.
-@end direntry
-
-@titlepage
-@title dmd Manual
-@subtitle For use with dmd @value{VERSION}
-@subtitle Last updated @value{UPDATED}
-
-@author Wolfgang J@"ahrling
-@author Ludovic Court`es
-@end titlepage
-
-@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-@ifnottex
-@node Top
-@top dmd Manual
-@end ifnottex
-
-
+@copying
 Copyright @copyright{} @value{OLD-YEARS} Wolfgang J@"ahrling@*
-Copyright @copyright{} @value{NEW-YEARS} Ludovic Court@`es
+Copyright @copyright{} @value{NEW-YEARS} Ludovic Courtès
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -38,6 +18,41 @@ any later version published by the Free Software Foundation; with no
 Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
 Texts.  A copy of the license is included in the file COPYING.DOC of
 the dmd distribution.
+@end copying
+
+@dircategory System software
+@direntry
+* dmd: (dmd).           The manual of the dmd service manager.
+* deco: (dmd)Invoking deco
+                        Controlling the dmd service manager.
+* reboot: (dmd)Invoking reboot
+                        Rebooting a dmd-controlled system.
+* halt: (dmd)Invoking halt
+                        Turning off a dmd-controlled system.
+@end direntry
+
+@titlepage
+@title GNU dmd Manual
+@subtitle For use with dmd @value{VERSION}
+@subtitle Last updated @value{UPDATED}
+
+@author Wolfgang J@"ahrling
+@author Ludovic Courtès
+
+@insertcopying
+@end titlepage
+
+@contents
+
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@ifnottex
+@node Top
+@top GNU dmd Manual
+
+This manual documents dmd version @value{VERSION}, a service manager for
+the GNU system.
 
 @menu
 * Introduction::      Introduction to the dmd service manager.
@@ -53,6 +68,7 @@ the dmd distribution.
 * Variable Index::
 * Type Index::
 @end menu
+@end ifnottex
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -89,7 +105,7 @@ The name dmd stands for @dfn{Daemon Managing Daemons} (or
 This program is written in @dfn{Guile}, an implementation of the
 Scheme programming language, using the @dfn{GOOPS} extension for
 object-orientation, therefore Guile is also used as the language for
-the configuration (@pxref{guile,,, guile, GNU Guile Reference Manual}).
+the configuration (@pxref{Top,,, guile, GNU Guile Reference Manual}).
 When you want to make use of advanced features of
 dmd, you should know how to work with Guile and GOOPS, but it has been
 tried to make using basic features of dmd possible without knowing how
@@ -297,8 +313,10 @@ trouble.  Both dmd and deco understand the standard arguments
 
 
 @menu
-* Invoking dmd::    How to start the service damon.
-* Invoking deco::   Controlling daemons.
+* Invoking dmd::                How to start the service damon.
+* Invoking deco::               Controlling daemons.
+* Invoking reboot::             Rebooting a dmd-controlled system.
+* Invoking halt::               Turning off a dmd-controlled system.
 @end menu
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -322,19 +340,20 @@ It accepts the following options:
 Read and evaluate @var{file} as the configuration script on startup.
 
 @var{file} is evaluated in the context of a fresh module where bindings
-from the @code{(dmd services)} module and Guile's @code{(oop goops)} are
+from the @code{(dmd service)} module and Guile's @code{(oop goops)} are
 available, in addition to the default set of Guile bindings.  In
 particular, this means that code in @var{file} may use
-@code{register-services}, the @code{<service>} class, and related tools.
+@code{register-services}, the @code{<service>} class, and related tools
+(@pxref{Services}).
 
 @item -I
 @itemx --insecure
 @cindex security
 @cindex insecure
-Do not check if the directory where the socket - from which we are
-going to receive commands - is located has secure permissions set.  If
-this option is not specified, dmd will abort if the permissions are
-set to something that is considered dangerous.
+Do not check if the directory where the socket---our communication
+rendez-vous with @command{deco}---is located has permissions @code{700}.
+If this option is not specified, @command{dmd} will abort if the
+permissions are not as expected.
 
 @item -l [@var{file}]
 @itemx --logfile[=@var{file}]
@@ -348,15 +367,11 @@ otherwise.
 @itemx --persistency[=@var{file}]
 @c FIXME-CRITICAL
 
-@item -S
-@itemx --silent
-Don't write to standard output.
-
 @item -s @var{file}
 @itemx --socket=@var{file}
 @cindex socket special file
 Receive further commands on the socket special file @var{file}.  If
-this option is not specified, @code{/var/run/dmd/$USER/default} is
+this option is not specified, @file{@var{localstatedir}/run/dmd/socket} is
 taken.  If @code{none} is specified as file name, the commands will be
 read from standard input.  Note that you can still use a socket with
 the name @code{none} if you specify the directory name as well, like
@@ -372,45 +387,88 @@ Synonym for @code{--silent}.
 @node Invoking deco
 @section Invoking deco
 
-@cindex deco Invocation
-@cindex invoking deco
-The @code{deco} command has the following synopsis:
+@cindex deco
+The @command{deco} command is a generic client program to control a
+running instance of @command{dmd} (@pxref{Invoking dmd}).  It has the
+following synopsis:
 
 @example
 deco [@var{option}@dots{}] @var{action} @var{service} [@var{arg}@dots{}]
 @end example
 
-It causes the @var{action} of the @var{service} to be invoked.  For
-each action, you should pass the appropriate @var{arg}s.  Actions that
-are available for every service are start, stop, restart, status,
-enable and disable.
+It causes the @var{action} of the @var{service} to be invoked.  For each
+action, you should pass the appropriate @var{arg}s.  Actions that are
+available for every service are @code{start}, @code{stop},
+@code{restart}, @code{status}, @code{enable}, @code{disable}, and
+@code{doc}.
 
 If you pass a file name as an @var{arg}, it will be passed as-is to
 dmd, thus if it is not an absolute name, it is local to the current
 working directory of dmd, not to deco.
 
-The @code{deco} command understands the following options:
+The @code{deco} command understands the following option:
 
 @table @samp
-@item -I
-@itemx --insecure
-Do not check if the directory where the socket - from which we are
-going to receive output from dmd - is located has secure permissions
-set.  If this option is not specified, deco will abort if the
-permissions are set to something that is considered dangerous.
-
-@item -r @var{file}
-@itemx --result-socket=@var{file}
-@cindex socket special file
-Receive the output from dmd on the socket special file @var{file}.  By
-default, /var/run/dmd/$USER/deco is used.
 
 @item -s @var{file}
 @itemx --socket=@var{file}
 Send commands to the socket special file @var{file}. If this option is
-not specified, /var/run/dmd/$USER/default is taken.
+not specified, @file{@var{localstatedir}/run/dmd/socket} is taken.
 
 @end table
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Invoking reboot
+@section Invoking reboot
+
+@cindex deco
+The @command{reboot} command is a convenience client program to instruct
+dmd (when used as an init system) to stop all running services and
+reboot the system.  It has the following synopsis:
+
+@example
+reboot [@var{option}@dots{}]
+@end example
+
+It is equivalent to running @command{deco stop dmd}.  The @code{reboot}
+command understands the following option:
+
+@table @samp
+
+@item -s @var{file}
+@itemx --socket=@var{file}
+Send commands to the socket special file @var{file}. If this option is
+not specified, @file{@var{localstatedir}/run/dmd/socket} is taken.
+
+@end table
+
+@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@node Invoking halt
+@section Invoking halt
+
+@cindex deco
+The @command{halt} command is a convenience client program to instruct
+dmd (when used as an init system) to stop all running services and turn
+off the system.  It has the following synopsis:
+
+@example
+halt [@var{option}@dots{}]
+@end example
+
+It is equivalent to running @command{deco power-off dmd}.  As usual, the
+@code{halt} command understands the following option:
+
+@table @samp
+
+@item -s @var{file}
+@itemx --socket=@var{file}
+Send commands to the socket special file @var{file}. If this option is
+not specified, @file{@var{localstatedir}/run/dmd/socket} is taken.
+
+@end table
+
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -419,11 +477,15 @@ not specified, /var/run/dmd/$USER/default is taken.
 
 @cindex service
 @tindex <service>
-The @dfn{service} is obviously a very important concept of dmd.  On
-the Guile-level, a service is represented as an instance of the class
-@code{<service>}.  When creating an instance of it, you can specify
-the initial values of its slots, and you actually must do this for
-some of the slots.
+The @dfn{service} is obviously a very important concept of dmd.  On the
+Guile level, a service is represented as an instance of
+@code{<service>}, a GOOPS class (@pxref{GOOPS,,, guile, GNU Guile
+Reference Manual}).  When creating an instance of it, you can specify
+the initial values of its slots, and you actually must do this for some
+of the slots.
+
+The @code{<service>} class and its associated procedures and methods are
+defined in the @code{(dmd service)} module.
 
 @menu
 * Slots of services::            What a <service> object consists of.
@@ -694,33 +756,34 @@ All of the procedures listed below return procedures generated from
 the supplied arguments.  These procedures take one argument in the
 case of destructors and no arguments in the case of constructors.
 
-@deffn {procedure} make-system-constructor . command
+@deffn {procedure} make-system-constructor @var{command}@dots{}
 The returned procedure will execute @var{command} in a shell and
 return @code{#t} if execution was successful, otherwise @code{#f}.
 For convenience, it takes multiple arguments which will be
 concatenated first.
 @end deffn
 
-@deffn {procedure} make-system-destructor . command
+@deffn {procedure} make-system-destructor @var{command}@dots{}
 Similar to @code{make-system-constructor}, but returns @code{#f} if
 execution of the @var{command} was successful, @code{#t} if not.
 @end deffn
 
-@deffn {procedure} make-forkexec-constructor program . args
-The returned procedure will fork a child process and execute
-@var{program} with the additional arguments @var{args}.  Note that you
-don't have to supply the program name as the first argument again,
-like it is necessary for @code{execl} and friends.  It returns the pid
-of the child process.
+@deffn {procedure} make-forkexec-constructor @var{program} @var{args}@dots{}
+The returned procedure will fork a child process, close all file
+descriptors except the standard output and standard error descriptors,
+and execute @var{program} with the additional arguments @var{args}.
+Note that you don't have to supply the program name as the first
+argument again, like it is necessary for @code{execl} and friends.  It
+returns the PID of the child process.
 @end deffn
 
-@deffn {procedure} make-kill-destructor signal
+@deffn {procedure} make-kill-destructor [@var{signal}]
 Returns a procedure that sends @var{signal} to the pid which it takes
 as argument.  This @emph{does} work together with respawning services,
 because in that case the @code{stop} method of the @code{<service>}
 class sets the @code{running} slot to @code{#f} before actually
 calling the destructor; if it would not do that, killing the process
-in the destructor would immediatelly respawn the service.
+in the destructor would immediately respawn the service.
 @end deffn
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -768,32 +831,28 @@ itself.  It provides the following actions (in addition to
 @code{enable}, @code{disable} and @code{restart} which do not make
 sense here).
 
-@table @samp
-@item @code{status}
+@table @code
+@item status
 Displays which services are started and which ones are not.
 
-@item @code{detailed-status}
+@item detailed-status
 Displays detailed information about every registered service.
 
-@item @code{load @var{file}}
-Evaluate the Scheme code in @var{file}.
+@item load @var{file}
+Evaluate the Scheme code in @var{file} in a fresh module that uses the
+@code{(oop goops)} and @code{(dmd services)} modules---as with the
+@code{--config} option of @command{dmd} (@pxref{Invoking dmd}).
 
-@item @code{silent}
-Don't send output to dmd's standard output, only to deco.
-
-@item @code{verbose}
-Undo what @code{silent} did.
-
-@item @code{daemonize}
+@item daemonize
 Fork and go into the background.  This should be called before
 respawnable services are started, as otherwise we would not get the
 @code{SIGCHLD} signals when they terminate.
 
-@item @code{enable-persistency}
+@item enable-persistency
 When terminating, safe the list of running services in a file.
 @c FIXME-CRITICAL: How can we specify which one?
 
-@item @code{disable-persistency}
+@item disable-persistency
 Don't safe the list of running services when terminating.
 
 @end table
