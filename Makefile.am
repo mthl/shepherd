@@ -59,7 +59,7 @@ info_TEXINFOS = dmd.texi
 SUBDIRS = examples utils
 
 # Things not automatically included in the distribution.
-EXTRA_DIST = $(templates) QUESTIONS fdl-1.3.texi
+EXTRA_DIST = $(templates) QUESTIONS fdl-1.3.texi ChangeLog-2003
 
 # Create the socket directory (aka. 'default-socket-dir'.)  Make it
 # accessible only by its owner since otherwise 'dmd' suggests using
@@ -128,3 +128,15 @@ SUFFIXES = .go
 # for details.
 dmd_install_go_files = install-nobase_nodist_guilemoduleDATA
 $(dmd_install_go_files): install-nobase_dist_guilemoduleDATA
+
+gen-ChangeLog:
+	if test -d .git; then				\
+	  $(top_srcdir)/build-aux/gitlog-to-changelog	\
+	    8da9cf2..HEAD > $(distdir)/cl-t;		\
+	  rm -f $(distdir)/ChangeLog;			\
+	  mv $(distdir)/cl-t $(distdir)/ChangeLog;	\
+	fi
+
+dist-hook: gen-ChangeLog
+
+.PHONY: gen-ChangeLog
