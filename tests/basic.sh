@@ -21,12 +21,13 @@ deco --version
 
 socket="t-socket-$$"
 conf="t-conf-$$"
+log="t-log-$$"
 stamp="t-stamp-$$"
 
 deco="deco -s $socket"
 dmd_pid=""
 
-trap "rm -f $socket $conf $stamp; test -z $dmd_pid || kill $dmd_pid" EXIT
+trap "rm -f $socket $conf $stamp $log; test -z $dmd_pid || kill $dmd_pid" EXIT
 
 cat > "$conf"<<EOF
 (use-modules (srfi srfi-26))
@@ -42,7 +43,7 @@ cat > "$conf"<<EOF
    #:respawn? #f))
 EOF
 
-dmd -I -s "$socket" -c "$conf" &
+dmd -I -s "$socket" -c "$conf" -l "$log" &
 dmd_pid=$!
 
 sleep 1				# XXX: wait till it's up
@@ -61,3 +62,5 @@ $deco status test | grep stopped
 
 $deco stop dmd
 ! kill -0 $dmd_pid
+
+test -f "$log"
