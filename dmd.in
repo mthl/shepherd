@@ -2,6 +2,6 @@
 -*- scheme -*-
 !#
 
-(set! %load-path (cons "%DMDDIR%" %load-path))
-(set! %load-compiled-path (cons "%DMDDIR%" %load-compiled-path))
+(set! %load-path (cons "%modsrcdir%" %load-path))
+(set! %load-compiled-path (cons "%modbuilddir%" %load-compiled-path))
 (apply (@ (dmd) main) (cdr (command-line)))

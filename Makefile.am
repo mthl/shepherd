@@ -68,10 +68,23 @@ install-data-local:
 	-$(MKDIR_P) $(DESTDIR)$(localstatedir)/run/dmd
 	-chmod 700 $(DESTDIR)$(localstatedir)/run/dmd
 
+# Relocate the script---i.e., have them refer to the installed module
+# directory.
+install-exec-hook:
+	for script in						\
+	   $(bin_SCRIPTS:%=$(DESTDIR)$(bindir)/%)		\
+	   $(sbin_SCRIPTS:%=$(DESTDIR)$(sbindir)/%) ;		\
+	do							\
+	  $(SED) -e's|$(abs_top_srcdir)/modules|$(dmddir)|g'	\
+	         -e's|$(abs_top_builddir)/modules|$(dmddir)|g'	\
+	         -i $$script ;					\
+	done
+
 # 'sed' expression to instantiate templates.
 instantiate =						\
-  -e 's,%DMDDIR%,${dmddir},g'				\
   -e 's,%PREFIX%,${prefix},g'				\
+  -e 's,%modsrcdir%,${abs_top_srcdir}/modules,g'	\
+  -e 's,%modbuilddir%,${abs_top_builddir}/modules,g'	\
   -e 's,%localstatedir%,${localstatedir},g'		\
   -e 's,%VERSION%,@VERSION@,g'				\
   -e 's,%PACKAGE_BUGREPORT%,@PACKAGE_BUGREPORT@,g'	\
