@@ -1,4 +1,4 @@
-* An -*- outline -*- of the `dmd' service manager.
+* An -*- outline -*- of the GNU dmd service manager.
 
 ** What is `dmd'?
 
@@ -14,9 +14,11 @@ Guile is available.  In particular, it has been tested on GNU/Linux.
 ** Requirements
 
 This program requires Guile (the GNU Ubiquitous Intelligent Language
-for Extension), version 1.6.x.  It uses GOOPS, but as GOOPS is part of
+for Extension), version 2.x.  It uses GOOPS, but as GOOPS is part of
 Guile, a normal Guile installation is sufficient.  It also uses
 readline, though it does not really depend on it.
+
+GNU Make is required to build dmd.
 
 ** Getting started
 
@@ -46,16 +48,22 @@ helpful in improving dmd can be found in `THANKS'.
 This program can be distributed under the terms of the GNU General
 Public License, version 3 or any later version, see the file `COPYING'
 for details.  The Texinfo manual can be distributed under the terms of
-the GNU Free Documentation License, version 1.1 or any later version,
-see the file `COPYING.DOC' and the Texinfo manual (`dmd.texi' or any
-file generated from it) for details.
+the GNU Free Documentation License, version 1.3 or any later version,
+see the manual for details.
+
+The GNU dmd home page is at:
+
+  http://www.gnu.org/software/dmd/
+
+GNU dmd is developed jointly with the GNU Guix project.  Both are
+essential components in putting the pieces together to build the
+GNU system.  Join us now!
 
 ** Bugs and Limitations
 
-There is no localization done yet.  Code from the user configuration
-is allowed to mess up everything.  Runlevels do not work yet.  It is
-hard to setup currently.  A few bugs are already marked in the source
-code.
+There is no localization done yet.  Code from the user configuration is
+allowed to mess up everything.  Runlevels do not work yet.  A few bugs
+are already marked in the source code.
 
-Send bug reports to  <wolfgang@pro-linux.de>
-              or to  <wolfgang.jaehrling@wt-ausbilder.de>.
+Send bug reports to <bug-guix@gnu.org>, with "dmd" and the version
+number in the Subject line.
