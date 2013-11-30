@@ -1,87 +1,90 @@
-Version -0.4
+                                                              -*- org -*-
+#+TITLE: GNU dmd NEWS – history of user-visible changes
+#+STARTUP: content hidestars
 
-	* Awaken from a 10-year nap.
-	* Ported to Guile 2.0.
-	* Modules are modules instead of being loaded.
-	* Build system fixes, cleanups, and upgrades.
+Copyright © 2002, 2003 Wolfgang Jährling
+Copyright © 2013 Ludovic Courtès <ludo@gnu.org>
 
-Version -0.5
+  Copying and distribution of this file, with or without modification,
+  are permitted in any medium without royalty provided the copyright
+  notice and this notice are preserved.
 
-	* dmd: `--socket=-' instead of `--socket=none'.
-	* Renamed `extra-action' to plain `action'.
-	* The result of user-defined stop code is ignored now.
-	* New action for all services: `dmd-status'.
-	* Distribution contains file `QUESTIONS'.
-	* Improved the `unknown' service implementation in `examples/'.
-	* Number of args given to actions is verified.
-	* Made docstrings for actions optional.
-	* Renamed `{en,dis}able-persistency' to `{,no-}persistency'.
-	* Can pass file name to dmd action `persistency'.
+Please send dmd bug reports to bug-guix@gnu.org.
 
-Version -0.6
+* Changes in version -0.4
+** Awaken from a 10-year nap.
+** Ported to Guile 2.0.
+** Modules are modules instead of being loaded.
+** Build system fixes, cleanups, and upgrades.
 
-	* New action `doc' for displaying documentation.
-	* `list-actions' is a sub-action of `doc' now.
-	* New action `cd' for dmd, useful with `--socket=none'.
-	* Distribution contains example for an `unknown' service.
-	* At configure time, dmd checks for a Guile installation.
-	* Enable readline on `--socket=none' and non-dumb terminal.
-	* Startup time finally became completely unacceptable. :-)
+* Changes in version -0.5
+** dmd: `--socket=-' instead of `--socket=none'.
+** Renamed `extra-action' to plain `action'.
+** The result of user-defined stop code is ignored now.
+** New action for all services: `dmd-status'.
+** Distribution contains file `QUESTIONS'.
+** Improved the `unknown' service implementation in `examples/'.
+** Number of args given to actions is verified.
+** Made docstrings for actions optional.
+** Renamed `{en,dis}able-persistency' to `{,no-}persistency'.
+** Can pass file name to dmd action `persistency'.
 
-Version -0.7
+* Changes in version -0.6
+** New action `doc' for displaying documentation.
+** `list-actions' is a sub-action of `doc' now.
+** New action `cd' for dmd, useful with `--socket=none'.
+** Distribution contains example for an `unknown' service.
+** At configure time, dmd checks for a Guile installation.
+** Enable readline on `--socket=none' and non-dumb terminal.
+** Startup time finally became completely unacceptable. :-)
 
-	* Can fork into background via dmd extra-action `daemonize'.
-	* New action for all services: list-actions.
-	* New options for dmd: --logfile (-l), and --silent/--quiet
-	* Standard option --usage works for both dmd and deco.
-	* You can pass relative file names to deco.
-	* Never send respawn-output to deco by accident.
-	* Better handling of terminals and similar services.
-	* Documented evolution of runlevels.
-	* Service groups can be used to start/stop services at once.
-	* Persistency (i.e. safe state on exit and restore next time).
-	* Invoke actions of service `unknown' (if defined) as fallback.
-	* Read commands from standard input if socket file name is `none'.
+* Changes in version -0.7
+** Can fork into background via dmd extra-action `daemonize'.
+** New action for all services: list-actions.
+** New options for dmd: --logfile (-l), and --silent/--quiet
+** Standard option --usage works for both dmd and deco.
+** You can pass relative file names to deco.
+** Never send respawn-output to deco by accident.
+** Better handling of terminals and similar services.
+** Documented evolution of runlevels.
+** Service groups can be used to start/stop services at once.
+** Persistency (i.e. safe state on exit and restore next time).
+** Invoke actions of service `unknown' (if defined) as fallback.
+** Read commands from standard input if socket file name is `none'.
 
-Version -0.8
+* Changes in version -0.8
+** Show output in deco, not only in dmd.
+** New options in deco: --insecure (-I) and --result-socket (-r)
+** --help displays the options for both dmd and deco.
+** Disable services which are respawning too fast.
+** New actions for all services: enable, disable and enforce.
+** Default extra actions work even when the service is stopped.
+** Documented some internals of dmd.
 
-	* Show output in deco, not only in dmd.
-	* New options in deco: --insecure (-I) and --result-socket (-r)
-	* --help displays the options for both dmd and deco.
-	* Disable services which are respawning too fast.
-	* New actions for all services: enable, disable and enforce.
-	* Default extra actions work even when the service is stopped.
-	* Documented some internals of dmd.
+* Changes in version -0.9
+** Example configuration added.
+** New option for deco: --socket (-s).
+** New option for dmd: --insecure (-I).
+** Added tutorial and completed documentation.
+** Create default socket dir on startup if desired.
+** Added a real build system.
 
-Version -0.9
+* Changes in Version -0.9.6
+** Controlling dmd completely with deco is now possible.
+** A few bugfixes for service handling.
+** Long options can be abbreviated, short ones also work.
+** Respawning of services works.
 
-	* Example configuration added.
-	* New option for deco: --socket (-s).
-	* New option for dmd: --insecure (-I).
-	* Added tutorial and completed documentation.
-	* Create default socket dir on startup if desired.
-	* Added a real build system.
+* Changes in version -0.9.7
+** User-defined code is always protected with a `catch'.
+** New options: --config and --socket.
+** The new deco program can be used to send commands to dmd.
 
-Version -0.9.6
+* Changes in version -0.9.8
+** Starting and stopping of services by symbol works better.
+** Performing extra actions on services possible.
+** Improved documentation.
+** More detailed output.
 
-	* Controlling dmd completely with deco is now possible.
-	* A few bugfixes for service handling.
-	* Long options can be abbreviated, short ones also work.
-	* Respawning of services works.
-
-Version -0.9.7
-
-	* User-defined code is always protected with a `catch'.
-	* New options: --config and --socket.
-	* The new deco program can be used to send commands to dmd.
-
-Version -0.9.8
-
-	* Starting and stopping of services by symbol works better.
-	* Performing extra actions on services possible.
-	* Improved documentation.
-	* More detailed output.
-
-Version -0.9.9
-
-	* Initial release.
+* Version -0.9.9
+** Initial release.
