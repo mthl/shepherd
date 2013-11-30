@@ -50,7 +50,9 @@ nodist_dmdsub_DATA =				\
   modules/dmd/system.go				\
   $(dist_dmdsub_DATA:%.scm=%.go)
 
-CLEANFILES = $(nodist_dmd_DATA) $(nodist_dmdsub_DATA) $(bin_SCRIPTS)
+CLEANFILES =					\
+  $(nodist_dmd_DATA) $(nodist_dmdsub_DATA)	\
+  $(bin_SCRIPTS) $(sbin_SCRIPTS)
 
 # Documentation.
 info_TEXINFOS = dmd.texi
