@@ -637,57 +637,66 @@
 	     #f ;; Unused
 	     services))
 
+(define (find-service pred)
+  "Return the first service that matches PRED, or #f if none was found."
+  (call/ec
+   (lambda (return)
+     (hash-fold (lambda (name services _)
+                  (and=> (find pred services)
+                         return))
+                #f
+                services)
+     #f)))
+
 ;; Lookup the services that provide NAME.  Returns a (possibly empty)
 ;; list of those.
 (define (lookup-services name)
   (hashq-ref services name '()))
 
-;; SIGCHLD handler.
 (define (respawn-service signum)
-  (define (handler return)
-    (let ((pid (car (waitpid WAIT_ANY))))
-      (for-each-service
-       (lambda (serv)
-	 (and (running? serv)
-	      (enabled? serv)
-              (match (slot-ref serv 'running)
-                ((? number? pid*)
-                 (= pid pid*))
-                (_ #f))
-	      ;; We found it.
-	      (begin
-		(slot-set! serv 'running #f)
-		(if (and (respawn? serv)
-                         (> (current-time)
-                            (+ (cdr respawn-limit)
-                               (car (slot-ref serv 'last-respawns)))))
-		    (if (not (slot-ref serv 'waiting-for-termination?))
-			(begin
-			  ;; Everything is okay, start it.
-			  (local-output "Respawning ~a."
-					(canonical-name serv))
-			  (set-car! (slot-ref serv 'last-respawns)
-				    (current-time))
-			  (slot-set! serv 'last-respawns
-				     (cdr (slot-ref serv 'last-respawns)))
-			  (start serv))
-                        ;; We have just been waiting for the
-                        ;; termination.  The `running' slot has already
-                        ;; been set to `#f' by `stop'.
-                        (begin
-                          (local-output "Service ~a terminated."
-                                        (canonical-name serv))
-                          (slot-set! serv 'waiting-for-termination? #f)))
-                    (begin
-                      (local-output "Service ~a has been disabled."
-                                    (canonical-name serv))
-                      (when (respawn? serv)
-                        (local-output "  (Respawning too fast.)"))
-                      (slot-set! serv 'enabled? #f)))
-		(return #t)))))))
+  "Handle SIGCHLD, possibly by respawning the service that just died, or
+otherwise by updating its state."
+  (let* ((pid  (car (waitpid WAIT_ANY)))
+         (serv (find-service (lambda (serv)
+                               (and (enabled? serv)
+                                    (match (slot-ref serv 'running)
+                                      ((? number? pid*)
+                                       (= pid pid*))
+                                      (_ #f)))))))
 
-  (catch-system-error
-   (call/ec handler)))
+    (unless serv
+      (local-output "warning: child process ~a died but it has no associated service"
+                    pid))
+
+    (when serv
+      (slot-set! serv 'running #f)
+      (if (and (respawn? serv)
+               (> (current-time)
+                  (+ (cdr respawn-limit)
+                     (car (slot-ref serv 'last-respawns)))))
+          (if (not (slot-ref serv 'waiting-for-termination?))
+              (begin
+                ;; Everything is okay, start it.
+                (local-output "Respawning ~a."
+                              (canonical-name serv))
+                (set-car! (slot-ref serv 'last-respawns)
+                          (current-time))
+                (slot-set! serv 'last-respawns
+                           (cdr (slot-ref serv 'last-respawns)))
+                (start serv))
+              ;; We have just been waiting for the
+              ;; termination.  The `running' slot has already
+              ;; been set to `#f' by `stop'.
+              (begin
+                (local-output "Service ~a terminated."
+                              (canonical-name serv))
+                (slot-set! serv 'waiting-for-termination? #f)))
+          (begin
+            (local-output "Service ~a has been disabled."
+                          (canonical-name serv))
+            (when (respawn? serv)
+              (local-output "  (Respawning too fast.)"))
+            (slot-set! serv 'enabled? #f))))))
 
 ;; Install it as the handler.
 (sigaction SIGCHLD respawn-service)
