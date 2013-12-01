@@ -28,6 +28,7 @@
             copy-hashq-table
 
             catch-system-error
+            EINTR-safe
             l10n
             local-output
             display-version
@@ -114,6 +115,19 @@
       EXPR ...)
     (lambda (key . args)
       #f)))
+
+(define (EINTR-safe proc)
+  "Wrap PROC so that if a 'system-error' exception with EINTR is raised (that
+was possible up to Guile 2.0.9 included) the call to PROC is restarted."
+  (lambda args
+    (let loop ()
+      (catch 'system-error
+        (lambda ()
+          (apply proc args))
+        (lambda args
+          (if (= EINTR (system-error-errno args))
+              (loop)
+              (apply throw args)))))))
 
 
 

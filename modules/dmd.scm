@@ -159,12 +159,14 @@
 	;; Get commands from the standard input port.
         (process-textual-commands (current-input-port))
         ;; Process the data arriving at a socket.
-        (let ((sock (open-server-socket socket-file)))
+        (let ((sock   (open-server-socket socket-file))
+
+              ;; With Guile <= 2.0.9, we can get a system-error exception for
+              ;; EINTR, which happens anytime we receive a signal, such as
+              ;; SIGCHLD.  Thus, wrap the 'accept' call.
+              (accept (EINTR-safe accept)))
           (let next-command ()
-            ;; With Guile <= 2.0.9, we can get a system-error exception for
-            ;; EINTR, which happens anytime we receive a signal, such as
-            ;; SIGCHLD.  Thus, wrap the 'accept' call.
-            (match (catch-system-error (accept sock))
+            (match (accept sock)
               ((command-source . client-address)
                (process-connection command-source))
               (_ #f))
