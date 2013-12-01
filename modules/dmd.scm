@@ -155,6 +155,14 @@
 	     (apply format #f (gettext (cadr args)) (caddr args))
 	     (quit 1))))
 
+    ;; XXX: This terrible hack allows us to make sure that signal handlers
+    ;; get a chance to run in a timely fashion.  Without it, after an EINTR,
+    ;; we could restart the accept(2) call below before the corresponding
+    ;; async has been queued.  See the thread at
+    ;; <https://lists.gnu.org/archive/html/guile-devel/2013-07/msg00004.html>.
+    (sigaction SIGALRM (lambda _ (alarm 1)))
+    (alarm 1)
+
     (if (not socket-file)
 	;; Get commands from the standard input port.
         (process-textual-commands (current-input-port))
