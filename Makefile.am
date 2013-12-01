@@ -121,12 +121,13 @@ modules/dmd/config.scm: modules/dmd/config.scm.in Makefile
 
 SUFFIXES = .go
 
-TESTS = tests/basic.sh
+TESTS = tests/basic.sh tests/respawn.sh
 TEST_EXTENSIONS = .sh
 EXTRA_DIST += $(TESTS)
 
 AM_TESTS_ENVIRONMENT =				\
-  PATH="$(abs_top_builddir):$$PATH" LC_ALL=C
+  PATH="$(abs_top_builddir):$$PATH" LC_ALL=C	\
+  SHELL="$(SHELL)"
 
 SH_LOG_COMPILER = $(SHELL)
 AM_SH_LOG_FLAGS = -x -e
