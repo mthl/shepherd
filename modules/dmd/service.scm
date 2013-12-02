@@ -699,7 +699,7 @@ otherwise by updating its state."
             (slot-set! serv 'enabled? #f))))))
 
 ;; Install it as the handler.
-(sigaction SIGCHLD respawn-service)
+(sigaction SIGCHLD respawn-service SA_NOCLDSTOP)
 
 ;; Add NEW-SERVICES to the list of known services.
 (define (register-services . new-services)
