@@ -653,50 +653,76 @@
 (define (lookup-services name)
   (hashq-ref services name '()))
 
+(define waitpid*
+  (let ((waitpid (EINTR-safe waitpid)))
+    (lambda (what flags)
+      "Like 'waitpid', but EINTR-safe, and return (0 . _) when there's no
+child left."
+      (catch 'system-error
+        (lambda ()
+          (waitpid what flags))
+        (lambda args
+          ;; Did we get ECHILD or something?  If we did, that's a problem,
+          ;; because this procedure is supposed to be called only upon
+          ;; SIGCHLD.
+          (let ((errno (system-error-errno args)))
+            (local-output "error: 'waitpid' unexpectedly failed with: ~s"
+                          (strerror errno))
+            '(0 . #f)))))))
+
 (define (respawn-service signum)
   "Handle SIGCHLD, possibly by respawning the service that just died, or
 otherwise by updating its state."
-  (let* ((pid  (car (waitpid WAIT_ANY)))
-         (serv (find-service (lambda (serv)
-                               (and (enabled? serv)
-                                    (match (slot-ref serv 'running)
-                                      ((? number? pid*)
-                                       (= pid pid*))
-                                      (_ #f)))))))
+  (let loop ()
+    (match (waitpid* WAIT_ANY WNOHANG)
+      ((0 . _)
+       ;; Nothing left to wait for.
+       #t)
+      ((pid . _)
+       (let ((serv (find-service (lambda (serv)
+                                   (and (enabled? serv)
+                                        (match (slot-ref serv 'running)
+                                          ((? number? pid*)
+                                           (= pid pid*))
+                                          (_ #f)))))))
 
-    (unless serv
-      (local-output "warning: child process ~a died but it has no associated service"
-                    pid))
+         (unless serv
+           (local-output "warning: child process ~a died but it has no associated service"
+                         pid))
 
-    (when serv
-      (slot-set! serv 'running #f)
-      (if (and (respawn? serv)
-               (> (current-time)
-                  (+ (cdr respawn-limit)
-                     (car (slot-ref serv 'last-respawns)))))
-          (if (not (slot-ref serv 'waiting-for-termination?))
-              (begin
-                ;; Everything is okay, start it.
-                (local-output "Respawning ~a."
-                              (canonical-name serv))
-                (set-car! (slot-ref serv 'last-respawns)
-                          (current-time))
-                (slot-set! serv 'last-respawns
-                           (cdr (slot-ref serv 'last-respawns)))
-                (start serv))
-              ;; We have just been waiting for the
-              ;; termination.  The `running' slot has already
-              ;; been set to `#f' by `stop'.
-              (begin
-                (local-output "Service ~a terminated."
-                              (canonical-name serv))
-                (slot-set! serv 'waiting-for-termination? #f)))
-          (begin
-            (local-output "Service ~a has been disabled."
-                          (canonical-name serv))
-            (when (respawn? serv)
-              (local-output "  (Respawning too fast.)"))
-            (slot-set! serv 'enabled? #f))))))
+         (when serv
+           (slot-set! serv 'running #f)
+           (if (and (respawn? serv)
+                    (> (current-time)
+                       (+ (cdr respawn-limit)
+                          (car (slot-ref serv 'last-respawns)))))
+               (if (not (slot-ref serv 'waiting-for-termination?))
+                   (begin
+                     ;; Everything is okay, start it.
+                     (local-output "Respawning ~a."
+                                   (canonical-name serv))
+                     (set-car! (slot-ref serv 'last-respawns)
+                               (current-time))
+                     (slot-set! serv 'last-respawns
+                                (cdr (slot-ref serv 'last-respawns)))
+                     (start serv))
+                   ;; We have just been waiting for the
+                   ;; termination.  The `running' slot has already
+                   ;; been set to `#f' by `stop'.
+                   (begin
+                     (local-output "Service ~a terminated."
+                                   (canonical-name serv))
+                     (slot-set! serv 'waiting-for-termination? #f)))
+               (begin
+                 (local-output "Service ~a has been disabled."
+                               (canonical-name serv))
+                 (when (respawn? serv)
+                   (local-output "  (Respawning too fast.)"))
+                 (slot-set! serv 'enabled? #f))))
+
+         ;; As noted in libc's manual (info "(libc) Process Completion"),
+         ;; loop so we don't miss any terminated child process.
+         (loop))))))
 
 ;; Install it as the handler.
 (sigaction SIGCHLD respawn-service SA_NOCLDSTOP)
