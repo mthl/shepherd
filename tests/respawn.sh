@@ -23,20 +23,22 @@ socket="t-socket-$$"
 conf="t-conf-$$"
 log="t-log-$$"
 stamp="t-stamp-$$"
-service_pid="t-service-pid-$$"
+service1_pid="t-service1-pid-$$"
+service2_pid="t-service2-pid-$$"
 
 deco="deco -s $socket"
 dmd_pid=""
 
-trap "rm -f $socket $conf $stamp $log; test -z $dmd_pid || kill $dmd_pid; \
-  test -f $service_pid && kill $service_pid" EXIT
+trap "rm -f $socket $conf $stamp $log; test -z $dmd_pid || kill $dmd_pid ;
+  test -f $service1_pid && kill \`cat $service1_pid\` || true ;
+  test -f $service2_pid && kill \`cat $service2_pid\` || true ;
+  rm -f $service1_pid $service2_pid" EXIT
 
 function wait_for_file
 {
     i=0
     while ! test -f "$1" && test $i -lt 20
     do
-	cat "$log"
 	sleep 0.3
 	i=`expr $i + 1`
     done
@@ -45,16 +47,13 @@ function wait_for_file
 
 function assert_killed_service_is_respawned
 {
-    old_pid="`cat "$service_pid"`"
-    rm "$service_pid"
+    old_pid="`cat "$1"`"
+    rm "$1"
     kill $old_pid
 
-    wait_for_file "$service_pid"
-    test -f "$service_pid"
-    new_pid="`cat "$service_pid"`"
-
-    grep -i "respawn.*test" "$log"
-    : > "$log"
+    wait_for_file "$1"
+    test -f "$1"
+    new_pid="`cat "$1"`"
 
     test "$old_pid" -ne "$new_pid"
     kill -0 "$new_pid"
@@ -63,13 +62,21 @@ function assert_killed_service_is_respawned
 cat > "$conf"<<EOF
 (register-services
  (make <service>
-   #:provides '(test)
+   #:provides '(test1)
    #:start (make-forkexec-constructor
 	    "$SHELL" "-c"
-	    "echo \$\$ > $service_pid ; while true ; do : ; done")
+	    "echo \$\$ > $service1_pid ; while true ; do sleep 1 ; done")
+   #:stop  (make-kill-destructor)
+   #:respawn? #t)
+ (make <service>
+   #:provides '(test2)
+   #:start (make-forkexec-constructor
+	    "$SHELL" "-c"
+	    "echo \$\$ > $service2_pid ; while true ; do sleep 1 ; done")
    #:stop  (make-kill-destructor)
    #:respawn? #t))
-(start 'test)
+(start 'test1)
+(start 'test2)
 EOF
 
 dmd -I -s "$socket" -c "$conf" -l "$log" &
@@ -78,22 +85,29 @@ dmd_pid=$!
 sleep 1				# XXX: wait till it's up
 kill -0 $dmd_pid
 test -S "$socket"
-$deco status test | grep started
+$deco status test1 | grep started
+$deco status test2 | grep started
 
-test -f "$service_pid"
-kill -0 `cat "$service_pid"`
+test -f "$service1_pid"
+test -f "$service2_pid"
+kill -0 `cat "$service1_pid"`
+kill -0 `cat "$service2_pid"`
 
-# Now, kill the service, and make sure it gets respawned.
-assert_killed_service_is_respawned
-assert_killed_service_is_respawned
-assert_killed_service_is_respawned
+# Now, kill the services, and make sure they both get respawned.
+assert_killed_service_is_respawned "$service1_pid"
+assert_killed_service_is_respawned "$service2_pid"
+assert_killed_service_is_respawned "$service1_pid"
+assert_killed_service_is_respawned "$service2_pid"
+assert_killed_service_is_respawned "$service1_pid"
+assert_killed_service_is_respawned "$service2_pid"
 
 # Make sure the respawnable service can be stopped.
-pid="`cat "$service_pid"`"
-rm "$service_pid"
-$deco stop test
-$deco status test | grep stopped
-! test -f "$service_pid"
+pid="`cat "$service1_pid"`"
+rm "$service1_pid"
+$deco stop test1
+$deco status test1 | grep stopped
+! test -f "$service1_pid"
 ! kill -0 "$pid"
 
+cat $service2_pid
 $deco stop dmd
