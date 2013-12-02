@@ -156,7 +156,7 @@ There is NO WARRANTY, to the extent permitted by law.")))
 ;; Logfile.
 (define default-logfile
   (if (zero? (getuid))
-      (string-append %localstatedir "/dmd.log")
+      (string-append %localstatedir "/log/dmd.log")
       (string-append user-homedir "/.dmd.log")))
 
 ;; Configuration file.

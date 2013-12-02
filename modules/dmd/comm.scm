@@ -94,6 +94,9 @@ return the socket."
 ;; Port for logging.  This must always be a valid port, never `#f'.
 (define log-output-port (%make-void-port "w"))
 (define (start-logging file)
+  (let ((directory (dirname file)))
+    (unless (file-exists? directory)
+      (mkdir directory)))
   (set! log-output-port (open-file file "wl")))   ; line-buffered port
 (define (stop-logging)
   (set! log-output-port (%make-void-port "w")))
