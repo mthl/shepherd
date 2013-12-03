@@ -544,7 +544,7 @@
 	* examples/Makefile.am (EXTRA_DIST): Add it.
 
 	* service.scm (make-service-group): New macro.  Suggested by
-	Alfred M. Szmidt <ams@kemisten.nu>.
+	Alfred M. Szmidt <ams@gnu.org>.
 
 	* support.scm (define-simple-syntax): New macro.  All callers of
 	define-syntax changed to use this instead.
