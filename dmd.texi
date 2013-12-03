@@ -373,10 +373,11 @@ otherwise.
 @cindex socket special file
 Receive further commands on the socket special file @var{file}.  If
 this option is not specified, @file{@var{localstatedir}/run/dmd/socket} is
-taken.  If @code{none} is specified as file name, the commands will be
-read from standard input.  Note that you can still use a socket with
-the name @code{none} if you specify the directory name as well, like
-this: @code{./none}.
+taken.
+
+If @code{-} is specified as file name, commands will be read from
+standard input, one per line, as would be passed on a @command{deco}
+command line (@pxref{Invoking deco}).
 
 @item --quiet
 Synonym for @code{--silent}.
@@ -943,7 +944,50 @@ but also doing nothing about it.
 @node Communication
 @section Communication
 
+The @code{(dmd comm)} module provides primitives that allow clients such
+as @command{deco} to connect to @command{dmd} and send it commands to
+control or change its behavior (@pxref{Slots of services, actions of
+services}).
+
+@tindex <dmd-command>
+Currently, clients may only send @dfn{commands}, represented by the
+@code{<dmd-command>} type.  Each command specifies a service it applies
+to, an action name, a list of strings to be used as arguments, and a
+working directory.  Commands are instantiated with @code{dmd-command}:
+
+@deffn {procedure} dmd-command @var{action} @var{service} @
+         [#:@var{arguments} '()] [#:@var{directory} (getcwd)]
+Return a new command (a @code{<dmd-command>}) object for @var{action} on
+@var{service}.
+@end deffn
+
+@noindent
+Commands may then be written to or read from a communication channel
+with the following procedures:
+
+@deffn {procedure} write-command @var{command} @var{port}
+Write @var{command} to @var{port}.
+@end deffn
+
+@deffn {procedure} read-command @var{port}
+Receive a command from @var{port} and return it.
+@end deffn
+
+In practice, communication with @command{dmd} takes place over a
+Unix-domain socket, as discussed earlier (@pxref{Invoking dmd}).
+Clients may open a connection with the procedure below.
+
+@deffn {procedure} open-connection [@var{file}]
+Open a connection to the daemon, using the Unix-domain socket at
+@var{file}, and return the socket.
+
+When @var{file} is omitted, the default socket is used.
+@end deffn
+
 @cindex output
+The daemon writes output to be logged or passed to the
+currently-connected client using @code{local-output}:
+
 @deffn {procedure} local-output format-string . args
 This procedure should be used for all output operations in dmd.  It
 outputs the @var{args} according to the @var{format-string}, then
@@ -951,36 +995,6 @@ inserts a newline.  It writes to whatever is the main output target of
 dmd, which might be multiple at the same time in future versions.
 @end deffn
 
-@tindex <receiver>
-For paket-based communication over a Unix Domain Socket, there are two
-classes.  They exist to make it easiely possible to use pakets of
-arbitrary size.  To receive data, you use an instance of the class
-@code{<receiver>}.  This can be done this way:
-
-@lisp
-(define my-receiver (make <receiver> "/tmp/socket-name"))
-@end lisp
-
-A @code{<receiver>} has the following method:
-
-@deffn {method} receive-data (obj <receiver>)
-This will return a string containing the data of the next paket.
-@end deffn
-
-@tindex <sender>
-Sending data so that a @code{<receiver>} understands it can be done
-with the class @code{<sender>}.  You can create an instance like this:
-
-@lisp
-(define my-sender (make <sender> "/tmp/socket-name"))
-@end lisp
-
-The class @code{<sender>} has the following method:
-
-@deffn {method} send-data (obj <sender) data
-Send @var{data} to the sender object @var{obj}.  You should always use
-this when the receiver-side is using a @code{<receiver>} object.
-@end deffn
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
