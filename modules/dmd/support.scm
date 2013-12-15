@@ -151,7 +151,12 @@ There is NO WARRANTY, to the extent permitted by law.")))
 
 
 ;; Home directory of the user.
-(define user-homedir (passwd:dir (getpwuid (getuid))))
+(define user-homedir
+  ;; When bootstrapping and running as PID 1, /etc/{passwd,shadow} may be
+  ;; unavailable.  Gracefully handle that.
+  (or (false-if-exception (passwd:dir (getpwuid (getuid))))
+      (getenv "HOME")
+      "/"))
 
 ;; Logfile.
 (define default-logfile
