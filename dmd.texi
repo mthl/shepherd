@@ -78,24 +78,29 @@ the GNU system.
 
 @cindex service manager
 This manual documents the @dfn{dmd} service manager.  It is used to
-start and stop system services (typically daemons).  It ensures that
-this will work---by automatically starting services that are needed for
-another service to run and avoiding that conflicting services are
-started at the same time.  It does so in a very flexible way.  dmd is
-the @dfn{init system} on the GNU system---the first user process that is
-started when the system boots, typically with PID 1, running as
-@code{root}, and taking care of system-wide services.  It is also a
-useful tool that assists unprivileged users in the management of their
-own daemons.
+start and stop system services (typically daemons) in a reliable
+fashion.  For instance it will dynamically determine and start any
+other services that our desired service depends upon.  As another
+example, dmd might detect conflicts between services.  In this
+situation it would simply prevent the conflicting services from
+running concurrently.
 
-As with all flexible software, it takes some work to learn how to use
-it.  To make it as easy as possible for you, this manual contains a
-chapter that enables you to start using dmd without reading about all
-the details first @ref{Jump Start}.  The second chapter @ref{deco and
-dmd} describes the programs in detail.  The other chapters provide a
-reference with examples, where all possibilities that dmd provides are
-explained.  An exception is the last chapter, which contains
-information for those brave enough to modify dmd itself.
+dmd is the @dfn{init system} of the GNU operating system---it is the
+first user process that gets started, typically with PID 1, and runs
+as @code{root}.  Normally the purpose of init systems is to manage all
+system-wide services, but dmd can also be a useful tool assisting
+unprivileged users in the management of their own daemons.
+
+Unfortunately all flexible software requires some time to master and
+dmd is no different.  But don't worry: this manual should allow you to
+get started quickly.  Its first chapter is designed as a practical
+introduction to dmd and should be all you need for everyday use
+(@pxref{Jump Start}).  In chapter two we will describe the
+@command{deco} and @command{dmd} programs, and their relationship, in
+more detail (@ref{deco and dmd}).  Subsequent chapters provide a full
+reference manual and plenty of examples, covering all of dmd's
+capabilities.  Finally, the last chapter provides information for
+those souls brave enough to hack dmd itself.
 
 The name dmd stands for @dfn{Daemon Managing Daemons} (or
 @dfn{Daemons-Managing Daemon}?).
@@ -105,12 +110,12 @@ The name dmd stands for @dfn{Daemon Managing Daemons} (or
 @cindex GOOPS
 This program is written in @dfn{Guile}, an implementation of the
 Scheme programming language, using the @dfn{GOOPS} extension for
-object-orientation, therefore Guile is also used as the language for
-the configuration (@pxref{Top,,, guile, GNU Guile Reference Manual}).
-When you want to make use of advanced features of
-dmd, you should know how to work with Guile and GOOPS, but it has been
-tried to make using basic features of dmd possible without knowing how
-to program in Scheme at all.
+object-orientation.  Guile is also dmd's configuration language
+(@pxref{Top,,, guile, GNU Guile Reference Manual}).  We have tried to
+make dmd's basic features as accessible as possible---you should be
+able to use these even if you do not know how to program in Scheme.  A
+basic grasp of Guile and GOOPS is required only if you wish to make
+use of dmd's more advanced features.
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
