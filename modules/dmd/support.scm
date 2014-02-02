@@ -162,6 +162,29 @@ There is NO WARRANTY, to the extent permitted by law.")))
 ;; dmd default subdirectory if dmd is run as a normal user.
 (define user-dmddir (string-append user-homedir "/.dmd.d"))
 
+(define (make-bare-init-file target)
+  "Return #t if a bare init file was created at TARGET; #f otherwise.
+
+TARGET should be a string representing a filepath + name."
+  (with-output-to-file target
+    (lambda ()
+      (format #t
+              ";; init.scm -- default dmd configuration file.
+
+;; Services known to dmd:
+;; Add new services (defined using 'make <service>') to dmd here by
+;; providing them as arguments to 'register-services'.
+(register-services)
+
+;; Send dmd into the background
+(action 'dmd 'daemonize)
+
+;; Services to start when dmd starts:
+;; Add the name of each service that should be started to the list
+;; below passed to 'for-each'.
+(for-each start '())
+"))))
+
 ;; Logfile.
 (define default-logfile
   (if (zero? (getuid))
@@ -174,6 +197,8 @@ There is NO WARRANTY, to the extent permitted by law.")))
       (string-append Prefix-dir "/etc/dmdconf.scm")
       (let ((config-file (string-append user-dmddir "/init.scm")))
         (catch-system-error (mkdir user-dmddir))
+        (if (not (file-exists? config-file))
+            (make-bare-init-file config-file))
         config-file)))
 
 ;; The directory where the socket resides.
@@ -231,4 +256,3 @@ which has essential bindings pulled in."
 	     (begin
 	       (local-output "Socket directory setup is insecure.")
 	       (quit 1))))))
-
