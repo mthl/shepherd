@@ -1,4 +1,5 @@
-;; support.scm -- Various general support facilities, shared by deco and dmd.
+;; support.scm -- Various support facilities, used by deco and dmd.
+;; Copyright (C) 2014 A.Sassmannshausen <alex.sassmannshausen@gmail.com>
 ;; Copyright (C) 2013 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
@@ -158,21 +159,28 @@ There is NO WARRANTY, to the extent permitted by law.")))
       (getenv "HOME")
       "/"))
 
+;; dmd default subdirectory if dmd is run as a normal user.
+(define user-dmddir (string-append user-homedir "/.dmd.d"))
+
 ;; Logfile.
 (define default-logfile
   (if (zero? (getuid))
       (string-append %localstatedir "/log/dmd.log")
-      (string-append user-homedir "/.dmd.log")))
+      (string-append user-dmddir "/dmd.log")))
 
 ;; Configuration file.
 (define default-config-file
   (if (zero? (getuid))
       (string-append Prefix-dir "/etc/dmdconf.scm")
-    (string-append user-homedir "/.dmdconf.scm")))
+      (let ((config-file (string-append user-dmddir "/init.scm")))
+        (catch-system-error (mkdir user-dmddir))
+        config-file)))
 
 ;; The directory where the socket resides.
 (define default-socket-dir
-  (string-append %localstatedir "/run/dmd"))
+  (if (zero? (getuid))
+      (string-append %localstatedir "/run/dmd")
+      (string-append user-dmddir "/run")))
 
 ;; Unix domain socket for receiving commands in dmd.
 (define default-socket-file
@@ -182,7 +190,7 @@ There is NO WARRANTY, to the extent permitted by law.")))
 (define default-persistency-state-file
   (if (zero? (getuid))
       (string-append %localstatedir "/lib/misc/dmd-state")
-      (string-append user-homedir "/.dmd-state")))
+      (string-append user-dmddir "/dmd-state")))
 
 ;; Global variables set from (dmd).
 (define persistency #f)
