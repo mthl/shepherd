@@ -1,2 +1,6 @@
-Wolfgang Jährling  <wolfgang@pro-linux.de>
-Ludovic Courtès  <ludo@gnu.org>
+GNU dmd was initially written by Wolfgang Jährling ca. 2003.
+Others have since contributed.
+
+Ludovic Courtès <ludo@gnu.org>
+Wolfgang Jährling <wolfgang@pro-linux.de>
+Alex Sassmannshausen <alex.sassmannshausen@gmail.com>
