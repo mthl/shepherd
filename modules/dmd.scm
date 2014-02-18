@@ -1,5 +1,5 @@
 ;; dmd.scm -- Daemon managing Daemons (or Daemons-managing Daemon?)
-;; Copyright (C) 2013 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
 ;; This file is part of GNU dmd.
@@ -23,6 +23,7 @@
   #:use-module (ice-9 readline) ;; Readline (for interactive use).
   #:use-module (oop goops)      ;; Defining classes and methods.
   #:use-module (srfi srfi-1)    ;; List library.
+  #:use-module (srfi srfi-26)
   #:use-module (dmd config)
   #:use-module (dmd support)
   #:use-module (dmd service)
@@ -54,6 +55,7 @@
 
   (let ((config-file default-config-file)
 	(socket-file default-socket-file)
+        (pid-file    #f)
 	(insecure #f)
 	(logfile default-logfile))
     ;; Process command line arguments.
@@ -98,6 +100,12 @@
 		    #:description "log actions in FILE"
 		    #:action (lambda (file)
 			       (set! logfile file)))
+		  (make <option>
+		    #:long "pid"
+		    #:takes-arg? #t #:optional-arg? #t #:arg-name "FILE"
+		    #:description "when ready write PID to FILE or stdout"
+		    #:action (lambda (file)
+			       (set! pid-file (or file #t))))
 		  (make <option>
 		    #:long "config" #:short #\c
 		    #:takes-arg? #t #:optional-arg? #f #:arg-name "FILE"
@@ -173,6 +181,16 @@
               ;; EINTR, which happens anytime we receive a signal, such as
               ;; SIGCHLD.  Thus, wrap the 'accept' call.
               (accept (EINTR-safe accept)))
+
+          ;; Possibly write out our PID, which means we're ready to accept
+          ;; connections.  XXX: What if we daemonized already?
+          (match pid-file
+            ((? string? file)
+             (call-with-output-file pid-file
+               (cute display (getpid) <>)))
+            (#t (display (getpid)))
+            (_  #t))
+
           (let next-command ()
             (match (accept sock)
               ((command-source . client-address)

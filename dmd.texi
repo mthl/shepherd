@@ -369,6 +369,10 @@ Log output into @var{file}, or if @var{file} is not given,
 @code{/var/log/dmd.log} when running as superuser, @var{~/.dmd.log}
 otherwise.
 
+@item --pid[=@var{file}]
+When dmd is ready to accept connections, write its PID to @var{file} or
+to the standard output if @var{file} is omitted.
+
 @item -p [@var{file}]
 @itemx --persistency[=@var{file}]
 @c FIXME-CRITICAL

@@ -1,5 +1,5 @@
 # GNU dmd --- Test respawnable services.
-# Copyright © 2013 Ludovic Courtès <ludo@gnu.org>
+# Copyright © 2013, 2014 Ludovic Courtès <ludo@gnu.org>
 #
 # This file is part of GNU dmd.
 #
@@ -25,11 +25,12 @@ log="t-log-$$"
 stamp="t-stamp-$$"
 service1_pid="t-service1-pid-$$"
 service2_pid="t-service2-pid-$$"
+pid="t-pid-$$"
 
 deco="deco -s $socket"
-dmd_pid=""
 
-trap "rm -f $socket $conf $stamp $log; test -z $dmd_pid || kill $dmd_pid ;
+trap "rm -f $socket $conf $stamp $log $pid $service1_pid $service2_pid ;
+  test -f $pid && kill \`cat $pid\` || true ;
   test -f $service1_pid && kill \`cat $service1_pid\` || true ;
   test -f $service2_pid && kill \`cat $service2_pid\` || true ;
   rm -f $service1_pid $service2_pid" EXIT
@@ -79,10 +80,14 @@ cat > "$conf"<<EOF
 (start 'test2)
 EOF
 
-dmd -I -s "$socket" -c "$conf" -l "$log" &
-dmd_pid=$!
+rm -f "$pid"
+dmd -I -s "$socket" -c "$conf" -l "$log" --pid="$pid" &
 
-sleep 1				# XXX: wait till it's up
+# Wait till it's ready.
+wait_for_file "$pid"
+
+dmd_pid="`cat $pid`"
+
 kill -0 $dmd_pid
 test -S "$socket"
 $deco status test1 | grep started

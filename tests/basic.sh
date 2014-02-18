@@ -1,5 +1,5 @@
 # GNU dmd --- Test basic communication capabilities.
-# Copyright © 2013 Ludovic Courtès <ludo@gnu.org>
+# Copyright © 2013, 2014 Ludovic Courtès <ludo@gnu.org>
 #
 # This file is part of GNU dmd.
 #
@@ -23,11 +23,12 @@ socket="t-socket-$$"
 conf="t-conf-$$"
 log="t-log-$$"
 stamp="t-stamp-$$"
+pid="t-pid-$$"
 
 deco="deco -s $socket"
-dmd_pid=""
 
-trap "rm -f $socket $conf $stamp $log; test -z $dmd_pid || kill $dmd_pid" EXIT
+trap "rm -f $socket $conf $stamp $log $pid;
+      test -f $pid && kill \`cat $pid\` || true" EXIT
 
 cat > "$conf"<<EOF
 (use-modules (srfi srfi-26))
@@ -43,10 +44,14 @@ cat > "$conf"<<EOF
    #:respawn? #f))
 EOF
 
-dmd -I -s "$socket" -c "$conf" -l "$log" &
-dmd_pid=$!
+rm -f "$pid"
+dmd -I -s "$socket" -c "$conf" -l "$log" --pid="$pid" &
 
-sleep 1				# XXX: wait till it's up
+# Wait till it's ready.
+while ! test -f "$pid" ; do : ; done
+
+dmd_pid="`cat $pid`"
+
 kill -0 $dmd_pid
 test -S "$socket"
 $deco status dmd | grep -E '(Start.*dmd|Stop.*test)'
