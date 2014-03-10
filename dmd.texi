@@ -854,6 +854,21 @@ Evaluate the Scheme code in @var{file} in a fresh module that uses the
 @code{(oop goops)} and @code{(dmd services)} modules---as with the
 @code{--config} option of @command{dmd} (@pxref{Invoking dmd}).
 
+@item unload @var{service-name}
+Attempt to remove the service identified by @var{service-name}.
+@command{dmd} will first stop the service, if necessary, and then
+remove it from the list of registered services.  Any services
+depending upon @var{service-name} will be stopped as part of this
+process.
+
+If @var{service-name} simply does not exist, output a warning and do
+nothing.  If it exists, but is provided by several services, output a
+warning and do nothing.  This latter case might occur for instance with
+the fictional service @code{web-server}, which might be provided by both
+@code{apache} and @code{nginx}.  If @var{service-name} is the special
+string and @code{all}, attempt to remove all services except for dmd
+itself.
+
 @item daemonize
 Fork and go into the background.  This should be called before
 respawnable services are started, as otherwise we would not get the

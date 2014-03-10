@@ -1,6 +1,7 @@
 ;; service.scm -- Representation of services.
-;; Copyright (C) 2013 Ludovic Court�s <ludo@gnu.org>
-;; Copyright (C) 2002, 2003 Wolfgang J�hrling <wolfgang@pro-linux.de>
+;; Copyright (C) 2013 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2002, 2003 Wolfgang Järling <wolfgang@pro-linux.de>
+;; Copyright (C) 2014 Alex Sassmannshausen <alex.sassmannshausen@gmail.com>
 ;;
 ;; This file is part of GNU dmd.
 ;;
@@ -761,6 +762,78 @@ otherwise by updating its state."
 
   (for-each register-single-service new-services))
 
+(define (deregister-service service-name)
+  "For each string in SERVICE-NAME, stop the associated service if
+necessary and remove it from the services table.  If SERVICE-NAME is
+the special string 'all', remove all services except for dmd.
+
+This will remove a service either if it is identified by its canonical
+name, or if it is the only service providing the service that is
+requested to be removed."
+  (define (deregister service)
+    (if (running? service)
+        (stop service))
+    ;; Remove services provided by service from the hash table.
+    (for-each
+     (lambda (name)
+       (let ((old (lookup-services name)))
+         (if (= 1 (length old))
+             ;; Only service provides this service, ergo:
+             (begin
+               ;; Reduce provided services count
+               (set! services-cnt (1- services-cnt))
+               ;; Remove service entry from services.
+               (hashq-remove! services name))
+             ;; ELSE: remove service from providing services.
+             (hashq-set! services name
+                         (remove
+                          (lambda (lk-service)
+                            (eq? (canonical-name service)
+                                 (canonical-name lk-service)))
+                          old)))))
+     (provided-by service)))
+  (define (service-pairs)
+    "Return '(name . service) of all user-registered services."
+    (filter identity
+            (hash-map->list
+             (lambda (key value)
+               (match value
+                 ((service)     ; only one service associated with KEY
+                  (and (eq? key (canonical-name service))
+                       (not (eq? key 'dmd))
+                       (cons key service)))
+                 (_ #f)))               ; all other cases: #f.
+             services)))
+
+  (let ((name (string->symbol service-name)))
+    (cond ((eq? name 'all)
+           ;; Special 'remove all' case.
+           (let ((pairs (service-pairs)))
+             (local-output "Unloading all optional services: '~a'..."
+                           (map car pairs))
+             (for-each deregister (map cdr pairs))
+             (local-output "Done.")))
+          (else
+           ;; Removing only one service.
+           (match (lookup-services name)
+             (()                        ; unknown service
+              (local-output
+               "Not unloading: '~a' is an uknown service." name))
+             ((service)             ; only SERVICE provides NAME
+              ;; Are we removing a user service窶ｦ
+              (if (eq? (canonical-name service) name)
+                  (local-output "Removing service '~a'..." name)
+                  ;; or a virtual service?
+                  (local-output
+                   "Removing service '~a' providing '~a'..."
+                   (canonical-name service) name))
+              (deregister service)
+              (local-output "Done."))
+             ((services ...)            ; ambiguous NAME
+              (local-output
+               "Not unloading: '~a' names several services: '~a'."
+               name (map canonical-name services))))))))
+
 ;;; Tests for validity of the slots of <service> objects.
 
 ;; Test if OBJ is a list that only contains symbols.
@@ -867,6 +940,13 @@ dangerous.  You have been warned."
             (local-output "Failed to load from '~a': ~a."
                           file-name (strerror (system-error-errno args)))
             #f))))
+     ;; Unload a service
+     (unload
+      "Unload the service identified by SERVICE-NAME or all services
+except for dmd if SERVICE-NAME is 'all'.  Stop services before
+removing them if needed."
+      (lambda (running service-name)
+        (deregister-service service-name)))
      ;; Go into the background.
      (daemonize
       "Go into the background.  Be careful, this means that a new
@@ -884,8 +964,8 @@ This status gets written into a file on termination, so that we can
 restore the status on next startup.  Optionally, you can pass a file
 name as argument that will be used to store the status."
       (lambda* (running #:optional (file #f))
-	(set! persistency #t)
-	(when file
+       (set! persistency #t)
+       (when file
           (set! persistency-state-file file))))
      (no-persistency
       "Don't safe state in a file on exit."

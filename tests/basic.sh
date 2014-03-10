@@ -1,5 +1,6 @@
 # GNU dmd --- Test basic communication capabilities.
 # Copyright © 2013, 2014 Ludovic Courtès <ludo@gnu.org>
+# Copyright © 2014 Alex Sassmannshausen <alex.sassmannshausen@gmail.com>
 #
 # This file is part of GNU dmd.
 #
@@ -41,6 +42,16 @@ cat > "$conf"<<EOF
              #t)
    #:stop  (lambda _
              (delete-file "$stamp"))
+   #:respawn? #f)
+ (make <service>
+   #:provides '(test-2)
+   #:requires '(test)
+   #:start (lambda _
+             (call-with-output-file "$stamp-2"
+               (cut display "bar" <>))
+             #t)
+   #:stop  (lambda _
+             (delete-file "$stamp-2"))
    #:respawn? #f))
 EOF
 
@@ -64,6 +75,19 @@ $deco stop test
 ! test -f "$stamp"
 
 $deco status test | grep stopped
+
+$deco start test-2
+
+$deco status test-2 | grep started
+
+# Unload one service, make sure the other it still around.
+$deco unload dmd test
+$deco status dmd | grep "Stopped: (test-2)"
+
+# Unload everything and make sure only 'dmd' is left.
+$deco unload dmd all
+$deco status dmd | grep "Stopped: ()"
+$deco status dmd | grep "Started: (dmd)"
 
 $deco stop dmd
 ! kill -0 $dmd_pid
