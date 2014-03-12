@@ -687,9 +687,12 @@ otherwise by updating its state."
                                            (= pid pid*))
                                           (_ #f)))))))
 
-         (unless serv
-           (local-output "warning: child process ~a died but it has no associated service"
-                         pid))
+         ;; FIXME: We can't emit the warning below reliably because it could be
+         ;; that PID is a service we just stopped, but since signal delivery
+         ;; is asynchronous, we just can't tell.
+         ;; (unless serv
+         ;;   (local-output "warning: child process ~a died but it has no associated service"
+         ;;                 pid))
 
          (when serv
            (slot-set! serv 'running #f)
