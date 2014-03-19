@@ -869,6 +869,14 @@ the fictional service @code{web-server}, which might be provided by both
 string and @code{all}, attempt to remove all services except for dmd
 itself.
 
+@item reload @var{file-name}
+Unload all known optional services using unload's @code{all} option,
+then load @var{file-name} using @code{load} functionality.  If
+file-name does not exist or @code{load} encounters an error, you may
+end up with no defined services.  As these can be reloaded at a later
+stage this is not considered a problem.  If the @code{unload} stage
+fails, @code{reload} will not attempt to load @var{file-name}.
+
 @item daemonize
 Fork and go into the background.  This should be called before
 respawnable services are started, as otherwise we would not get the

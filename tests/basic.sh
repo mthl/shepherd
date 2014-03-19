@@ -65,7 +65,8 @@ dmd_pid="`cat $pid`"
 
 kill -0 $dmd_pid
 test -S "$socket"
-$deco status dmd | grep -E '(Start.*dmd|Stop.*test)'
+pristine_status=`$deco status dmd` # Prep for 'reload' test.
+echo $pristine_status | grep -E '(Start.*dmd|Stop.*test)'
 
 $deco start test
 test -f "$stamp"
@@ -83,6 +84,9 @@ $deco status test-2 | grep started
 # Unload one service, make sure the other it still around.
 $deco unload dmd test
 $deco status dmd | grep "Stopped: (test-2)"
+
+$deco reload dmd "$conf"
+test "`$deco status dmd`" == "$pristine_status"
 
 # Unload everything and make sure only 'dmd' is left.
 $deco unload dmd all

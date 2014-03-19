@@ -837,6 +837,18 @@ requested to be removed."
                "Not unloading: '~a' names several services: '~a'."
                name (map canonical-name services))))))))
 
+(define (load-config file-name)
+  (local-output "Loading ~a." file-name)
+  ;; Every action is protected anyway, so no need for a `catch'
+  ;; here.  FIXME: What about `quit'?
+  (catch 'system-error
+    (lambda ()
+      (load-in-user-module file-name))
+    (lambda args
+      (local-output "Failed to load from '~a': ~a."
+                    file-name (strerror (system-error-errno args)))
+      #f)))
+
 ;;; Tests for validity of the slots of <service> objects.
 
 ;; Test if OBJ is a list that only contains symbols.
@@ -933,16 +945,7 @@ which ones are not."
       "Load the Scheme code from FILE into dmd.  This is potentially
 dangerous.  You have been warned."
       (lambda (running file-name)
-	(local-output "Loading ~a." file-name)
-	;; Every action is protected anyway, so no need for a `catch'
-	;; here.  FIXME: What about `quit'?
-        (catch 'system-error
-          (lambda ()
-            (load-in-user-module file-name))
-          (lambda args
-            (local-output "Failed to load from '~a': ~a."
-                          file-name (strerror (system-error-errno args)))
-            #f))))
+        (load-config file-name)))
      ;; Unload a service
      (unload
       "Unload the service identified by SERVICE-NAME or all services
@@ -950,6 +953,12 @@ except for dmd if SERVICE-NAME is 'all'.  Stop services before
 removing them if needed."
       (lambda (running service-name)
         (deregister-service service-name)))
+     (reload
+      "Unload all services, then load from FILE-NAME into dmd.  This
+is potentialy dangerous.  You have been warned."
+      (lambda (running file-name)
+        (and (deregister-service "all") ; unload all services
+             (load-config file-name)))) ; reload from FILE-NAME
      ;; Go into the background.
      (daemonize
       "Go into the background.  Be careful, this means that a new
@@ -967,9 +976,9 @@ This status gets written into a file on termination, so that we can
 restore the status on next startup.  Optionally, you can pass a file
 name as argument that will be used to store the status."
       (lambda* (running #:optional (file #f))
-       (set! persistency #t)
-       (when file
-          (set! persistency-state-file file))))
+               (set! persistency #t)
+               (when file
+                 (set! persistency-state-file file))))
      (no-persistency
       "Don't safe state in a file on exit."
       (lambda (running)
