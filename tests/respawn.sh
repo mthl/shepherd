@@ -65,15 +65,15 @@ cat > "$conf"<<EOF
  (make <service>
    #:provides '(test1)
    #:start (make-forkexec-constructor
-	    "$SHELL" "-c"
-	    "echo \$\$ > $service1_pid ; while true ; do sleep 1 ; done")
+	    '("$SHELL" "-c"
+	      "echo \$\$ > $PWD/$service1_pid ; while true ; do sleep 1 ; done"))
    #:stop  (make-kill-destructor)
    #:respawn? #t)
  (make <service>
    #:provides '(test2)
    #:start (make-forkexec-constructor
-	    "$SHELL" "-c"
-	    "echo \$\$ > $service2_pid ; while true ; do sleep 1 ; done")
+	    '("$SHELL" "-c"
+	      "echo \$\$ > $PWD/$service2_pid ; while true ; do sleep 1 ; done"))
    #:stop  (make-kill-destructor)
    #:respawn? #t))
 (start 'test1)

@@ -1,5 +1,5 @@
 ;; service.scm -- Representation of services.
-;; Copyright (C) 2013 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Järling <wolfgang@pro-linux.de>
 ;; Copyright (C) 2014 Alex Sassmannshausen <alex.sassmannshausen@gmail.com>
 ;;
@@ -543,35 +543,76 @@
   (or (list-unless-false (lookup-running sym))
       (lookup-services sym)))
 
-;; FIXME: They ignore arguments currently, but they should not.
+
+;;;
+;;; Starting/stopping services.
+;;;
 
-;; Produce a constructor that execs PROGRAM with CHILD-ARGS in a child
-;; process and returns its pid.
-(define (make-forkexec-constructor program . child-args)
-  (lambda args
-    (let ((pid (primitive-fork)))
-      (if (zero? pid)
-          (let ((max-fd (max-file-descriptors)))
-            ;; Become the leader of a new session and session group.
-            ;; Programs such as 'mingetty' expect this.
-            (setsid)
+(define (default-service-directory)
+  "Return the default current directory from which a service is started."
+  (if (zero? (getuid))
+      "/"
+      (or (getenv "HOME")
+          (and=> (catch-system-error (getpw (getuid)))
+                 passwd:dir)
+          (getcwd))))
 
-            ;; Close all the file descriptors except stdout and stderr.
-            (catch-system-error (close-fdes 0))
-            (let loop ((i 3))
-              (when (< i max-fd)
-                (catch-system-error (close-fdes i))
-                (loop (+ i 1))))
+(define (default-environment-variables)
+  "Return the list of environment variable name/value pairs that should be
+set when starting a service."
+  (environ))
 
-            (catch 'system-error
-              (lambda ()
-                (apply execlp program program child-args))
-              (lambda args
-                (format (current-error-port)
-                        "exec of ~s failed: ~a~%"
-                        program (strerror (system-error-errno args)))
-                (primitive-exit 1))))
-          pid))))
+(define* (exec-command command
+                       #:key directory environment-variables)
+  "Run COMMAND with the given settings."
+  (match command
+    ((program args ...)
+     ;; Become the leader of a new session and session group.
+     ;; Programs such as 'mingetty' expect this.
+     (setsid)
+
+     (chdir directory)
+     (environ environment-variables)
+
+     ;; Close all the file descriptors except stdout and stderr.
+     (let ((max-fd (max-file-descriptors)))
+       (catch-system-error (close-fdes 0))
+       (let loop ((i 3))
+         (when (< i max-fd)
+           (catch-system-error (close-fdes i))
+           (loop (+ i 1)))))
+
+     (catch 'system-error
+       (lambda ()
+         (apply execlp program program args))
+       (lambda args
+         (format (current-error-port)
+                 "exec of ~s failed: ~a~%"
+                 program (strerror (system-error-errno args)))
+         (primitive-exit 1))))))
+
+(define make-forkexec-constructor
+  (case-lambda*
+   "Produce a constructor that execs COMMAND, a program name/argument list,
+in a child process and returns its PID.  COMMAND is started with DIRECTORY as
+its current directory, and ENVIRONMENT-VARIABLES as its environment
+variables."
+   ((command #:key
+             (directory (default-service-directory))
+             (environment-variables (default-environment-variables)))
+    (lambda args
+      (let ((pid (primitive-fork)))
+        (if (zero? pid)
+            (exec-command command
+                          #:directory directory
+                          #:environment-variables environment-variables)
+            pid))))
+   ((program . program-args)
+    ;; The old form, documented until 0.1 included.
+    (issue-deprecation-warning
+     "This 'make-forkexec-constructor' form is deprecated; use
+ (make-forkexec-constructor '(\"PROGRAM\" \"ARGS\"...).")
+    (make-forkexec-constructor (cons program program-args)))))
 
 ;; Produce a destructor that sends SIGNAL to the process with the pid
 ;; given as argument, where SIGNAL defaults to `SIGTERM'.
