@@ -592,27 +592,36 @@ set when starting a service."
          (primitive-exit 1))))))
 
 (define make-forkexec-constructor
-  (case-lambda*
-   "Produce a constructor that execs COMMAND, a program name/argument list,
+  (let ((warn-deprecated-form
+         ;; Until 0.1, this procedure took a rest list.
+         (lambda ()
+           (issue-deprecation-warning
+            "This 'make-forkexec-constructor' form is deprecated; use
+ (make-forkexec-constructor '(\"PROGRAM\" \"ARGS\"...)."))))
+    (case-lambda*
+     "Produce a constructor that execs COMMAND, a program name/argument list,
 in a child process and returns its PID.  COMMAND is started with DIRECTORY as
 its current directory, and ENVIRONMENT-VARIABLES as its environment
 variables."
-   ((command #:key
-             (directory (default-service-directory))
-             (environment-variables (default-environment-variables)))
-    (lambda args
-      (let ((pid (primitive-fork)))
-        (if (zero? pid)
-            (exec-command command
-                          #:directory directory
-                          #:environment-variables environment-variables)
-            pid))))
-   ((program . program-args)
-    ;; The old form, documented until 0.1 included.
-    (issue-deprecation-warning
-     "This 'make-forkexec-constructor' form is deprecated; use
- (make-forkexec-constructor '(\"PROGRAM\" \"ARGS\"...).")
-    (make-forkexec-constructor (cons program program-args)))))
+     ((command #:key
+               (directory (default-service-directory))
+               (environment-variables (default-environment-variables)))
+      (let ((command (if (string? command)
+                         (begin
+                           (warn-deprecated-form)
+                           (list command))
+                         command)))
+        (lambda args
+          (let ((pid (primitive-fork)))
+            (if (zero? pid)
+                (exec-command command
+                              #:directory directory
+                              #:environment-variables environment-variables)
+                pid)))))
+     ((program . program-args)
+      ;; The old form, documented until 0.1 included.
+      (warn-deprecated-form)
+      (make-forkexec-constructor (cons program program-args))))))
 
 ;; Produce a destructor that sends SIGNAL to the process with the pid
 ;; given as argument, where SIGNAL defaults to `SIGTERM'.
