@@ -1,5 +1,5 @@
 ;; halt.scm -- Halt or power off the system.
-;; Copyright (C) 2013 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014 Ludovic Courtès <ludo@gnu.org>
 ;;
 ;; This file is part of GNU dmd.
 ;;
@@ -47,14 +47,15 @@
 			       (set! socket-file file))))
 
     (set! command-args (reverse command-args))
-    (let ((sock (open-connection socket-file)))
-      ;; Send the command without further ado.
-      (write-command (dmd-command 'power-off 'dmd) sock)
+    (with-system-error-handling
+     (let ((sock (open-connection socket-file)))
+       ;; Send the command without further ado.
+       (write-command (dmd-command 'power-off 'dmd) sock)
 
-      ;; Receive output.
-      (setvbuf sock _IOLBF)
-      (let loop ((line (read-line sock)))
-        (unless (eof-object? line)
-          (display line)
-          (newline)
-          (loop (read-line sock)))))))
+       ;; Receive output.
+       (setvbuf sock _IOLBF)
+       (let loop ((line (read-line sock)))
+         (unless (eof-object? line)
+           (display line)
+           (newline)
+           (loop (read-line sock))))))))

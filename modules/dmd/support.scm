@@ -29,6 +29,7 @@
             copy-hashq-table
 
             catch-system-error
+            with-system-error-handling
             EINTR-safe
             l10n
             local-output
@@ -116,6 +117,22 @@
       EXPR ...)
     (lambda (key . args)
       #f)))
+
+(define (call-with-system-error-handling thunk)
+  "Call THUNK, catching any 'system-error' exception."
+  (catch 'system-error
+    thunk
+    (lambda (key proc format-string format-args . rest)
+      (format (current-error-port) "error: ~a: ~a~%" proc
+              (apply format #f format-string format-args))
+      (quit 1))))
+
+(define-syntax-rule (with-system-error-handling body ...)
+  "Evaluate BODY in a context where 'system-error' throws are caught and
+turned into user error messages."
+  (call-with-system-error-handling
+   (lambda ()
+     body ...)))
 
 (define (EINTR-safe proc)
   "Wrap PROC so that if a 'system-error' exception with EINTR is raised (that

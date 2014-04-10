@@ -1,5 +1,5 @@
 ;; deco.scm -- The `DaEmon COntrol' program.
-;; Copyright (C) 2013 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
 ;; This file is part of GNU dmd.
@@ -61,20 +61,22 @@
       (exit 1))
 
     (set! command-args (reverse command-args))
-    (let ((sock (open-connection socket-file)))
-      ;; Send the command.
-      (match command-args
-        ((action service args ...)
-         (write-command (dmd-command (string->symbol action)
-                                     (string->symbol service)
-                                     #:arguments args)
-                        sock)))
 
-      ;; Receive output.
-      (setvbuf sock _IOLBF)
-      (let loop ((line (read-line sock)))
-        (unless (eof-object? line)
-          (display line)
-          (newline)
-          (loop (read-line sock)))))))
+    (with-system-error-handling
+     (let ((sock (open-connection socket-file)))
+       ;; Send the command.
+       (match command-args
+         ((action service args ...)
+          (write-command (dmd-command (string->symbol action)
+                                      (string->symbol service)
+                                      #:arguments args)
+                         sock)))
+
+       ;; Receive output.
+       (setvbuf sock _IOLBF)
+       (let loop ((line (read-line sock)))
+         (unless (eof-object? line)
+           (display line)
+           (newline)
+           (loop (read-line sock))))))))
 
