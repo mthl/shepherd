@@ -1,5 +1,5 @@
 ;; comm.scm -- Communication between processes and general output.
-;; Copyright (C) 2013 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
 ;; This file is part of GNU dmd.
@@ -63,7 +63,16 @@ return the socket."
   (with-fluids ((%default-port-encoding "UTF-8"))
     (let ((sock    (socket PF_UNIX SOCK_STREAM 0))
           (address (make-socket-address PF_UNIX file)))
-      (connect sock address)
+      (catch 'system-error
+        (lambda ()
+          (connect sock address))
+        (lambda (key proc format-string format-args errno . rest)
+          ;; Guile's 'connect' throws an exception that doesn't specify
+          ;; FILE.  Augment it with this information.
+          (apply throw
+                 key proc
+                 "~A: ~A" (list file (strerror (car errno)))
+                 (list errno) rest)))
       sock)))
 
 (define (read-command port)
