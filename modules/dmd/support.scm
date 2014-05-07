@@ -209,7 +209,10 @@ TARGET should be a string representing a filepath + name."
       (string-append user-dmddir "/dmd.log")))
 
 ;; Configuration file.
-(define default-config-file
+(define (default-config-file)
+  "Return the default configuration file---either the user's file, or the
+global system configuration file when running as 'root'.  As a side effect,
+create a template configuration file if non exists."
   (if (zero? (getuid))
       (string-append Prefix-dir "/etc/dmdconf.scm")
       (let ((config-file (string-append user-dmddir "/init.scm")))

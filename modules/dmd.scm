@@ -53,7 +53,7 @@
 (define (main . args)
   (false-if-exception (setlocale LC_ALL ""))
 
-  (let ((config-file default-config-file)
+  (let ((config-file (default-config-file))
 	(socket-file default-socket-file)
         (pid-file    #f)
 	(insecure #f)
