@@ -106,7 +106,7 @@ return the socket."
   (let ((directory (dirname file)))
     (unless (file-exists? directory)
       (mkdir directory)))
-  (set! log-output-port (open-file file "wl")))   ; line-buffered port
+  (set! log-output-port (open-file file "al")))   ; line-buffered port
 (define (stop-logging)
   (set! log-output-port (%make-void-port "w")))
 
