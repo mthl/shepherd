@@ -228,50 +228,50 @@
 ;; Stop the service, including services that depend on it.  If the
 ;; latter fails, continue anyway.  Return `#f' if it could be stopped.
 (define-method (stop (obj <service>) . args)
-  (if (not (running? obj))
-      (local-output "Service ~a is not running." (canonical-name obj))
-    (if (slot-ref obj 'stop-delay?)
-	(begin
-	  (slot-set! obj 'waiting-for-termination? #t)
-	  (local-output "Service ~a pending to be stopped."
-			(canonical-name obj)))
-      (begin
-	;; Stop services that depend on it.
-	(for-each-service
-	 (lambda (serv)
-	   (and (running? serv)
-		(for-each (lambda (sym)
-			    (and (memq sym (provided-by obj))
-				 (stop serv)))
-			  (required-by serv)))))
+  ;; Block asyncs so the SIGCHLD handler doesn't execute concurrently.
+  ;; Notably, that makes sure the handler process the SIGCHLD for OBJ's
+  ;; process once we're done; otherwise, it could end up respawning OBJ.
+  (call-with-blocked-asyncs
+   (lambda ()
+     (if (not (running? obj))
+         (local-output "Service ~a is not running." (canonical-name obj))
+         (if (slot-ref obj 'stop-delay?)
+             (begin
+               (slot-set! obj 'waiting-for-termination? #t)
+               (local-output "Service ~a pending to be stopped."
+                             (canonical-name obj)))
+             (begin
+               ;; Stop services that depend on it.
+               (for-each-service
+                (lambda (serv)
+                  (and (running? serv)
+                       (for-each (lambda (sym)
+                                   (and (memq sym (provided-by obj))
+                                        (stop serv)))
+                                 (required-by serv)))))
 
-	(let ((running-value (slot-ref obj 'running)))
-	  ;; If it is a respawnable service, we have to pretend that it is
-	  ;; already stopped, because killing it in the destructor would
-	  ;; respawn it immediatelly otherwise.  Thus, always clear the
-	  ;; 'running' slot first, and then call the destructor with the
-	  ;; original value of that slot.
-	  (slot-set! obj 'running #f)
+               ;; Stop the service itself.
+               (catch #t
+                 (lambda ()
+                   (apply (slot-ref obj 'stop)
+                          (slot-ref obj 'running)
+                          args))
+                 (lambda (key . args)
+                   ;; Special case: `dmd' may quit.
+                   (and (eq? dmd-service obj)
+                        (eq? key 'quit)
+                        (apply quit args))
+                   (caught-error key args)))
 
-	  ;; Stop the service itself.
-	  (catch #t
-	    (lambda ()
-	      (apply (slot-ref obj 'stop)
-		     running-value
-		     args))
-	    (lambda (key . args)
-	      ;; Special case: `dmd' may quit.
-	      (and (eq? dmd-service obj)
-		   (eq? key 'quit)
-		   (apply quit args))
-              (slot-set! obj 'running running-value)
-	      (caught-error key args))))
-	;; Status message.
-	(let ((name (canonical-name obj)))
-	  (if (running? obj)
-	      (local-output "Service ~a could not be stopped." name)
-	    (local-output "Service ~a has been stopped." name))))))
-  (slot-ref obj 'running))
+               ;; OBJ is no longer running.
+               (slot-set! obj 'running #f)
+
+               ;; Status message.
+               (let ((name (canonical-name obj)))
+                 (if (running? obj)
+                     (local-output "Service ~a could not be stopped." name)
+                     (local-output "Service ~a has been stopped." name))))))
+     (slot-ref obj 'running))))
 
 ;; Call action THE-ACTION with ARGS.
 (define-method (action (obj <service>) the-action . args)
@@ -737,13 +737,8 @@ otherwise by updating its state."
                                            (= pid pid*))
                                           (_ #f)))))))
 
-         ;; FIXME: We can't emit the warning below reliably because it could be
-         ;; that PID is a service we just stopped, but since signal delivery
-         ;; is asynchronous, we just can't tell.
-         ;; (unless serv
-         ;;   (local-output "warning: child process ~a died but it has no associated service"
-         ;;                 pid))
-
+         ;; SERV can be #f for instance when this code runs just after a
+         ;; service's 'stop' method killed its process and completed.
          (when serv
            (slot-set! serv 'running #f)
            (if (and (respawn? serv)
