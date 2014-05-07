@@ -170,10 +170,13 @@ There is NO WARRANTY, to the extent permitted by law.")))
 
 ;; Home directory of the user.
 (define user-homedir
-  ;; When bootstrapping and running as PID 1, /etc/{passwd,shadow} may be
-  ;; unavailable.  Gracefully handle that.
-  (or (false-if-exception (passwd:dir (getpwuid (getuid))))
-      (getenv "HOME")
+  ;; Look for $HOME first, to allow users to override the defaults.  This is
+  ;; notably useful when dmd is built in a Guix chroot.
+  (or (getenv "HOME")
+
+      ;; When bootstrapping and running as PID 1, /etc/{passwd,shadow} may be
+      ;; unavailable.  Gracefully handle that.
+      (false-if-exception (passwd:dir (getpwuid (getuid))))
       "/"))
 
 ;; dmd default subdirectory if dmd is run as a normal user.
