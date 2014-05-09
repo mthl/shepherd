@@ -108,6 +108,7 @@ return the socket."
       (mkdir directory)))
   (set! log-output-port (open-file file "al")))   ; line-buffered port
 (define (stop-logging)
+  (close-port log-output-port)
   (set! log-output-port (%make-void-port "w")))
 
 (define %current-client-socket
