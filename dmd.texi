@@ -826,6 +826,19 @@ calling the destructor; if it would not do that, killing the process
 in the destructor would immediately respawn the service.
 @end deffn
 
+The @code{make-forkexec-constructor} procedure builds upon the following
+procedure.
+
+@deffn {procedure} exec-command @var{command} @
+  [#:directory (default-service-directory)] @
+  [#:environment-variables (default-environment-variables)]
+Run @var{command} as the current process from @var{directory}, and with
+@var{environment-variables} (a list of strings like @code{"PATH=/bin"}.)
+File descriptors 1 and 2 are kept as is, whereas file descriptor 0
+(standard input) points to @file{/dev/null}; all other file descriptors
+are closed prior to yielding control to @var{command}.
+@end deffn
+
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 @node Service Examples

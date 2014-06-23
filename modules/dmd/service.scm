@@ -60,6 +60,7 @@
             handle-unknown
             make-forkexec-constructor
             make-kill-destructor
+            exec-command
             make-system-constructor
             make-system-destructor
             make-init.d-service
@@ -563,8 +564,14 @@ set when starting a service."
   (environ))
 
 (define* (exec-command command
-                       #:key directory environment-variables)
-  "Run COMMAND with the given settings."
+                       #:key
+                       (directory (default-service-directory))
+                       (environment-variables (default-environment-variables)))
+  "Run COMMAND as the current process from DIRECTORY, and with
+ENVIRONMENT-VARIABLES (a list of strings like \"PATH=/bin\".)  File
+descriptors 1 and 2 are kept as is, whereas file descriptor 0 (standard
+input) points to /dev/null; all other file descriptors are closed prior to
+yielding control to COMMAND."
   (match command
     ((program args ...)
      ;; Become the leader of a new session and session group.
