@@ -577,6 +577,11 @@ set when starting a service."
      ;; Close all the file descriptors except stdout and stderr.
      (let ((max-fd (max-file-descriptors)))
        (catch-system-error (close-fdes 0))
+
+       ;; Make sure file descriptor zero is used, so we don't end up reusing
+       ;; it for something unrelated, which can confuse some packages.
+       (dup2 (open-fdes "/dev/null" O_RDONLY) 0)
+
        (let loop ((i 3))
          (when (< i max-fd)
            (catch-system-error (close-fdes i))
