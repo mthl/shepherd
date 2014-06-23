@@ -827,9 +827,12 @@ in the destructor would immediately respawn the service.
 @end deffn
 
 The @code{make-forkexec-constructor} procedure builds upon the following
-procedure.
+procedures.
 
 @deffn {procedure} exec-command @var{command} @
+  [#:directory (default-service-directory)] @
+  [#:environment-variables (default-environment-variables)]
+@deffnx {procedure} fork+exec-command @var{command} @
   [#:directory (default-service-directory)] @
   [#:environment-variables (default-environment-variables)]
 Run @var{command} as the current process from @var{directory}, and with
@@ -837,6 +840,9 @@ Run @var{command} as the current process from @var{directory}, and with
 File descriptors 1 and 2 are kept as is, whereas file descriptor 0
 (standard input) points to @file{/dev/null}; all other file descriptors
 are closed prior to yielding control to @var{command}.
+
+@code{fork+exec-command} does the same, but in a separate process whose
+PID it returns.
 @end deffn
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

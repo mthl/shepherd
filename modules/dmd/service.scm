@@ -61,6 +61,7 @@
             make-forkexec-constructor
             make-kill-destructor
             exec-command
+            fork+exec-command
             make-system-constructor
             make-system-destructor
             make-init.d-service
@@ -603,6 +604,20 @@ yielding control to COMMAND."
                  program (strerror (system-error-errno args)))
          (primitive-exit 1))))))
 
+(define* (fork+exec-command command
+                            #:key
+                            (directory (default-service-directory))
+                            (environment-variables
+                             (default-environment-variables)))
+  "Spawn a process that executed COMMAND as per 'exec-command', and return
+its PID."
+  (let ((pid (primitive-fork)))
+    (if (zero? pid)
+        (exec-command command
+                      #:directory directory
+                      #:environment-variables environment-variables)
+        pid)))
+
 (define make-forkexec-constructor
   (let ((warn-deprecated-form
          ;; Until 0.1, this procedure took a rest list.
@@ -624,12 +639,9 @@ variables."
                            (list command))
                          command)))
         (lambda args
-          (let ((pid (primitive-fork)))
-            (if (zero? pid)
-                (exec-command command
-                              #:directory directory
-                              #:environment-variables environment-variables)
-                pid)))))
+          (fork+exec-command command
+                             #:directory directory
+                             #:environment-variables environment-variables))))
      ((program . program-args)
       ;; The old form, documented until 0.1 included.
       (warn-deprecated-form)
