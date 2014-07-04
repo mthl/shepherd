@@ -121,7 +121,7 @@ modules/dmd/config.scm: modules/dmd/config.scm.in Makefile
 
 SUFFIXES = .go
 
-TESTS = tests/basic.sh tests/respawn.sh
+TESTS = tests/basic.sh tests/respawn.sh tests/no-home.sh
 TEST_EXTENSIONS = .sh
 EXTRA_DIST += $(TESTS)
 

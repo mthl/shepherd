@@ -53,7 +53,7 @@
 (define (main . args)
   (false-if-exception (setlocale LC_ALL ""))
 
-  (let ((config-file (default-config-file))
+  (let ((config-file #f)
 	(socket-file default-socket-file)
         (pid-file    #f)
 	(insecure #f)
@@ -149,7 +149,7 @@
     ;; `caught-error' does not do this yet.)
     (catch #t
       (lambda ()
-        (load-in-user-module config-file))
+        (load-in-user-module (or config-file (default-config-file))))
       (lambda (key . args)
 	(caught-error key args)
 	(quit 1)))

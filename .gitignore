@@ -44,3 +44,5 @@ Makefile
 /tests/basic.trs
 /tests/respawn.log
 /tests/respawn.trs
+/tests/no-home.log
+/tests/no-home.trs
