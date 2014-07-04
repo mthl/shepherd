@@ -29,7 +29,8 @@ pid="t-pid-$$"
 
 deco="deco -s $socket"
 
-trap "rm -f $socket $conf $stamp $log $pid $service1_pid $service2_pid ;
+trap "cat $log || true ;
+  rm -f $socket $conf $stamp $log $pid $service1_pid $service2_pid ;
   test -f $pid && kill \`cat $pid\` || true ;
   test -f $service1_pid && kill \`cat $service1_pid\` || true ;
   test -f $service2_pid && kill \`cat $service2_pid\` || true ;
@@ -90,6 +91,7 @@ dmd_pid="`cat $pid`"
 
 kill -0 $dmd_pid
 test -S "$socket"
+$deco status dmd
 $deco status test1 | grep started
 $deco status test2 | grep started
 

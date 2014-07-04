@@ -552,12 +552,18 @@
 
 (define (default-service-directory)
   "Return the default current directory from which a service is started."
+  (define (ensure-valid directory)
+    (if (and (file-exists? directory)
+             (file-is-directory? directory))
+        directory
+        "/"))
+
   (if (zero? (getuid))
       "/"
-      (or (getenv "HOME")
-          (and=> (catch-system-error (getpw (getuid)))
-                 passwd:dir)
-          (getcwd))))
+      (ensure-valid (or (getenv "HOME")
+                        (and=> (catch-system-error (getpw (getuid)))
+                               passwd:dir)
+                        (getcwd)))))
 
 (define (default-environment-variables)
   "Return the list of environment variable name/value pairs that should be
