@@ -402,11 +402,13 @@
   (local-output "Status of ~a:"
 		(canonical-name obj))
   (if (running? obj)
-      (local-output "  It is started.")
-    (local-output "  It is stopped."))
+      (begin
+        (local-output "  It is started.")
+        (local-output "  Running value is ~s." (slot-ref obj 'running)))
+      (local-output "  It is stopped."))
   (if (enabled? obj)
       (local-output "  It is enabled.")
-    (local-output "  It is disabled."))
+      (local-output "  It is disabled."))
   (local-output "  Provides ~a." (provided-by obj))
   (local-output "  Requires ~a." (required-by obj))
   (local-output "  Conflicts with ~a." (conflicts-with obj))
