@@ -3,13 +3,43 @@
 #+STARTUP: content hidestars
 
 Copyright © 2002, 2003 Wolfgang Jährling
-Copyright © 2013 Ludovic Courtès <ludo@gnu.org>
+Copyright © 2013, 2014 Ludovic Courtès <ludo@gnu.org>
 
   Copying and distribution of this file, with or without modification,
   are permitted in any medium without royalty provided the copyright
   notice and this notice are preserved.
 
 Please send dmd bug reports to bug-guix@gnu.org.
+
+* Changes in version 0.2
+
+** Non-root configuration file is now ~/.dmd.d/init.scm.
+
+For unprivileged uses of dmd, the configuration file used to be
+~/.dmdconf.scm.  It is now ~/.dmd.d/init.scm
+
+** Generate template configuration file when none is found.
+
+A ~/.dmd.d/init.scm template configuration file is now generated when
+dmd is started and no such file exists.
+
+** The 'dmd' service has new 'unload' and 'reload' actions.
+
+The 'unload' action allows a service to be stopped and its definition to
+be unloaded; 'reload' allows a service to be unloaded, and a new
+redefinition to be reloaded, atomically.  See the manual for details.
+
+** 'make-forkexec-constructor' has a new calling convention.
+
+In particular, the procedure now has #:environment-variables
+and #:directory arguments.  See the manual for details.
+
+** New 'exec-command' and 'fork+exec-command' convenience procedures.
+** The 'status' action displays the running value of services (the PID.)
+** 'dmd' has a new '--pid' option.
+** Failures to connect to dmd are gracefully handled.
+** Data is always appended to the log file.
+** Assorted bug fixes and documentation improvements.
 
 * Changes in version 0.1
 ** A single socket is used for communication with dmd, with a new protocol.
