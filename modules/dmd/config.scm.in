@@ -4,6 +4,7 @@
   #:export (Version
             Prefix-dir
             %localstatedir
+            %sysconfdir
             copyright
             bug-address
             package-name
@@ -12,6 +13,7 @@
 (define Version "%VERSION%")
 (define Prefix-dir "%PREFIX%")
 (define %localstatedir "%localstatedir%")
+(define %sysconfdir "%sysconfdir%")
 
 (define copyright "Copyright (C) 2002, 2003 Wolfgang Jährling")
 (define bug-address "%PACKAGE_BUGREPORT%")

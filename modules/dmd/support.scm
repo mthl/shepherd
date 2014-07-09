@@ -217,7 +217,7 @@ TARGET should be a string representing a filepath + name."
 global system configuration file when running as 'root'.  As a side effect,
 create a template configuration file if non exists."
   (if (zero? (getuid))
-      (string-append Prefix-dir "/etc/dmdconf.scm")
+      (string-append %sysconfdir "/dmdconf.scm")
       (let ((config-file (string-append user-dmddir "/init.scm")))
         (catch-system-error (mkdir user-dmddir))
         (if (not (file-exists? config-file))
