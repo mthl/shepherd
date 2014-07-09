@@ -115,7 +115,8 @@ modules/dmd/config.scm: modules/dmd/config.scm.in Makefile
 %.go: %.scm $(templates:%.in=%)
 	$(MKDIR_P) "`dirname "$@"`"
 	LC_ALL=C					\
-	$(GUILD) compile -L "$(top_builddir)/modules"	\
+	$(GUILD) compile --target="$(host)"		\
+	  -L "$(top_builddir)/modules"			\
 	  -L "$(top_srcdir)/modules"			\
 	  -Wformat -Wunbound-variable -Warity-mismatch	\
 	  -o "$@" "$<"
