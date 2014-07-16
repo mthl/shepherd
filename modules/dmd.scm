@@ -172,6 +172,13 @@
       (sigaction SIGALRM (lambda _ (alarm 1)))
       (alarm 1))
 
+    ;; Stop everything when we get SIGINT.  When running as PID 1, that means
+    ;; rebooting; this is what happens when pressing ctrl-alt-del, see
+    ;; ctrlaltdel(8).
+    (sigaction SIGINT
+      (lambda _
+        (stop dmd-service)))
+
     (if (not socket-file)
 	;; Get commands from the standard input port.
         (process-textual-commands (current-input-port))
