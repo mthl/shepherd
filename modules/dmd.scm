@@ -20,7 +20,7 @@
 (define-module (dmd)
   #:use-module (ice-9 match)
   #:use-module (ice-9 rdelim)   ;; Line-based I/O.
-  #:use-module (ice-9 readline) ;; Readline (for interactive use).
+  #:autoload   (ice-9 readline) (activate-readline) ;for interactive use
   #:use-module (oop goops)      ;; Defining classes and methods.
   #:use-module (srfi srfi-1)    ;; List library.
   #:use-module (srfi srfi-26)
