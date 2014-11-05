@@ -1044,9 +1044,13 @@ if previously spawned childs terminate.  Therefore, this action should
 usually only be used (if at all) *before* childs get spawned for which
 we want to receive these signals."
       (lambda (running)
-	(if (zero? (primitive-fork))
-	    #t
-            (primitive-exit 0))))
+        (case (getpid)
+          ((1)
+           (local-output "Running as PID 1, so not daemonizing."))
+          (else
+           (if (zero? (primitive-fork))
+               #t
+               (primitive-exit 0))))))
      (persistency
       "Safe the current state of running and non-running services.
 This status gets written into a file on termination, so that we can
