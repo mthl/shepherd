@@ -1,5 +1,5 @@
 ;; service.scm -- Representation of services.
-;; Copyright (C) 2013, 2014 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014, 2015 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Järling <wolfgang@pro-linux.de>
 ;; Copyright (C) 2014 Alex Sassmannshausen <alex.sassmannshausen@gmail.com>
 ;;
@@ -66,7 +66,8 @@
             make-system-destructor
             make-init.d-service
 
-            dmd-service))
+            dmd-service
+            make-actions))
 
 ;; Conveniently create an actions object containing the actions for a
 ;; <service> object.  The current structure is a list of actions,
