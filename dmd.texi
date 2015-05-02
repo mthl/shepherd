@@ -140,7 +140,7 @@ mentioned below.
 When dmd gets started, it reads and evaluates a configuration file.  When it is
 started with superuser priviledges, it tries to use
 @code{/etc/dmdconf.scm}, when started as normal user, it looks for a
-file called @code{.dmdconf.scm} in the user's home directory.  With the
+file called @code{.dmd.d/init.scm} in the user's home directory.  With the
 option @code{--config} (or, for short, @code{-c}), you can specify
 where to look instead.  So if you want to start dmd with an
 alternative file, use one of the following commands:
