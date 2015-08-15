@@ -807,14 +807,17 @@ execution of the @var{command} was successful, @code{#t} if not.
 @end deffn
 
 @deffn {procedure} make-forkexec-constructor @var{command} @
+  [#:user #f] @
+  [#:group #f] @
   [#:directory (default-service-directory)] @
   [#:environment-variables (default-environment-variables)]
 Return a procedure that forks a child process, close all file
 descriptors except the standard output and standard error descriptors,
 sets the current directory to @var{directory}, changes the environment
-to @var{environment-variables} (using the @code{environ} procedure), and
-executes @var{command} (a list of strings.)  Return the PID of the child
-process.
+to @var{environment-variables} (using the @code{environ} procedure),
+sets the current user to @var{user} and the current group to
+@var{group}, and executes @var{command} (a list of strings.)  The
+result of the procedure will be the PID of the child process.
 @end deffn
 
 @deffn {procedure} make-kill-destructor [@var{signal}]
@@ -830,9 +833,13 @@ The @code{make-forkexec-constructor} procedure builds upon the following
 procedures.
 
 @deffn {procedure} exec-command @var{command} @
+  [#:user #f] @
+  [#:group #f] @
   [#:directory (default-service-directory)] @
   [#:environment-variables (default-environment-variables)]
 @deffnx {procedure} fork+exec-command @var{command} @
+  [#:user #f] @
+  [#:group #f] @
   [#:directory (default-service-directory)] @
   [#:environment-variables (default-environment-variables)]
 Run @var{command} as the current process from @var{directory}, and with
@@ -841,8 +848,15 @@ File descriptors 1 and 2 are kept as is, whereas file descriptor 0
 (standard input) points to @file{/dev/null}; all other file descriptors
 are closed prior to yielding control to @var{command}.
 
-@code{fork+exec-command} does the same, but in a separate process whose
-PID it returns.
+By default, @var{command} is run as the current user.  If the
+@var{user} keyword argument is present and not false, change to
+@var{user} immediately before invoking @var{command}.  @var{user} may
+be a string, indicating a user name, or a number, indicating a user
+ID.  Likewise, @var{command} will be run under the current group,
+unless the @var{group} keyword argument is present and not false.
+
+@code{fork+exec-command} does the same as @code{exec-command}, but in
+a separate process whose PID it returns.
 @end deffn
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

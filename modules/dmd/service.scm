@@ -575,13 +575,22 @@ set when starting a service."
 
 (define* (exec-command command
                        #:key
+                       (user #f)
+                       (group #f)
                        (directory (default-service-directory))
                        (environment-variables (default-environment-variables)))
   "Run COMMAND as the current process from DIRECTORY, and with
 ENVIRONMENT-VARIABLES (a list of strings like \"PATH=/bin\".)  File
-descriptors 1 and 2 are kept as is, whereas file descriptor 0 (standard
-input) points to /dev/null; all other file descriptors are closed prior to
-yielding control to COMMAND."
+descriptors 1 and 2 are kept as is, whereas file descriptor
+0 (standard input) points to /dev/null; all other file descriptors are
+closed prior to yielding control to COMMAND.
+
+By default, COMMAND is run as the current user.  If the USER keyword
+argument is present and not false, change to USER immediately before
+invoking COMMAND.  USER may be a string, indicating a user name, or a
+number, indicating a user ID.  Likewise, COMMAND will be run under the
+current group, unless the GROUP keyword argument is present and not
+false."
   (match command
     ((program args ...)
      ;; Become the leader of a new session and session group.
@@ -604,6 +613,26 @@ yielding control to COMMAND."
            (catch-system-error (close-fdes i))
            (loop (+ i 1)))))
 
+     (when user
+       (catch #t
+         (lambda ()
+           (setuid (passwd:uid (getpw user))))
+         (lambda (key . args)
+           (format (current-error-port)
+                   "failed to change to user ~s:~%" user)
+           (print-exception (current-error-port) #f key args)
+           (primitive-exit 1))))
+
+     (when group
+       (catch #t
+         (lambda ()
+           (setgid (group:gid (getgr group))))
+         (lambda (key . args)
+           (format (current-error-port)
+                   "failed to change to group ~s:~%" group)
+           (print-exception (current-error-port) #f key args)
+           (primitive-exit 1))))
+
      (catch 'system-error
        (lambda ()
          (apply execlp program program args))
@@ -615,6 +644,8 @@ yielding control to COMMAND."
 
 (define* (fork+exec-command command
                             #:key
+                            (user #f)
+                            (group #f)
                             (directory (default-service-directory))
                             (environment-variables
                              (default-environment-variables)))
@@ -623,6 +654,8 @@ its PID."
   (let ((pid (primitive-fork)))
     (if (zero? pid)
         (exec-command command
+                      #:user user
+                      #:group group
                       #:directory directory
                       #:environment-variables environment-variables)
         pid)))
@@ -636,10 +669,13 @@ its PID."
  (make-forkexec-constructor '(\"PROGRAM\" \"ARGS\"...)."))))
     (case-lambda*
      "Produce a constructor that execs COMMAND, a program name/argument list,
-in a child process and returns its PID.  COMMAND is started with DIRECTORY as
-its current directory, and ENVIRONMENT-VARIABLES as its environment
-variables."
+in a child process and returns its PID.  COMMAND is started with
+DIRECTORY as its current directory, and ENVIRONMENT-VARIABLES as its
+environment variables.  If USER and/or GROUP are given, switch to the
+given USER and/or GROUP to run COMMAND."
      ((command #:key
+               (user #f)
+               (group #f)
                (directory (default-service-directory))
                (environment-variables (default-environment-variables)))
       (let ((command (if (string? command)
@@ -649,6 +685,8 @@ variables."
                          command)))
         (lambda args
           (fork+exec-command command
+                             #:user user
+                             #:group group
                              #:directory directory
                              #:environment-variables environment-variables))))
      ((program . program-args)
