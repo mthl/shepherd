@@ -56,6 +56,7 @@
             lookup-services
             respawn-service
             register-services
+            provided-by
             required-by
             handle-unknown
             make-forkexec-constructor
