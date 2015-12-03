@@ -614,16 +614,8 @@ false."
            (catch-system-error (close-fdes i))
            (loop (+ i 1)))))
 
-     (when user
-       (catch #t
-         (lambda ()
-           (setuid (passwd:uid (getpw user))))
-         (lambda (key . args)
-           (format (current-error-port)
-                   "failed to change to user ~s:~%" user)
-           (print-exception (current-error-port) #f key args)
-           (primitive-exit 1))))
-
+     ;; setgid must be done *before* setuid, otherwise the user will
+     ;; likely no longer have permissions to setgid.
      (when group
        (catch #t
          (lambda ()
@@ -631,6 +623,16 @@ false."
          (lambda (key . args)
            (format (current-error-port)
                    "failed to change to group ~s:~%" group)
+           (print-exception (current-error-port) #f key args)
+           (primitive-exit 1))))
+
+     (when user
+       (catch #t
+         (lambda ()
+           (setuid (passwd:uid (getpw user))))
+         (lambda (key . args)
+           (format (current-error-port)
+                   "failed to change to user ~s:~%" user)
            (print-exception (current-error-port) #f key args)
            (primitive-exit 1))))
 
