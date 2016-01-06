@@ -1,5 +1,5 @@
 # GNU dmd --- Test respawnable services.
-# Copyright © 2013, 2014 Ludovic Courtès <ludo@gnu.org>
+# Copyright © 2013, 2014, 2016 Ludovic Courtès <ludo@gnu.org>
 #
 # This file is part of GNU dmd.
 #
@@ -95,8 +95,13 @@ $deco status dmd
 $deco status test1 | grep started
 $deco status test2 | grep started
 
-test -f "$service1_pid"
-test -f "$service2_pid"
+# The services are started, but that does not mean that they have
+# written their PID file yet, so use 'wait_for_file' rather than
+# 'test -f'.
+wait_for_file "$service1_pid"
+wait_for_file "$service2_pid"
+
+# Make sure the PIDs are valid.
 kill -0 `cat "$service1_pid"`
 kill -0 `cat "$service2_pid"`
 
