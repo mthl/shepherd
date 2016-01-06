@@ -1,5 +1,5 @@
 ;; service.scm -- Representation of services.
-;; Copyright (C) 2013, 2014, 2015 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014, 2015, 2016 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Järling <wolfgang@pro-linux.de>
 ;; Copyright (C) 2014 Alex Sassmannshausen <alex.sassmannshausen@gmail.com>
 ;;
@@ -613,6 +613,9 @@ false."
          (when (< i max-fd)
            (catch-system-error (close-fdes i))
            (loop (+ i 1)))))
+
+     ;; Clear supplementary groups.
+     (catch-system-error (setgroups #()))
 
      ;; setgid must be done *before* setuid, otherwise the user will
      ;; likely no longer have permissions to setgid.
