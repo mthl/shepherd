@@ -87,6 +87,22 @@
 ;; Respawning CAR times in CDR seconds will disable the service.
 (define respawn-limit (cons 5 5))
 
+(define (respawn-limit-hit? respawns times seconds)
+  "Return true of RESPAWNS, the list of times at which a given service was
+respawned, shows that it has been respawned more than TIMES in SECONDS."
+  (define now (current-time))
+
+  ;; Note: This is O(TIMES), but TIMES is typically small.
+  (let loop ((times    times)
+             (respawns respawns))
+    (match respawns
+      (()
+       #f)
+      ((last-respawn rest ...)
+       (or (zero? times)
+           (and (> (+ last-respawn seconds) now)
+                (loop (- times 1) rest)))))))
+
 (define-class <service> ()
   ;; List of provided service-symbols.  The first one is also called
   ;; the `canonical name' and must be unique to this service.
@@ -140,9 +156,8 @@
   ;; need for a destructor (i.e. no value in the `stop' slot).
   (stop-delay? #:init-keyword #:stop-delay?
 	       #:init-value #f)
-  ;; The times of the last respawns.
-  (last-respawns #:init-form (apply circular-list
-				    (make-list (car respawn-limit) 0))))
+  ;; The times of the last respawns, most recent first.
+  (last-respawns #:init-form '()))
 
 (define action:name car)
 (define action:proc cadr)
@@ -210,6 +225,9 @@
 			     problem)
                (call-with-blocked-asyncs
                 (lambda ()
+                  ;; Reset the list of respawns.
+                  (slot-set! obj 'last-respawns '())
+
                   ;; Start the service itself.  Asyncs are blocked so that if
                   ;; the newly-started process dies immediately, the SIGCHLD
                   ;; handler is invoked later, once we have set the 'running'
@@ -819,18 +837,17 @@ otherwise by updating its state."
          (when serv
            (slot-set! serv 'running #f)
            (if (and (respawn? serv)
-                    (> (current-time)
-                       (+ (cdr respawn-limit)
-                          (car (slot-ref serv 'last-respawns)))))
+                    (not (respawn-limit-hit? (slot-ref serv 'last-respawns)
+                                             (car respawn-limit)
+                                             (cdr respawn-limit))))
                (if (not (slot-ref serv 'waiting-for-termination?))
                    (begin
                      ;; Everything is okay, start it.
                      (local-output "Respawning ~a."
                                    (canonical-name serv))
-                     (set-car! (slot-ref serv 'last-respawns)
-                               (current-time))
                      (slot-set! serv 'last-respawns
-                                (cdr (slot-ref serv 'last-respawns)))
+                                (cons (current-time)
+                                      (slot-ref serv 'last-respawns)))
                      (start serv))
                    ;; We have just been waiting for the
                    ;; termination.  The `running' slot has already
