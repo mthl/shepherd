@@ -1,6 +1,6 @@
 ;; support.scm -- Various support facilities, used by deco and dmd.
 ;; Copyright (C) 2014 A.Sassmannshausen <alex.sassmannshausen@gmail.com>
-;; Copyright (C) 2013, 2014 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014, 2016 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
 ;; This file is part of GNU dmd.
@@ -40,6 +40,7 @@
             default-config-file
             default-socket-dir
             default-socket-file
+            %system-socket-file
             default-persistency-state-file
 
             load-in-user-module
@@ -224,15 +225,23 @@ create a template configuration file if non exists."
             (make-bare-init-file config-file))
         config-file)))
 
+;; Socket directory for the system's instance (PID 1).
+(define %system-socket-dir
+  (string-append %localstatedir "/run/dmd"))
+
 ;; The directory where the socket resides.
 (define default-socket-dir
   (if (zero? (getuid))
-      (string-append %localstatedir "/run/dmd")
+      %system-socket-dir
       (string-append user-dmddir "/run")))
 
 ;; Unix domain socket for receiving commands in dmd.
 (define default-socket-file
   (string-append default-socket-dir "/socket"))
+
+;; Location of the socket of the system's instance (PID 1).
+(define %system-socket-file
+  (string-append %system-socket-dir "/socket"))
 
 ;; Saving the state on exit.
 (define default-persistency-state-file

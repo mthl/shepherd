@@ -1,5 +1,5 @@
 ;; halt.scm -- Halt or power off the system.
-;; Copyright (C) 2013, 2014, 2015 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014, 2015, 2016 Ludovic Courtès <ludo@gnu.org>
 ;;
 ;; This file is part of GNU dmd.
 ;;
@@ -33,7 +33,7 @@
 (define (main . args)
   (false-if-exception (setlocale LC_ALL ""))
 
-  (let ((socket-file default-socket-file)
+  (let ((socket-file %system-socket-file)
 	(command-args '()))
     (process-args program-name args
 		  ""
