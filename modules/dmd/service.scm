@@ -436,6 +436,20 @@ respawned, shows that it has been respawned more than TIMES in SECONDS."
       (local-output "  Will be respawned.")
     (local-output "  Will not be respawned.")))
 
+(define-method (service->sexp (service <service>))
+  "Return a representation of SERVICE as an sexp meant to be consumed by
+clients."
+  `(service (version 0)                           ;protocol version
+            (provides ,(provided-by service))
+            (requires ,(required-by service))
+            (respawn? ,(respawn? service))
+            (docstring ,(slot-ref service 'docstring))
+
+            ;; Status.
+            (enabled? ,(enabled? service))
+            (running ,(slot-ref service 'running))
+            (last-respawns ,(slot-ref service 'last-respawns))))
+
 ;; Return whether OBJ requires something that is not yet running.
 (define-method (depends-resolved? (obj <service>))
   (call/ec (lambda (return)
@@ -783,6 +797,13 @@ given USER and/or GROUP to run COMMAND."
 	     #f ;; Unused
 	     services))
 
+(define (service-list)
+  "Return the list of services currently defined."
+  (hash-fold (lambda (key services result)
+               (append services result))
+             '()
+             services))
+
 (define (find-service pred)
   "Return the first service that matches PRED, or #f if none was found."
   (call/ec
@@ -1061,6 +1082,16 @@ which ones are not."
       "Display detailed information about all services."
       (lambda (running)
 	(for-each-service dmd-status)))
+
+     ;; Same, but send the result as an sexp.
+     (status-sexp
+      "Return an s-expression showing information about all the services."
+      (lambda (running)
+        (local-output "~s~%"
+                      `(service-list
+                        (version 0)               ;protocol version
+                        ,@(map service->sexp (service-list))))))
+
      ;; Halt.
      (halt
       "Halt the system."

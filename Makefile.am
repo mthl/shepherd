@@ -136,6 +136,7 @@ TESTS =						\
   tests/basic.sh				\
   tests/respawn.sh				\
   tests/no-home.sh				\
+  tests/status-sexp.sh				\
   tests/sigint.sh
 
 TEST_EXTENSIONS = .sh
