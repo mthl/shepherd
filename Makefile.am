@@ -70,7 +70,7 @@ install-data-local:
 
 # Relocate the script---i.e., have them refer to the installed module
 # directory.
-install-exec-hook:
+install-exec-hook: install-executable-symlinks
 	for script in						\
 	   $(bin_SCRIPTS:%=$(DESTDIR)$(bindir)/%)		\
 	   $(sbin_SCRIPTS:%=$(DESTDIR)$(sbindir)/%) ;		\
@@ -79,6 +79,15 @@ install-exec-hook:
 	         -e's|$(abs_top_builddir)/modules|$(dmddir)|g'	\
 	         -i $$script ;					\
 	done
+
+# Install 'shutdown' as a symlink to 'halt; XXX: someday we'll do
+# better.
+install-executable-symlinks:
+	cd $(DESTDIR)$(sbindir); ln -s halt shutdown
+
+# Remove the 'shutdown' symlink.
+uninstall-hook:
+	cd $(DESTDIR)$(sbindir); rm -f shutdown
 
 # 'sed' expression to instantiate templates.
 instantiate =						\
