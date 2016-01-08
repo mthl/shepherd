@@ -31,6 +31,8 @@
             catch-system-error
             with-system-error-handling
             EINTR-safe
+            with-atomic-file-output
+
             l10n
             local-output
             display-version
@@ -147,6 +149,21 @@ was possible up to Guile 2.0.9 included) the call to PROC is restarted."
           (if (= EINTR (system-error-errno args))
               (loop)
               (apply throw args)))))))
+
+(define (with-atomic-file-output file proc)       ;copied from Guix
+  "Call PROC with an output port for the file that is going to replace FILE.
+Upon success, FILE is atomically replaced by what has been written to the
+output port, and PROC's result is returned."
+  (let* ((template (string-append file ".XXXXXX"))
+         (out      (mkstemp! template)))
+    (with-throw-handler #t
+      (lambda ()
+        (let ((result (proc out)))
+          (close out)
+          (rename-file template file)
+          result))
+      (lambda (key . args)
+        (catch-system-error (delete-file template))))))
 
 
 

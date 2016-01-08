@@ -1,6 +1,6 @@
 ;; dmd.scm -- Daemon managing Daemons (or Daemons-managing Daemon?)
-;; Copyright (C) 2013, 2014 Ludovic Courtès <ludo@gnu.org>
-;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
+;; Copyright (C) 2013, 2014, 2016 Ludovic CourtÃ¨s <ludo@gnu.org>
+;; Copyright (C) 2002, 2003 Wolfgang JÃ¤hrling <wolfgang@pro-linux.de>
 ;;
 ;; This file is part of GNU dmd.
 ;;
@@ -194,7 +194,7 @@
           ;; connections.  XXX: What if we daemonized already?
           (match pid-file
             ((? string? file)
-             (call-with-output-file pid-file
+             (with-atomic-file-output pid-file
                (cute display (getpid) <>)))
             (#t (display (getpid)))
             (_  #t))
