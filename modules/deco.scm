@@ -1,6 +1,6 @@
 ;; deco.scm -- The `DaEmon COntrol' program.
-;; Copyright (C) 2013, 2014 Ludovic Courtès <ludo@gnu.org>
-;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
+;; Copyright (C) 2013, 2014, 2016 Ludovic CourtÃ¨s <ludo@gnu.org>
+;; Copyright (C) 2002, 2003 Wolfgang JÃ¤hrling <wolfgang@pro-linux.de>
 ;;
 ;; This file is part of GNU dmd.
 ;;
@@ -33,6 +33,25 @@
 
 
 
+(define (run-command socket-file action service args)
+  "Perform ACTION with ARGS on SERVICE, and display the result.  Connect to
+the daemon via SOCKET-FILE."
+  (with-system-error-handling
+   (let ((sock (open-connection socket-file)))
+     ;; Send the command.
+     (write-command (dmd-command (string->symbol action)
+                                 (string->symbol service)
+                                 #:arguments args)
+                    sock)
+
+     ;; Receive output.
+     (setvbuf sock _IOLBF)
+     (let loop ((line (read-line sock)))
+       (unless (eof-object? line)
+         (display line)
+         (newline)
+         (loop (read-line sock)))))))
+
 ;; Main program.
 (define (main . args)
   (false-if-exception (setlocale LC_ALL ""))
@@ -54,29 +73,12 @@
 		    #:action (lambda (file)
 			       (set! socket-file file))))
 
-    ;; Make sure we got at least two arguments.
-    (when (< (length command-args) 2)
-      (format (current-error-port)
-              (l10n "Usage: deco ACTION SERVICE OPTIONS...~%"))
-      (exit 1))
-
-    (set! command-args (reverse command-args))
-
-    (with-system-error-handling
-     (let ((sock (open-connection socket-file)))
-       ;; Send the command.
-       (match command-args
-         ((action service args ...)
-          (write-command (dmd-command (string->symbol action)
-                                      (string->symbol service)
-                                      #:arguments args)
-                         sock)))
-
-       ;; Receive output.
-       (setvbuf sock _IOLBF)
-       (let loop ((line (read-line sock)))
-         (unless (eof-object? line)
-           (display line)
-           (newline)
-           (loop (read-line sock))))))))
-
+    (match (reverse command-args)
+      (((and action (or "status" "detailed-status"))) ;one argument
+       (run-command socket-file action "dmd" '()))
+      ((action service args ...)
+       (run-command socket-file action service args))
+      (_
+       (format (current-error-port)
+               (l10n "Usage: deco ACTION [SERVICE [OPTIONS...]]~%"))
+       (exit 1)))))

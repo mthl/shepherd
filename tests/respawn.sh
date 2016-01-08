@@ -91,7 +91,7 @@ dmd_pid="`cat $pid`"
 
 kill -0 $dmd_pid
 test -S "$socket"
-$deco status dmd
+$deco status
 $deco status test1 | grep started
 $deco status test2 | grep started
 

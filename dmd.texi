@@ -172,14 +172,14 @@ will automatically be started as well.  The current status of all the
 services defined in the configuration file can be queried like this:
 
 @example
-deco status dmd
+deco status
 @end example
 
 @noindent
 Or, to get additional details about each service, run:
 
 @example
-deco detailed-status dmd
+deco detailed-status
 @end example
 
 @noindent
@@ -431,12 +431,19 @@ running instance of @command{dmd} (@pxref{Invoking dmd}).  It has the
 following synopsis:
 
 @example
-deco [@var{option}@dots{}] @var{action} @var{service} [@var{arg}@dots{}]
+deco [@var{option}@dots{}] @var{action} [@var{service} [@var{arg}@dots{}]]
 @end example
 
-It causes the @var{action} of the @var{service} to be invoked.  For each
-action, you should pass the appropriate @var{arg}s.  Actions that are
-available for every service are @code{start}, @code{stop},
+It causes the @var{action} of the @var{service} to be invoked.  When
+@var{service} is omitted and @var{action} is @code{status} or
+@code{detailed-status}, the @code{dmd} service is used@footnote{This
+shorthand does not work for other actions such as @code{stop}, because
+inadvertently typing @code{deco stop} would stop all the services, which
+could be pretty annoying.} (@pxref{The dmd and unknown services}, for
+more information on the @code{dmd} service.)
+
+For each action, you should pass the appropriate @var{arg}s.  Actions
+that are available for every service are @code{start}, @code{stop},
 @code{restart}, @code{status}, @code{enable}, @code{disable}, and
 @code{doc}.
 

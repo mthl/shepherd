@@ -1,5 +1,5 @@
 # GNU dmd --- Test basic communication capabilities.
-# Copyright © 2013, 2014 Ludovic Courtès <ludo@gnu.org>
+# Copyright © 2013, 2014, 2016 Ludovic Courtès <ludo@gnu.org>
 # Copyright © 2014 Alex Sassmannshausen <alex.sassmannshausen@gmail.com>
 #
 # This file is part of GNU dmd.
@@ -83,15 +83,15 @@ $deco status test-2 | grep started
 
 # Unload one service, make sure the other it still around.
 $deco unload dmd test
-$deco status dmd | grep "Stopped: (test-2)"
+$deco status | grep "Stopped: (test-2)"
 
 $deco reload dmd "$conf"
-test "`$deco status dmd`" == "$pristine_status"
+test "`$deco status`" == "$pristine_status"
 
 # Unload everything and make sure only 'dmd' is left.
 $deco unload dmd all
-$deco status dmd | grep "Stopped: ()"
-$deco status dmd | grep "Started: (dmd)"
+$deco status | grep "Stopped: ()"
+$deco status | grep "Started: (dmd)"
 
 $deco stop dmd
 ! kill -0 $dmd_pid
