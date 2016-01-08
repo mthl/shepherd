@@ -646,14 +646,13 @@ false."
            (catch-system-error (close-fdes i))
            (loop (+ i 1)))))
 
-     ;; Clear supplementary groups.
-     (catch-system-error (setgroups #()))
-
      ;; setgid must be done *before* setuid, otherwise the user will
      ;; likely no longer have permissions to setgid.
      (when group
        (catch #t
          (lambda ()
+           ;; Clear supplementary groups.
+           (setgroups #())
            (setgid (group:gid (getgr group))))
          (lambda (key . args)
            (format (current-error-port)
