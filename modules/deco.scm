@@ -39,9 +39,7 @@ the daemon via SOCKET-FILE."
   (with-system-error-handling
    (let ((sock (open-connection socket-file)))
      ;; Send the command.
-     (write-command (dmd-command (string->symbol action)
-                                 (string->symbol service)
-                                 #:arguments args)
+     (write-command (dmd-command action service #:arguments args)
                     sock)
 
      ;; Receive output.
@@ -75,9 +73,11 @@ the daemon via SOCKET-FILE."
 
     (match (reverse command-args)
       (((and action (or "status" "detailed-status"))) ;one argument
-       (run-command socket-file action "dmd" '()))
+       (run-command socket-file (string->symbol action) 'dmd '()))
       ((action service args ...)
-       (run-command socket-file action service args))
+       (run-command socket-file
+                    (string->symbol action)
+                    (string->symbol service) args))
       (_
        (format (current-error-port)
                (l10n "Usage: deco ACTION [SERVICE [OPTIONS...]]~%"))
