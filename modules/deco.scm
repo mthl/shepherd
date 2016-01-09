@@ -32,24 +32,108 @@
 (define program-name "deco")
 
 
+(define (service-list-error services)
+  (format (current-error-port)
+          (l10n "~a: error: received an invalid service list:~%~s~%")
+          program-name services))
+
+(define-syntax alist-let*
+  (syntax-rules ()
+    "Bind the given KEYs in EXP to the corresponding items in ALIST.  ALIST
+is assumed to be a list of two-element tuples rather than a traditional list
+of pairs."
+    ((_ alist (key ...) exp ...)
+     (let ((key (and=> (assoc-ref alist 'key) car)) ...)
+       exp ...))))
+
+(define service-canonical-name
+  (match-lambda
+    (('service ('version 0 _ ...) (provides (name0 _ ...)) _ ...)
+     name0)))
+
+(define (display-status-summary services)
+  "Display a summary of the status of all of SERVICES."
+  (match services
+    (('service-list ('version 0) services ...)
+     (call-with-values
+         (lambda ()
+           (partition (match-lambda
+                        (('service ('version 0 _ ...) properties ...)
+                         (car (assoc-ref properties 'running))))
+                      services))
+       (lambda (started stopped)
+         (format #t (l10n "Started: ~a~%")
+                 (map service-canonical-name started))
+         (format #t (l10n "Stopped: ~a~%")
+                 (map service-canonical-name stopped)))))
+    (_
+     (service-list-error services))))
+
+(define (display-detailed-status services)
+  "Display the detailed status of SERVICES."
+  (match services
+    (('service-list ('version 0) services ...)
+     (for-each display-service-status services))
+    (_
+     (service-list-error services))))
+
+(define (display-service-status service)
+  "Display the status of SERVICE, an sexp."
+  (match service
+    (('service ('version 0 _ ...) properties ...)
+     (alist-let* properties (provides requires running respawn? enabled?)
+       (format #t (l10n "Status of ~a:~%") (first provides))
+       (if running
+           (begin
+             (format #t (l10n "  It is started.~%"))
+             (format #t (l10n "  Running value is ~s.~%") running))
+           (format #t (l10n "  It is stopped.~%")))
+       (if enabled?
+           (format #t (l10n "  It is enabled.~%"))
+           (format #t (l10n "  It is disabled.~%")))
+       (format #t (l10n "  Provides ~a.~%") provides)
+       (format #t (l10n "  Requires ~a.~%") requires)
+       ;; FIXME: We don't have that information.
+       ;; (format #t (l10n "  Conflicts with ~a." (conflicts-with obj)))
+       (if respawn?
+           (format #t (l10n "  Will be respawned.~%"))
+           (format #t (l10n "  Will not be respawned.~%")))))))
 
 (define (run-command socket-file action service args)
   "Perform ACTION with ARGS on SERVICE, and display the result.  Connect to
 the daemon via SOCKET-FILE."
   (with-system-error-handling
-   (let ((sock (open-connection socket-file)))
+   (let ((sock    (open-connection socket-file))
+         (action* (if (and (eq? service 'dmd) (eq? action 'detailed-status))
+                      'status
+                      action)))
      ;; Send the command.
-     (write-command (dmd-command action service #:arguments args)
+     (write-command (dmd-command action* service #:arguments args)
                     sock)
 
      ;; Receive output.
      (setvbuf sock _IOLBF)
-     (let loop ((line (read-line sock)))
-       (unless (eof-object? line)
-         (display line)
-         (newline)
-         (loop (read-line sock)))))))
 
+     ;; Interpret the command's output when possible and format it in a
+     ;; human-readable way.
+     (match (list action service)
+       (('status 'dmd)
+        (display-status-summary (read sock)))
+       (('detailed-status 'dmd)
+        (display-detailed-status (read sock)))
+       (('status _)
+        (display-service-status (read sock)))
+       (_
+        ;; For other commands, we don't do any interpretation.
+        (let loop ((line (read-line sock)))
+          (unless (eof-object? line)
+            (display line)
+            (newline)
+            (loop (read-line sock))))))
+
+     (close-port sock))))
+
+
 ;; Main program.
 (define (main . args)
   (false-if-exception (setlocale LC_ALL ""))
@@ -82,3 +166,7 @@ the daemon via SOCKET-FILE."
        (format (current-error-port)
                (l10n "Usage: deco ACTION [SERVICE [OPTIONS...]]~%"))
        (exit 1)))))
+
+;; Local Variables:
+;; eval: (put 'alist-let* 'scheme-indent-function 2)
+;; End:

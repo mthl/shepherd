@@ -59,6 +59,12 @@ dmd_pid="`cat $pid`"
 kill -0 $dmd_pid
 test -S "$socket"
 
+# Code to fetch service status info.
+fetch_status="
+  (let ((sock (open-connection \"$socket\")))
+    (write-command (dmd-command 'status 'dmd) sock)
+    (read sock))"
+
 dmd_service_sexp="
    (service (version 0)
       (provides (dmd)) (requires ())
@@ -66,11 +72,11 @@ dmd_service_sexp="
       (docstring \"The dmd service is used to operate on dmd itself.\")
       (enabled? #t) (running #t) (last-respawns ()))"
 
-guile -c "
-(use-modules (srfi srfi-1))
+"$GUILE" -c "
+(use-modules (dmd comm) (srfi srfi-1))
 
 (exit
- (lset= equal? '`$deco status-sexp dmd`
+ (lset= equal? $fetch_status
 	       '(service-list (version 0)
                   $dmd_service_sexp
 		  (service (version 0)
@@ -88,9 +94,11 @@ guile -c "
 # Unload everything and make sure only 'dmd' is left.
 $deco unload dmd all
 
-guile -c "
+"$GUILE" -c "
+(use-modules (dmd comm))
+
 (exit
-  (equal? '`$deco status-sexp dmd`
+  (equal? $fetch_status
           '(service-list (version 0) $dmd_service_sexp)))"
 
 $deco stop dmd

@@ -45,7 +45,6 @@
             doc
             conflicts-with
             conflicts-with-running
-            dmd-status
             depends-resolved?
             launch-service
             first-running
@@ -308,7 +307,8 @@ respawned, shows that it has been respawned more than TIMES in SECONDS."
 	 (local-output "~a was not running." (canonical-name obj)))
        (start obj))
       ((status)
-       (dmd-status obj))
+       ;; Return the raw sexp and let the client present it nicely.
+       (local-output "~s" (service->sexp obj)))
       (else
        ;; FIXME: Unknown service.
        (local-output "Service ~a does not have a ~a action."
@@ -416,25 +416,6 @@ respawned, shows that it has been respawned more than TIMES in SECONDS."
 (define-method (enforce (obj <service>) . args)
   (for-each stop (conflicts-with-running obj))
   (apply start obj args))
-
-;; Display information about the service.
-(define-method (dmd-status (obj <service>))
-  (local-output "Status of ~a:"
-		(canonical-name obj))
-  (if (running? obj)
-      (begin
-        (local-output "  It is started.")
-        (local-output "  Running value is ~s." (slot-ref obj 'running)))
-      (local-output "  It is stopped."))
-  (if (enabled? obj)
-      (local-output "  It is enabled.")
-      (local-output "  It is disabled."))
-  (local-output "  Provides ~a." (provided-by obj))
-  (local-output "  Requires ~a." (required-by obj))
-  (local-output "  Conflicts with ~a." (conflicts-with obj))
-  (if (respawn? obj)
-      (local-output "  Will be respawned.")
-    (local-output "  Will not be respawned.")))
 
 (define-method (service->sexp (service <service>))
   "Return a representation of SERVICE as an sexp meant to be consumed by
@@ -1061,30 +1042,9 @@ file when persistence is enabled."
     ;; allowed to quit, while user-supplied code shouldn't be.
     #:actions
     (make-actions
-     ;; Display status.
      (status
-      "Display the status of dmd.  I.e. which services are running and
-which ones are not."
-      (lambda (running)
-	(let ((started '()) (stopped '()))
-	  (for-each-service
-	   (lambda (service)
-	     (if (running? service)
-		 (set! started (cons (canonical-name service)
-				     started))
-                 (set! stopped (cons (canonical-name service)
-                                     stopped)))))
-	  (local-output "Started: ~a" started)
-	  (local-output "Stopped: ~a" stopped))))
-     ;; Look at every service in detail.
-     (detailed-status
-      "Display detailed information about all services."
-      (lambda (running)
-	(for-each-service dmd-status)))
-
-     ;; Same, but send the result as an sexp.
-     (status-sexp
-      "Return an s-expression showing information about all the services."
+      "Return an s-expression showing information about all the services.
+Clients such as 'deco' can read it and format it in a human-readable way."
       (lambda (running)
         (local-output "~s~%"
                       `(service-list

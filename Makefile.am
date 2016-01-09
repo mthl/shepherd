@@ -144,7 +144,9 @@ EXTRA_DIST += $(TESTS)
 
 AM_TESTS_ENVIRONMENT =				\
   PATH="$(abs_top_builddir):$$PATH" LC_ALL=C	\
-  SHELL="$(SHELL)"
+  SHELL="$(SHELL)" GUILE="$(GUILE)"
+  GUILE_LOAD_PATH="$(abs_top_srcdir)/modules:$(abs_top_builddir)/modules:$$GUILE_LOAD_PATH" \
+  GUILE_LOAD_COMPILED_PATH="$(abs_top_srcdir)/modules:$(abs_top_builddir)/modules:$$GUILE_LOAD_COMPILED_PATH"
 
 SH_LOG_COMPILER = $(SHELL)
 AM_SH_LOG_FLAGS = -x -e
