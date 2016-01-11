@@ -55,7 +55,7 @@ CLEANFILES =						\
   $(bin_SCRIPTS) $(sbin_SCRIPTS)
 
 # Documentation.
-info_TEXINFOS = dmd.texi
+info_TEXINFOS = shepherd.texi
 SUBDIRS = examples utils
 
 # Things not automatically included in the distribution.

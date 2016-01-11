@@ -1,12 +1,12 @@
 \input texinfo @c -*- texinfo -*-
-@c dmd.texi -- The documentation in Texinfo format.
+@c shepherd.texi -- The documentation in Texinfo format.
 @documentencoding UTF-8
-@setfilename dmd.info
-@settitle GNU dmd Manual
+@setfilename shepherd.info
+@settitle The GNU Shepherd Manual
 
 @include version.texi
 @set OLD-YEARS 2002, 2003
-@set NEW-YEARS 2013
+@set NEW-YEARS 2013, 2016
 
 @copying
 Copyright @copyright{} @value{OLD-YEARS} Wolfgang J@"ahrling@*
@@ -22,18 +22,18 @@ Documentation License''.
 
 @dircategory System software
 @direntry
-* dmd: (dmd).           The manual of the dmd service manager.
-* deco: (dmd)Invoking deco
-                        Controlling the dmd service manager.
-* reboot: (dmd)Invoking reboot
-                        Rebooting a dmd-controlled system.
-* halt: (dmd)Invoking halt
-                        Turning off a dmd-controlled system.
+* shepherd: (shepherd). The Shepherd service manager.
+* deco: (shepherd)Invoking deco
+                        Controlling the Shepherd service manager.
+* reboot: (shepherd)Invoking reboot
+                        Rebooting a Shepherd-controlled system.
+* halt: (shepherd)Invoking halt
+                        Turning off a Shepherd-controlled system.
 @end direntry
 
 @titlepage
-@title GNU dmd Manual
-@subtitle For use with dmd @value{VERSION}
+@title The GNU Shepherd Manual
+@subtitle For use with the GNU Shepherd @value{VERSION}
 @subtitle Last updated @value{UPDATED}
 
 @author Wolfgang J@"ahrling
@@ -49,19 +49,19 @@ Documentation License''.
 
 @ifnottex
 @node Top
-@top GNU dmd Manual
+@top The GNU Shepherd Manual
 
-This manual documents dmd version @value{VERSION}, a service manager for
-the GNU system.
+This manual documents the Shepherd version @value{VERSION}, a service
+manager for the GNU system.
 
 @menu
-* Introduction::      Introduction to the dmd service manager.
-* Jump Start::        How to do simple things with dmd.
-* deco and dmd::      User interface to service management.
+* Introduction::      Introduction to the Shepherd service manager.
+* Jump Start::        How to do simple things with the Shepherd.
+* deco and shepherd::      User interface to service management.
 * Services::          Details on services.
 * Runlevels::         Details on runlevels.
-* Misc Facilities::   Generally useful things provided by dmd.
-* Internals::         Hacking dmd.
+* Misc Facilities::   Generally useful things provided by the Shepherd.
+* Internals::         Hacking shepherd.
 
 * GNU Free Documentation License::  The license of this manual.
 * Concept Index::
@@ -77,45 +77,47 @@ the GNU system.
 @chapter Introduction
 
 @cindex service manager
-This manual documents the @dfn{dmd} service manager.  It is used to
-start and stop system services (typically daemons) in a reliable
+This manual documents the Shepherd service manager.  The Shepherd looks
+after system services, typically @dfn{daemons}.
+It is used to start and stop them in a reliable
 fashion.  For instance it will dynamically determine and start any
 other services that our desired service depends upon.  As another
-example, dmd might detect conflicts between services.  In this
+example, the Shepherd might detect conflicts among services.  In this
 situation it would simply prevent the conflicting services from
 running concurrently.
 
-dmd is the @dfn{init system} of the GNU operating system---it is the
+The Shepherd is the @dfn{init system} of the GNU operating system---it is the
 first user process that gets started, typically with PID 1, and runs
 as @code{root}.  Normally the purpose of init systems is to manage all
-system-wide services, but dmd can also be a useful tool assisting
+system-wide services, but the Shepherd can also be a useful tool assisting
 unprivileged users in the management of their own daemons.
 
 Unfortunately all flexible software requires some time to master and
-dmd is no different.  But don't worry: this manual should allow you to
+the Shepherd is no different.  But don't worry: this manual should allow you to
 get started quickly.  Its first chapter is designed as a practical
-introduction to dmd and should be all you need for everyday use
+introduction to the Shepherd and should be all you need for everyday use
 (@pxref{Jump Start}).  In chapter two we will describe the
-@command{deco} and @command{dmd} programs, and their relationship, in
-more detail (@ref{deco and dmd}).  Subsequent chapters provide a full
-reference manual and plenty of examples, covering all of dmd's
+@command{deco} and @command{shepherd} programs, and their relationship, in
+more detail (@ref{deco and shepherd}).  Subsequent chapters provide a full
+reference manual and plenty of examples, covering all of Shepherd's
 capabilities.  Finally, the last chapter provides information for
-those souls brave enough to hack dmd itself.
+those souls brave enough to hack the Shepherd itself.
 
-The name dmd stands for @dfn{Daemon Managing Daemons} (or
-@dfn{Daemons-Managing Daemon}?).
+@cindex dmd
+The Shepherd was formerly known as ``dmd'', which stands for @dfn{Daemon
+Managing Daemons} (or @dfn{Daemons-Managing Daemon}?).
 
 @cindex Guile
 @cindex Scheme
 @cindex GOOPS
 This program is written in @dfn{Guile}, an implementation of the
 Scheme programming language, using the @dfn{GOOPS} extension for
-object-orientation.  Guile is also dmd's configuration language
+object-orientation.  Guile is also the Shepherd's configuration language
 (@pxref{Top,,, guile, GNU Guile Reference Manual}).  We have tried to
-make dmd's basic features as accessible as possible---you should be
+make the Shepherd's basic features as accessible as possible---you should be
 able to use these even if you do not know how to program in Scheme.  A
 basic grasp of Guile and GOOPS is required only if you wish to make
-use of dmd's more advanced features.
+use of the Shepherd's more advanced features.
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -123,7 +125,7 @@ use of dmd's more advanced features.
 @chapter Jump Start
 
 @cindex prefix
-This chapter gives a short overview of dmd.  It is enough if you just
+This chapter gives a short overview of the Shepherd.  It is enough if you just
 need the basic features of it.  As it is not assumed that readers are
 familiar with all the involved issues, a very experienced user might
 be annoyed by the often very detailed descriptions in this
@@ -131,31 +133,32 @@ introduction.  Those users are encouraged to just skip to the
 reference section.
 
 Note that all the full file names in the following text are based on
-the assumption that you have installed dmd with an empty prefix.  If
-your dmd installation for example resides in @code{/usr/local}
+the assumption that you have installed the Shepherd with an empty prefix.  If
+your the Shepherd installation for example resides in @code{/usr/local}
 instead, add this directory name in front of the absolute file names
 mentioned below.
 
 @cindex Configuration file
-When dmd gets started, it reads and evaluates a configuration file.  When it is
+When @command{shepherd} gets started, it reads and evaluates a configuration file.  When it is
 started with superuser priviledges, it tries to use
 @code{/etc/dmdconf.scm}, when started as normal user, it looks for a
 file called @code{.dmd.d/init.scm} in the user's home directory.  With the
 option @code{--config} (or, for short, @code{-c}), you can specify
-where to look instead.  So if you want to start dmd with an
+where to look instead.  So if you want to start @command{shepherd} with an
 alternative file, use one of the following commands:
 
 @example
-dmd --config=/etc/dmdconf.scm.old
-dmd -c /etc/dmdconf.scm.old
+shepherd --config=/etc/dmdconf.scm.old
+shepherd -c /etc/dmdconf.scm.old
 @end example
 
 @cindex Starting a service
-As its name suggests, dmd is just a daemon that (usually) runs in the
+As the final ``d'' suggests, @command{shepherd} is just
+a daemon that (usually) runs in the
 background, so you will not interact with it directly.  After it is
-started, dmd will listen on a socket special file, usually
+started, @command{shepherd} will listen on a socket special file, usually
 @code{/var/run/dmd/socket}, for further commands.  You use the tool
-@dfn{deco} to send these commands to dmd.  Usage of deco is simple and
+@dfn{deco} to send these commands to @command{shepherd}.  Usage of deco is simple and
 straightforward: To start a service called @code{apache}, you use:
 
 @example
@@ -230,7 +233,7 @@ called @code{smail}, as both are mailer-daemons.  If a service needs
 any mailer-daemon, no matter which one, it can just depend on
 @code{mailer-daemon}, and one of those who provide it gets started (if
 none is running yet) when resolving dependencies.  The nice thing is
-that, if trying to start one of them fails, dmd will go on and try to
+that, if trying to start one of them fails, @command{shepherd} will go on and try to
 start the next one, so you can also use virtual services for
 specifying @emph{fallbacks}.
 
@@ -255,7 +258,7 @@ all.)
 
 There are two actions which are special, because even if services
 can implement them on their own, a default implementation is provided
-by dmd (another reason why they are special is that the default
+by @command{shepherd} (another reason why they are special is that the default
 implementations can be called even when the service is not running;
 this inconsistency is just to make it more intuitive to get
 information about the status of a service, see below).
@@ -273,7 +276,7 @@ of the additional actions a service provides; obviously, it can also
 be called when the service is not running.  Services cannot provide
 their own implementation of @code{list-actions}.
 
-A special service is @code{dmd}, which is used for controlling dmd
+A special service is @code{dmd}, which is used for controlling the Shepherd
 itself.  It implements various actions.  For example, the
 @code{status} action displays which services are started and which
 ones are stopped, whereas @code{detailed-status} has the effect of
@@ -282,14 +285,14 @@ one after another.  The @code{load}
 action is unusual insofar as it shows a feature that is actually
 available to all services, but which we have not seen yet: It takes an
 additional argument.  You can use @code{load} to load arbitrary code
-into dmd at runtime, like this:
+into the Shepherd at runtime, like this:
 
 @example
 deco load dmd ~/additional-services.scm
 @end example
 
-This is enough now about the @code{deco} and @code{dmd} programs, we
-will now take a look at how to configure dmd.  In the configuration
+This is enough now about the @command{deco} and @command{shepherd} programs, we
+will now take a look at how to configure the Shepherd.  In the configuration
 file, we need mainly the definition of services.  We can also do
 various other things there, like starting a few services already.
 
@@ -303,7 +306,7 @@ Ok, to summarize:
 
 @itemize @bullet
 @item
-dmd is a daemon, deco the program that controls it.
+@command{shepherd} is a daemon, @command{deco} the program that controls it.
 @item
 You can start, stop, restart, enable and disable every service, as
 well as display its status.
@@ -317,52 +320,52 @@ You can display the status of a service, even if the service does not
 provide a specific implementation for this action.  The same is true
 for restarting.
 @item
-The @code{dmd} service is used to control dmd itself.
+The @code{dmd} service is used to control @command{shepherd} itself.
 @end itemize
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-@node deco and dmd
-@chapter deco and dmd
+@node deco and shepherd
+@chapter @command{deco} and @command{shepherd}
 
 @cindex deco
-@cindex dmd
+@cindex shepherd
 @cindex daemon
 @cindex daemon controller
 @cindex relative file names
 The daemon that runs in the background and is responsible for
-controlling the services is @dfn{dmd}, while the user interface tool
-is called @dfn{deco}, the @dfn{DaEmon COntroller}@footnote{Some people
+controlling the services is @command{shepherd}, while the user interface tool
+is called @command{deco}, the @dfn{DaEmon COntroller}@footnote{Some people
 might argue that it actually is short for ``decoration'', indicating
 that it is useless. :-)}.  To perform an action, like stopping a
 service or calling an action of a service, you use the deco program.
-It will communicate with dmd over a Unix Domain Socket.
+It will communicate with shepherd over a Unix Domain Socket.
 
-Thus, you start dmd once, and then always use deco whenever you want
+Thus, you start @command{shepherd} once, and then always use deco whenever you want
 to do something service-related.  Since deco passes its current
-working directory to dmd, you can pass relative file names without
-trouble.  Both dmd and deco understand the standard arguments
+working directory to @command{shepherd}, you can pass relative file names without
+trouble.  Both @command{shepherd} and deco understand the standard arguments
 @code{--help}, @code{--version} and @code{--usage}.
 
 
 @menu
-* Invoking dmd::                How to start the service damon.
+* Invoking shepherd::           How to start the service damon.
 * Invoking deco::               Controlling daemons.
-* Invoking reboot::             Rebooting a dmd-controlled system.
-* Invoking halt::               Turning off a dmd-controlled system.
+* Invoking reboot::             Rebooting a shepherd-controlled system.
+* Invoking halt::               Turning off a shepherd-controlled system.
 @end menu
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-@node Invoking dmd
-@section Invoking dmd
+@node Invoking shepherd
+@section Invoking @command{shepherd}
 
-@cindex dmd Invocation
-@cindex invoking dmd
-The @code{dmd} program has the following synopsis:
+@cindex @command{shepherd} Invocation
+@cindex invoking @command{shepherd}
+The @code{shepherd} program has the following synopsis:
 
 @example
-dmd [@var{option}@dots{}]
+shepherd [@var{option}@dots{}]
 @end example
 
 It accepts the following options:
@@ -373,7 +376,7 @@ It accepts the following options:
 Read and evaluate @var{file} as the configuration script on startup.
 
 @var{file} is evaluated in the context of a fresh module where bindings
-from the @code{(dmd service)} module and Guile's @code{(oop goops)} are
+from the @code{(shepherd service)} module and Guile's @code{(oop goops)} are
 available, in addition to the default set of Guile bindings.  In
 particular, this means that code in @var{file} may use
 @code{register-services}, the @code{<service>} class, and related tools
@@ -385,7 +388,7 @@ particular, this means that code in @var{file} may use
 @cindex insecure
 Do not check if the directory where the socket---our communication
 rendez-vous with @command{deco}---is located has permissions @code{700}.
-If this option is not specified, @command{dmd} will abort if the
+If this option is not specified, @command{shepherd} will abort if the
 permissions are not as expected.
 
 @item -l [@var{file}]
@@ -397,7 +400,7 @@ Log output into @var{file}, or if @var{file} is not given,
 otherwise.
 
 @item --pid[=@var{file}]
-When dmd is ready to accept connections, write its PID to @var{file} or
+When @command{shepherd} is ready to accept connections, write its PID to @var{file} or
 to the standard output if @var{file} is omitted.
 
 @item -p [@var{file}]
@@ -427,7 +430,7 @@ Synonym for @code{--silent}.
 
 @cindex deco
 The @command{deco} command is a generic client program to control a
-running instance of @command{dmd} (@pxref{Invoking dmd}).  It has the
+running instance of @command{shepherd} (@pxref{Invoking shepherd}).  It has the
 following synopsis:
 
 @example
@@ -448,8 +451,8 @@ that are available for every service are @code{start}, @code{stop},
 @code{doc}.
 
 If you pass a file name as an @var{arg}, it will be passed as-is to
-dmd, thus if it is not an absolute name, it is local to the current
-working directory of dmd, not to deco.
+the Shepherd, thus if it is not an absolute name, it is local to the current
+working directory of @command{shepherd}, not to deco.
 
 The @code{deco} command understands the following option:
 
@@ -469,7 +472,7 @@ not specified, @file{@var{localstatedir}/run/dmd/socket} is taken.
 
 @cindex deco
 The @command{reboot} command is a convenience client program to instruct
-dmd (when used as an init system) to stop all running services and
+the Shepherd (when used as an init system) to stop all running services and
 reboot the system.  It has the following synopsis:
 
 @example
@@ -495,7 +498,7 @@ not specified, @file{@var{localstatedir}/run/dmd/socket} is taken.
 
 @cindex deco
 The @command{halt} command is a convenience client program to instruct
-dmd (when used as an init system) to stop all running services and turn
+the Shepherd (when used as an init system) to stop all running services and turn
 off the system.  It has the following synopsis:
 
 @example
@@ -522,7 +525,7 @@ not specified, @file{@var{localstatedir}/run/dmd/socket} is taken.
 
 @cindex service
 @tindex <service>
-The @dfn{service} is obviously a very important concept of dmd.  On the
+The @dfn{service} is obviously a very important concept of the Shepherd.  On the
 Guile level, a service is represented as an instance of
 @code{<service>}, a GOOPS class (@pxref{GOOPS,,, guile, GNU Guile
 Reference Manual}).  When creating an instance of it, you can specify
@@ -530,7 +533,7 @@ the initial values of its slots, and you actually must do this for some
 of the slots.
 
 The @code{<service>} class and its associated procedures and methods are
-defined in the @code{(dmd service)} module.
+defined in the @code{(shepherd service)} module.
 
 @menu
 * Slots of services::            What a <service> object consists of.
@@ -539,7 +542,7 @@ defined in the @code{(dmd service)} module.
 * Service De- and Constructors:: Commonly used ways of starting and
                                    stopping services.
 * Service Examples::             Examples that show how services are used.
-* The dmd and unknown services:: Special services in dmd.
+* The dmd and unknown services:: Special services in the Shepherd.
 @end menu
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -591,7 +594,7 @@ It will also be passed as an argument to the procedure in the
 @vindex respawn? (slot of <service>)
 @cindex Respawning services
 @code{respawn?} specifies whether the service should be respawned by
-dmd.  If this slot has the value @code{#t}, then assume the
+the Shepherd.  If this slot has the value @code{#t}, then assume the
 @code{running} slot specifies a child process PID and restart the
 service if that process terminates.  Otherwise this slot is @code{#f},
 which is the default.  See also the @code{last-respawns} slot.
@@ -906,7 +909,7 @@ also specifies some more initial values for the slots:
 
 @cindex dmd service
 @cindex special services
-The service @code{dmd} is special, because it is used to control dmd
+The service @code{dmd} is special, because it is used to control the Shepherd
 itself.  It provides the following actions (in addition to
 @code{enable}, @code{disable} and @code{restart} which do not make
 sense here).
@@ -920,12 +923,12 @@ Displays detailed information about every registered service.
 
 @item load @var{file}
 Evaluate the Scheme code in @var{file} in a fresh module that uses the
-@code{(oop goops)} and @code{(dmd services)} modules---as with the
-@code{--config} option of @command{dmd} (@pxref{Invoking dmd}).
+@code{(oop goops)} and @code{(shepherd services)} modules---as with the
+@code{--config} option of @command{shepherd} (@pxref{Invoking shepherd}).
 
 @item unload @var{service-name}
 Attempt to remove the service identified by @var{service-name}.
-@command{dmd} will first stop the service, if necessary, and then
+@command{shepherd} will first stop the service, if necessary, and then
 remove it from the list of registered services.  Any services
 depending upon @var{service-name} will be stopped as part of this
 process.
@@ -935,7 +938,7 @@ nothing.  If it exists, but is provided by several services, output a
 warning and do nothing.  This latter case might occur for instance with
 the fictional service @code{web-server}, which might be provided by both
 @code{apache} and @code{nginx}.  If @var{service-name} is the special
-string and @code{all}, attempt to remove all services except for dmd
+string and @code{all}, attempt to remove all services except for the Shepherd
 itself.
 
 @item reload @var{file-name}
@@ -995,7 +998,7 @@ This will be called when the runlevel should be entered.
 @chapter Misc Facilities
 
 This is a list of facilities which are available to code running
-inside of dmd and is considered generally useful, but is not directly
+inside of the Shepherd and is considered generally useful, but is not directly
 related to one of the other topic covered in this manual.
 
 @menu
@@ -1016,7 +1019,7 @@ message and throw an @code{assertion-failed} exception.
 @end deffn
 
 @deffn {procedure} caught-error key args
-Tell dmd that a @var{key} error with @var{args} has occured.  This is
+Tell the Shepherd that a @var{key} error with @var{args} has occured.  This is
 the simplest way to cause caught error result in uniformly formated
 warning messages.  The current implementation is not very good,
 though.
@@ -1029,7 +1032,7 @@ An alias for @code{call-with-current-continuation}.
 @deffn {procedure} call/ec proc
 A simplistic implementation of the nonstandard, but popular procedure
 @code{call-with-escape-continuation}, i.e. a @code{call/cc} for
-outgoing continuations only.  Note that the variant included in dmd is
+outgoing continuations only.  Note that the variant included in the Shepherd is
 not aware of @code{dynamic-wind} at all and does not yet support
 returning multiple values.
 @end deffn
@@ -1045,8 +1048,8 @@ but also doing nothing about it.
 @node Communication
 @section Communication
 
-The @code{(dmd comm)} module provides primitives that allow clients such
-as @command{deco} to connect to @command{dmd} and send it commands to
+The @code{(shepherd comm)} module provides primitives that allow clients such
+as @command{deco} to connect to @command{shepherd} and send it commands to
 control or change its behavior (@pxref{Slots of services, actions of
 services}).
 
@@ -1074,8 +1077,8 @@ Write @var{command} to @var{port}.
 Receive a command from @var{port} and return it.
 @end deffn
 
-In practice, communication with @command{dmd} takes place over a
-Unix-domain socket, as discussed earlier (@pxref{Invoking dmd}).
+In practice, communication with @command{shepherd} takes place over a
+Unix-domain socket, as discussed earlier (@pxref{Invoking shepherd}).
 Clients may open a connection with the procedure below.
 
 @deffn {procedure} open-connection [@var{file}]
@@ -1090,10 +1093,10 @@ The daemon writes output to be logged or passed to the
 currently-connected client using @code{local-output}:
 
 @deffn {procedure} local-output format-string . args
-This procedure should be used for all output operations in dmd.  It
+This procedure should be used for all output operations in the Shepherd.  It
 outputs the @var{args} according to the @var{format-string}, then
 inserts a newline.  It writes to whatever is the main output target of
-dmd, which might be multiple at the same time in future versions.
+the Shepherd, which might be multiple at the same time in future versions.
 @end deffn
 
 
@@ -1116,16 +1119,16 @@ utillity, so it can by used by everyone.
 @chapter Internals
 
 This chapter contains information about the design and the
-implementation details of dmd for people who want to hack dmd itself.
-If you want your work to get included in dmd, please contact me and
+implementation details of the Shepherd for people who want to hack it.
+If you want your work to get included in the Shepherd, please contact me and
 say what you intend to do so that I can give advice on how to do it
 and we can avoid duplicating work.  My development version is usually
 a bit ahead of what I release, as I only want to publish code that got
 some testing.
 
 @menu
-* Coding standards::    How to properly hack dmd.
-* Design decisions::    Why dmd is what it is.
+* Coding standards::    How to properly hack the Shepherd.
+* Design decisions::    Why the Shepherd is what it is.
 * Service Internals::   How services actually work.
 * Runlevel evolution::  Learning from past mistakes.
 @end menu
@@ -1147,7 +1150,7 @@ Formatting should be as in Guile and Guix, basically.
 The general idea of a service manager that uses dependencies, similar
 to those of a Makefile, came from the developers of the GNU Hurd, but
 as few people are satisfied with System V Init, many other people had
-the same idea independently.  Nevertheless, dmd was written with the
+the same idea independently.  Nevertheless, the Shepherd was written with the
 goal of becoming a replacement for System V Init on GNU/Hurd, which
 was one of the reasons for choosing the extension language of the GNU
 project, Guile, for implementation (another reason being that it makes
@@ -1159,7 +1162,7 @@ services.  System V Init makes this hard: While you can start and stop
 a service, @code{init} will not know about it, and use the runlevel
 configuration as its source of information, opening the door for
 inconsistencies (which fortunatly are not a practical problem
-usually).  In dmd, this was avoided by having a central entity that is
+usually).  In the Shepherd, this was avoided by having a central entity that is
 responsible for starting and stopping the services, which therefore
 knows which services are actually started (if not completely
 inproperly used, but that is a requirement which is impossible to
@@ -1177,8 +1180,8 @@ additional bonus of adding some more flexibility.  For example, it is
 easiely possible to grant password-protected control over certain
 services to unprivileged users, if desired.
 
-An essential aspect of the design of dmd (which was already mentioned
-above) is that dmd should always know exactly what is happening,
+An essential aspect of the design of the Shepherd (which was already mentioned
+above) is that it should always know exactly what is happening,
 i.e. which services are started and stopped.  The alternative would
 have been to not use a daemon, but to save the state on the file
 system, again opening the door for inconsistencies of all sorts.
@@ -1189,7 +1192,7 @@ not the service that is supposed to be respawned) would cause horrible
 confusion.  My understanding of ``The Right Thing'' is that this
 conceptionally limited strategy is exactly what we do not want.
 
-The way dependencies work in dmd took a while to mature, as it was not
+The way dependencies work in the Shepherd took a while to mature, as it was not
 easy to figure out what is appropriate.  I decided to not make it too
 sophisticated by trying to guess what the user might want just to
 theoretically fulfill the request we are processing.  If something
@@ -1264,14 +1267,14 @@ we won't start AA but directly go on to starting B).
 I hope you can agree that the latter solution after all is the best
 one, because we can be sure to not do something that the user does not
 want us to do.  Software should not run amok.  This explanation was
-very long, but I think it was necessary to justify why dmd uses a very
+very long, but I think it was necessary to justify why the Shepherd uses a very
 primitive algorithm to resolve dependencies, despite the fact that it
 could theoretically be a bit more clever in certain situations.
 
 One might argue that it is possible to ask the user if the planned
 actions are ok with her, and if the plan changes ask again, but
 especially given that services are supposed to usually work, I see few
-reasons to make the source code of dmd more complicated than
+reasons to make the source code of the Shepherd more complicated than
 necessary.  If you volunteer to write @emph{and} maintain a more
 clever strategy (and volunteer to explain it to everyone who wants to
 understand it), you are welcome to do so, of course@dots{}
@@ -1312,7 +1315,7 @@ services should be started when we enter a runlevel and which ones
 should be stopped when leaving it.  But one could also specify for
 every service in which runlevels it should be running.
 
-In dmd, we do not want to limit ourselfes to a single runlevel style.
+In the Shepherd, we do not want to limit ourselfes to a single runlevel style.
 We allow for all possible strategies to be implemented, providing the
 most useful ones as defaults.  We also want to make it possible to
 combine the different styles arbitrariely.
@@ -1333,7 +1336,7 @@ Also, the runlevel implementation should be implemented completely on
 top of the service concept, i.e. the service part should not depend on
 the idea of runlevels or care about them at all.  Otherwise
 understanding the service part (which is the most essential aspect of
-dmd) would become harder than necessary.
+the Shepherd) would become harder than necessary.
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
