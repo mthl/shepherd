@@ -18,10 +18,10 @@
 ;; along with the GNU Shepherd.  If not, see <http://www.gnu.org/licenses/>.
 
 (define-module (deco)
-  #:use-module (dmd config)
-  #:use-module (dmd support)
-  #:use-module (dmd args)
-  #:use-module (dmd comm)
+  #:use-module (shepherd config)
+  #:use-module (shepherd support)
+  #:use-module (shepherd args)
+  #:use-module (shepherd comm)
   #:use-module (oop goops)
   #:use-module (ice-9 rdelim)
   #:use-module (ice-9 match)

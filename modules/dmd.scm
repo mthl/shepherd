@@ -24,13 +24,13 @@
   #:use-module (oop goops)      ;; Defining classes and methods.
   #:use-module (srfi srfi-1)    ;; List library.
   #:use-module (srfi srfi-26)
-  #:use-module (dmd config)
-  #:use-module (dmd support)
-  #:use-module (dmd service)
-  #:use-module (dmd system)
-  #:use-module (dmd runlevel)
-  #:use-module (dmd args)
-  #:use-module (dmd comm)
+  #:use-module (shepherd config)
+  #:use-module (shepherd support)
+  #:use-module (shepherd service)
+  #:use-module (shepherd system)
+  #:use-module (shepherd runlevel)
+  #:use-module (shepherd args)
+  #:use-module (shepherd comm)
   #:export (program-name
             main))
 

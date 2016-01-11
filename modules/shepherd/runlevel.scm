@@ -17,11 +17,11 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with the GNU Shepherd.  If not, see <http://www.gnu.org/licenses/>.
 
-(define-module (dmd runlevel)
+(define-module (shepherd runlevel)
   #:use-module (oop goops)
   #:use-module (srfi srfi-1)
-  #:use-module (dmd support)
-  #:use-module (dmd service)
+  #:use-module (shepherd support)
+  #:use-module (shepherd service)
   #:export (<runlevel>
             enter
             enter-selector

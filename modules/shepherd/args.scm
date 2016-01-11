@@ -17,10 +17,10 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with the GNU Shepherd.  If not, see <http://www.gnu.org/licenses/>.
 
-(define-module (dmd args)
+(define-module (shepherd args)
   #:use-module (oop goops)
-  #:use-module (dmd support)
-  #:use-module (dmd config)
+  #:use-module (shepherd support)
+  #:use-module (shepherd config)
   #:export (<option>
             process-args))
 

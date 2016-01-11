@@ -21,37 +21,37 @@ bin_SCRIPTS = dmd deco
 sbin_SCRIPTS = halt reboot
 templates =					\
   dmd.in deco.in halt.in reboot.in		\
-  modules/dmd/config.scm.in			\
-  modules/dmd/system.scm.in
+  modules/shepherd/config.scm.in		\
+  modules/shepherd/system.scm.in
 
 # Build this module first.
-BUILT_SOURCES = modules/dmd/config.scm
+BUILT_SOURCES = modules/shepherd/config.scm
 
 # The source files.
-dmddir = ${datadir}/dmd
-dist_dmd_DATA =					\
+shepherddir = ${datadir}/shepherd
+dist_shepherd_DATA =				\
   modules/deco.scm				\
   modules/dmd.scm				\
   modules/halt.scm				\
   modules/reboot.scm
-nodist_dmd_DATA = $(dist_dmd_DATA:%.scm=%.go)
+nodist_shepherd_DATA = $(dist_shepherd_DATA:%.scm=%.go)
 
-dmdsubdir = $(dmddir)/dmd
-dist_dmdsub_DATA =				\
-  modules/dmd/args.scm				\
-  modules/dmd/service.scm			\
-  modules/dmd/support.scm			\
-  modules/dmd/runlevel.scm			\
-  modules/dmd/comm.scm
-nodist_dmdsub_DATA =				\
-  modules/dmd/config.scm			\
-  modules/dmd/config.go				\
-  modules/dmd/system.scm			\
-  modules/dmd/system.go				\
-  $(dist_dmdsub_DATA:%.scm=%.go)
+shepherdsubdir = $(shepherddir)/shepherd
+dist_shepherdsub_DATA =				\
+  modules/shepherd/args.scm			\
+  modules/shepherd/service.scm			\
+  modules/shepherd/support.scm			\
+  modules/shepherd/runlevel.scm			\
+  modules/shepherd/comm.scm
+nodist_shepherdsub_DATA =			\
+  modules/shepherd/config.scm			\
+  modules/shepherd/config.go			\
+  modules/shepherd/system.scm			\
+  modules/shepherd/system.go			\
+  $(dist_shepherdsub_DATA:%.scm=%.go)
 
-CLEANFILES =					\
-  $(nodist_dmd_DATA) $(nodist_dmdsub_DATA)	\
+CLEANFILES =						\
+  $(nodist_shepherd_DATA) $(nodist_shepherdsub_DATA)	\
   $(bin_SCRIPTS) $(sbin_SCRIPTS)
 
 # Documentation.
@@ -71,13 +71,13 @@ install-data-local:
 # Relocate the script---i.e., have them refer to the installed module
 # directory.
 install-exec-hook: install-executable-symlinks
-	for script in						\
-	   $(bin_SCRIPTS:%=$(DESTDIR)$(bindir)/%)		\
-	   $(sbin_SCRIPTS:%=$(DESTDIR)$(sbindir)/%) ;		\
-	do							\
-	  $(SED) -e's|$(abs_top_srcdir)/modules|$(dmddir)|g'	\
-	         -e's|$(abs_top_builddir)/modules|$(dmddir)|g'	\
-	         -i $$script ;					\
+	for script in							\
+	   $(bin_SCRIPTS:%=$(DESTDIR)$(bindir)/%)			\
+	   $(sbin_SCRIPTS:%=$(DESTDIR)$(sbindir)/%) ;			\
+	do								\
+	  $(SED) -e's|$(abs_top_srcdir)/modules|$(shepherddir)|g'	\
+	         -e's|$(abs_top_builddir)/modules|$(shepherddir)|g'	\
+	         -i $$script ;						\
 	done
 
 # Install 'shutdown' as a symlink to 'halt; XXX: someday we'll do
@@ -114,11 +114,11 @@ maybe_executable =					\
 	$(SED) $(instantiate) < $< >$@
 	$(maybe_executable)
 
-modules/dmd/config.scm: modules/dmd/config.scm.in Makefile
+modules/shepherd/config.scm: modules/shepherd/config.scm.in Makefile
 	$(MKDIR_P) "`dirname $@`"
 	$(SED) $(instantiate) < $< >$@
 
-# Make sure 'modules/dmd/{config,system.scm}' are built first.
+# Make sure 'modules/shepherd/{config,system.scm}' are built first.
 # XXX: Use the C locale for when Guile lacks
 # <http://git.sv.gnu.org/cgit/guile.git/commit/?h=stable-2.0&id=e2c6bf3866d1186c60bacfbd4fe5037087ee5e3f>.
 %.go: %.scm $(templates:%.in=%)
@@ -156,8 +156,8 @@ AM_SH_LOG_FLAGS = -x -e
 # files.  See
 # <http://lists.gnu.org/archive/html/guile-devel/2010-07/msg00125.html>
 # for details.
-dmd_install_go_files = install-nobase_nodist_guilemoduleDATA
-$(dmd_install_go_files): install-nobase_dist_guilemoduleDATA
+shepherd_install_go_files = install-nobase_nodist_guilemoduleDATA
+$(shepherd_install_go_files): install-nobase_dist_guilemoduleDATA
 
 gen-ChangeLog:
 	if test -d .git; then				\

@@ -17,8 +17,8 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with the GNU Shepherd.  If not, see <http://www.gnu.org/licenses/>.
 
-(define-module (dmd comm)
-  #:use-module (dmd support)
+(define-module (shepherd comm)
+  #:use-module (shepherd support)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
   #:use-module (oop goops)

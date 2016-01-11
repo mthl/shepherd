@@ -88,6 +88,6 @@ dnl Finish.
 AC_CONFIG_FILES([Makefile
                  examples/Makefile
 		 utils/Makefile
-		 modules/dmd/system.scm])
+		 modules/shepherd/system.scm])
 
 AC_OUTPUT

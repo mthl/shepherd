@@ -18,16 +18,16 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with the GNU Shepherd.  If not, see <http://www.gnu.org/licenses/>.
 
-(define-module (dmd service)
+(define-module (shepherd service)
   #:use-module (oop goops)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-26)
   #:use-module (ice-9 match)
   #:use-module (ice-9 format)
-  #:use-module (dmd support)
-  #:use-module (dmd comm)
-  #:use-module (dmd config)
-  #:use-module (dmd system)
+  #:use-module (shepherd support)
+  #:use-module (shepherd comm)
+  #:use-module (shepherd config)
+  #:use-module (shepherd system)
   #:replace (system
              system*)
   #:export (<service>

@@ -18,8 +18,8 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with the GNU Shepherd.  If not, see <http://www.gnu.org/licenses/>.
 
-(define-module (dmd support)
-  #:use-module (dmd config)
+(define-module (shepherd support)
+  #:use-module (shepherd config)
   #:use-module (ice-9 match)
   #:export (call/ec
             caught-error
@@ -277,7 +277,7 @@ which has essential bindings pulled in."
     ;; The typical configuration file wants to do '(make <service> ...)', and
     ;; '(register-services ...)', so provide the relevant bindings by default.
     (module-use! m (resolve-interface '(oop goops)))
-    (module-use! m (resolve-interface '(dmd service)))
+    (module-use! m (resolve-interface '(shepherd service)))
     m))
 
 (define (load-in-user-module file)

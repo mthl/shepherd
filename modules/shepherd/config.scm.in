@@ -1,6 +1,6 @@
 ;; config.scm.in -- Making information accessible in -*- scheme -*- code.
 
-(define-module (dmd config)
+(define-module (shepherd config)
   #:export (Version
             Prefix-dir
             %localstatedir

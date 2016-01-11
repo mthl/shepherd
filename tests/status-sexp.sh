@@ -73,7 +73,7 @@ dmd_service_sexp="
       (enabled? #t) (running #t) (last-respawns ()))"
 
 "$GUILE" -c "
-(use-modules (dmd comm) (srfi srfi-1))
+(use-modules (shepherd comm) (srfi srfi-1))
 
 (exit
  (lset= equal? $fetch_status
@@ -95,7 +95,7 @@ dmd_service_sexp="
 $deco unload dmd all
 
 "$GUILE" -c "
-(use-modules (dmd comm))
+(use-modules (shepherd comm))
 
 (exit
   (equal? $fetch_status
