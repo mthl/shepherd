@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with the GNU Shepherd.  If not, see <http://www.gnu.org/licenses/>.
 
-dmd --version
+shepherd --version
 
 HOME=/nowhere
 export HOME
@@ -36,7 +36,7 @@ trap "rm -f $socket $pid;
       test -f $pid && kill \`cat $pid\` || true" EXIT
 
 # Make sure 'dmd' starts even though $HOME is not writable.
-dmd -I -s "$socket" -c /dev/null -l /dev/null --pid="$pid" &
+shepherd -I -s "$socket" -c /dev/null -l /dev/null --pid="$pid" &
 dmd_pid="$!"
 
 # Wait until it's ready, or until it terminates.

@@ -1,4 +1,4 @@
-;; dmd.scm -- Daemon managing Daemons (or Daemons-managing Daemon?)
+;; shepherd.scm -- The daemon shepherd.
 ;; Copyright (C) 2013, 2014, 2016 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
@@ -17,7 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with the GNU Shepherd.  If not, see <http://www.gnu.org/licenses/>.
 
-(define-module (dmd)
+(define-module (shepherd)
   #:use-module (ice-9 match)
   #:use-module (ice-9 rdelim)   ;; Line-based I/O.
   #:autoload   (ice-9 readline) (activate-readline) ;for interactive use
@@ -34,7 +34,7 @@
   #:export (program-name
             main))
 
-(define program-name "dmd")
+(define program-name "shepherd")
 
 
 

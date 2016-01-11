@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with the GNU Shepherd.  If not, see <http://www.gnu.org/licenses/>.
 
-dmd --version
+shepherd --version
 deco --version
 
 socket="t-socket-$$"
@@ -56,7 +56,7 @@ cat > "$conf"<<EOF
 EOF
 
 rm -f "$pid"
-dmd -I -s "$socket" -c "$conf" -l "$log" --pid="$pid" &
+shepherd -I -s "$socket" -c "$conf" -l "$log" --pid="$pid" &
 
 # Wait till it's ready.
 while ! test -f "$pid" ; do : ; done

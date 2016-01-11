@@ -17,10 +17,10 @@
 # along with the GNU Shepherd.  If not, see <http://www.gnu.org/licenses/>.
 
 # The main programs.
-bin_SCRIPTS = dmd deco
+bin_SCRIPTS = shepherd deco
 sbin_SCRIPTS = halt reboot
 templates =					\
-  dmd.in deco.in halt.in reboot.in		\
+  shepherd.in deco.in halt.in reboot.in		\
   modules/shepherd/config.scm.in		\
   modules/shepherd/system.scm.in
 
@@ -31,7 +31,7 @@ BUILT_SOURCES = modules/shepherd/config.scm
 shepherddir = ${datadir}/shepherd
 dist_shepherd_DATA =				\
   modules/deco.scm				\
-  modules/dmd.scm				\
+  modules/shepherd.scm				\
   modules/halt.scm				\
   modules/reboot.scm
 nodist_shepherd_DATA = $(dist_shepherd_DATA:%.scm=%.go)
@@ -62,7 +62,7 @@ SUBDIRS = examples utils
 EXTRA_DIST = $(templates) QUESTIONS fdl-1.3.texi ChangeLog-2003
 
 # Create the socket directory (aka. 'default-socket-dir'.)  Make it
-# accessible only by its owner since otherwise 'dmd' suggests using
+# accessible only by its owner since otherwise 'shepherd' suggests using
 # '--insecure'.  This is just a convenience, so allow it to fail.
 install-data-local:
 	-$(MKDIR_P) $(DESTDIR)$(localstatedir)/run/dmd
