@@ -11,6 +11,9 @@ dnl We're fine with GNU make constructs, hence '-Wno-portability'.
 AM_INIT_AUTOMAKE([1.11 gnu silent-rules -Wall -Wno-portability
   std-options color-tests])
 
+dnl Enable silent rules by default.
+AM_SILENT_RULES([yes])
+
 AC_CANONICAL_HOST
 AC_PROG_MKDIR_P
 AC_PROG_SED

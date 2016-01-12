@@ -104,25 +104,33 @@ instantiate =						\
 
 # Instantiate templates.
 
+AM_V_INSTANTIATE = $(AM_V_INSTANTIATE_$(V))
+AM_V_INSTANTIATE_ = $(AM_V_INSTANTIATE_$(AM_DEFAULT_VERBOSITY))
+AM_V_INSTANTIATE_0 = @echo "  INSTANTIATE" $@;
+
 # Emit a 'chmod +x' command only if $@ matches one of the scripts.
 maybe_executable =					\
    $(subst $@,chmod +x $@,				\
       $(findstring $@,$(bin_SCRIPTS) $(sbin_SCRIPTS)))
 
 %: %.in Makefile
-	$(MKDIR_P) "`dirname $@`"
-	$(SED) $(instantiate) < $< >$@
+	$(AM_V_INSTANTIATE)$(MKDIR_P) "`dirname $@`" ;	\
+	$(SED) $(instantiate) < $< >$@ ;		\
 	$(maybe_executable)
 
 modules/shepherd/config.scm: modules/shepherd/config.scm.in Makefile
 	$(MKDIR_P) "`dirname $@`"
 	$(SED) $(instantiate) < $< >$@
 
+AM_V_GUILEC = $(AM_V_GUILEC_$(V))
+AM_V_GUILEC_ = $(AM_V_GUILEC_$(AM_DEFAULT_VERBOSITY))
+AM_V_GUILEC_0 = @echo "  GUILEC" $@;
+
 # Make sure 'modules/shepherd/{config,system.scm}' are built first.
 # XXX: Use the C locale for when Guile lacks
 # <http://git.sv.gnu.org/cgit/guile.git/commit/?h=stable-2.0&id=e2c6bf3866d1186c60bacfbd4fe5037087ee5e3f>.
 %.go: %.scm $(templates:%.in=%)
-	$(MKDIR_P) "`dirname "$@"`"
+	$(AM_V_GUILEC)$(MKDIR_P) "`dirname "$@"`" ;	\
 	LC_ALL=C					\
 	$(GUILD) compile --target="$(host)"		\
 	  -L "$(top_builddir)/modules"			\
