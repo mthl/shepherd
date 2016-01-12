@@ -211,13 +211,7 @@ respawned, shows that it has been respawned more than TIMES in SECONDS."
 	 ;; that's running, so we can go on and launch it.
 	 (let ((problem
 		;; Resolve all dependencies.
-		(call/ec (lambda (return)
-			   (for-each (lambda (symbol)
-				       ;; FIXME: enforce?!
-				       (or (start symbol)
-					   (return symbol)))
-				     (required-by obj))
-			   #f))))
+		(find (negate start) (required-by obj))))
 	   (if problem
 	       (local-output "Service ~a depends on ~a."
 			     (canonical-name obj)
@@ -242,7 +236,7 @@ respawned, shows that it has been respawned more than TIMES in SECONDS."
 	   ;; Status message.
 	   (local-output (if (running? obj)
 			     (l10n "Service ~a has been started.")
-			   (l10n "Service ~a could not be started."))
+                             (l10n "Service ~a could not be started."))
 			 (canonical-name obj)))))
   (slot-ref obj 'running))
 
@@ -433,12 +427,7 @@ clients."
 
 ;; Return whether OBJ requires something that is not yet running.
 (define-method (depends-resolved? (obj <service>))
-  (call/ec (lambda (return)
-	     (for-each (lambda (dep)
-			 (or (lookup-running dep)
-			     (return #f)))
-		       (required-by obj))
-	     #t)))
+  (every lookup-running (required-by obj)))
 
 
 
@@ -449,15 +438,11 @@ clients."
 	 (which (first-running possibilities)))
     (if (null? possibilities)
 	(local-output "No service provides ~a." name)
-      (or which
-	  ;; None running yet, start one.
-	  (set! which
-		(call/ec (lambda (return)
-			   (for-each (lambda (service)
-				       (and (apply proc service args)
-					    (return service)))
-				     possibilities)
-			   #f)))))
+        (or which
+            ;; None running yet, start one.
+            (set! which (find (lambda (service)
+                                (apply proc service args))
+                              possibilities))))
     (or which
 	(let ((unknown (lookup-running 'unknown)))
 	  (if (and unknown

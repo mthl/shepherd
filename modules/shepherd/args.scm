@@ -1,6 +1,6 @@
 ;; args.scm -- Command line argument handling.
-;; Copyright (C) 2013 Ludovic Courtès <ludo@gnu.org>
-;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
+;; Copyright (C) 2013, 2016 Ludovic CourtÃ¨s <ludo@gnu.org>
+;; Copyright (C) 2002, 2003 Wolfgang JÃ¤hrling <wolfgang@pro-linux.de>
 ;;
 ;; This file is part of the GNU Shepherd.
 ;;
@@ -19,6 +19,7 @@
 
 (define-module (shepherd args)
   #:use-module (oop goops)
+  #:use-module (srfi srfi-1)
   #:use-module (shepherd support)
   #:use-module (shepherd config)
   #:export (<option>
@@ -119,12 +120,9 @@
 
   ;; Return the option, or `#f' if none found.
   (define (find-short-option char)
-    (call/ec (lambda (return)
-	       (for-each (lambda (option)
-			   (and (equal? char (short option))
-				(return option)))
-			 options)
-	       #f)))
+    (find (lambda (option)
+            (equal? char (short option)))
+          options))
 
   ;; Interpret ARG as non-option argument.
   (define (no-option arg)
