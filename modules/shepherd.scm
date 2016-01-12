@@ -232,15 +232,7 @@
            ((start) (apply start service-symbol args))
            ((stop) (apply stop service-symbol args))
            ((enforce) (apply enforce service-symbol args))
-           ((dmd-status)
-            (if (not (null? args))
-                (local-output "Too many arguments.")
-                (let ((target-services (lookup-running-or-providing
-                                        service-symbol)))
-                  (if (null? target-services)
-                      (handle-unknown service-symbol 'action the-action args)
-                      (for-each dmd-status
-                                target-services)))))
+
            ;; Actions which have the semantics of `action' are
            ;; handled there.
            (else (apply action service-symbol the-action args))))
