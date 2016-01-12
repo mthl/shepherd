@@ -157,7 +157,7 @@ As the final ``d'' suggests, @command{shepherd} is just
 a daemon that (usually) runs in the
 background, so you will not interact with it directly.  After it is
 started, @command{shepherd} will listen on a socket special file, usually
-@code{/var/run/dmd/socket}, for further commands.  You use the tool
+@code{/var/run/shepherd/socket}, for further commands.  You use the tool
 @dfn{deco} to send these commands to @command{shepherd}.  Usage of deco is simple and
 straightforward: To start a service called @code{apache}, you use:
 
@@ -396,8 +396,8 @@ permissions are not as expected.
 @cindex logging
 @cindex log file
 Log output into @var{file}, or if @var{file} is not given,
-@code{/var/log/dmd.log} when running as superuser, @var{~/.dmd.log}
-otherwise.
+@code{/var/log/shepherd.log} when running as superuser,
+@var{~/.dmd.d/shepherd.log} otherwise.
 
 @item --pid[=@var{file}]
 When @command{shepherd} is ready to accept connections, write its PID to @var{file} or
@@ -411,7 +411,7 @@ to the standard output if @var{file} is omitted.
 @itemx --socket=@var{file}
 @cindex socket special file
 Receive further commands on the socket special file @var{file}.  If
-this option is not specified, @file{@var{localstatedir}/run/dmd/socket} is
+this option is not specified, @file{@var{localstatedir}/run/shepherd/socket} is
 taken.
 
 If @code{-} is specified as file name, commands will be read from
@@ -461,7 +461,7 @@ The @code{deco} command understands the following option:
 @item -s @var{file}
 @itemx --socket=@var{file}
 Send commands to the socket special file @var{file}. If this option is
-not specified, @file{@var{localstatedir}/run/dmd/socket} is taken.
+not specified, @file{@var{localstatedir}/run/shepherd/socket} is taken.
 
 @end table
 
@@ -487,7 +487,7 @@ command understands the following option:
 @item -s @var{file}
 @itemx --socket=@var{file}
 Send commands to the socket special file @var{file}. If this option is
-not specified, @file{@var{localstatedir}/run/dmd/socket} is taken.
+not specified, @file{@var{localstatedir}/run/shepherd/socket} is taken.
 
 @end table
 
@@ -513,7 +513,7 @@ It is equivalent to running @command{deco power-off dmd}.  As usual, the
 @item -s @var{file}
 @itemx --socket=@var{file}
 Send commands to the socket special file @var{file}. If this option is
-not specified, @file{@var{localstatedir}/run/dmd/socket} is taken.
+not specified, @file{@var{localstatedir}/run/shepherd/socket} is taken.
 
 @end table
 

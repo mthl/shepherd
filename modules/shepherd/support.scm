@@ -226,8 +226,8 @@ TARGET should be a string representing a filepath + name."
 ;; Logfile.
 (define default-logfile
   (if (zero? (getuid))
-      (string-append %localstatedir "/log/dmd.log")
-      (string-append user-dmddir "/dmd.log")))
+      (string-append %localstatedir "/log/shepherd.log")
+      (string-append user-dmddir "/shepherd.log")))
 
 ;; Configuration file.
 (define (default-config-file)
@@ -244,7 +244,7 @@ create a template configuration file if non exists."
 
 ;; Socket directory for the system's instance (PID 1).
 (define %system-socket-dir
-  (string-append %localstatedir "/run/dmd"))
+  (string-append %localstatedir "/run/shepherd"))
 
 ;; The directory where the socket resides.
 (define default-socket-dir

@@ -65,8 +65,8 @@ EXTRA_DIST = $(templates) QUESTIONS fdl-1.3.texi ChangeLog-2003
 # accessible only by its owner since otherwise 'shepherd' suggests using
 # '--insecure'.  This is just a convenience, so allow it to fail.
 install-data-local:
-	-$(MKDIR_P) $(DESTDIR)$(localstatedir)/run/dmd
-	-chmod 700 $(DESTDIR)$(localstatedir)/run/dmd
+	-$(MKDIR_P) $(DESTDIR)$(localstatedir)/run/shepherd
+	-chmod 700 $(DESTDIR)$(localstatedir)/run/shepherd
 
 # Relocate the script---i.e., have them refer to the installed module
 # directory.
