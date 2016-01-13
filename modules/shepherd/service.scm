@@ -434,22 +434,23 @@ clients."
 ;; Try to start (with PROC) a service providing NAME.  Used by `start'
 ;; and `enforce'.
 (define (launch-service name proc args)
-  (let* ((possibilities (lookup-services name))
-	 (which (first-running possibilities)))
-    (if (null? possibilities)
-	(local-output "No service provides ~a." name)
-        (or which
-            ;; None running yet, start one.
-            (set! which (find (lambda (service)
-                                (apply proc service args))
-                              possibilities))))
-    (or which
-	(let ((unknown (lookup-running 'unknown)))
-	  (if (and unknown
-		   (defines-action? unknown 'start))
-	      (apply action unknown 'start name args)
-	    (local-output "Providing ~a impossible." name))))
-    (and which #t)))
+  (match (lookup-services name)
+    (()
+     (local-output "No service provides ~a." name))
+    ((possibilities ...)
+     (or (first-running possibilities)
+
+         ;; None running yet, start one.
+         (find (lambda (service)
+                 (apply proc service args))
+               possibilities)
+
+         ;; Failed to start something, try the 'unknown' service.
+         (let ((unknown (lookup-running 'unknown)))
+           (if (and unknown
+                    (defines-action? unknown 'start))
+               (apply action unknown 'start name args)
+               (local-output "Providing ~a impossible." name)))))))
 
 ;; Starting by name.
 (define-method (start (obj <symbol>) . args)
