@@ -748,15 +748,8 @@ given USER and/or GROUP to run COMMAND."
 
 ;;; Registered services.
 
-;; Current size of the hash table below.  The table will be resized on
-;; demand.
-(define services-max-cnt 100)
-
-;; Number of used entries in the table below.
-(define services-cnt 0)
-
 ;; All registered services.
-(define services (make-hash-table services-max-cnt))
+(define services (make-hash-table 75))
 
 ;;; Perform actions with services:
 
@@ -880,16 +873,6 @@ otherwise by updating its state."
     ;; Insert into the hash table.
     (for-each (lambda (name)
 		(let ((old (lookup-services name)))
-		  ;; Counting the number of used entries.
-		  (and (null? old)
-		       (set! services-cnt (1+ services-cnt)))
-		  (and (= services-cnt services-max-cnt)
-		       (begin
-			 ;; Double the size, so that we don't have to
-			 ;; do all this too often.
-			 (set! services-max-cnt (* 2 services-max-cnt))
-			 (set! services
-			       (copy-hashq-table services services-max-cnt))))
 		  ;; Actually add the new service now.
 		  (hashq-set! services name (cons new old))))
 	      (provided-by new)))
@@ -912,12 +895,8 @@ requested to be removed."
      (lambda (name)
        (let ((old (lookup-services name)))
          (if (= 1 (length old))
-             ;; Only service provides this service, ergo:
-             (begin
-               ;; Reduce provided services count
-               (set! services-cnt (1- services-cnt))
-               ;; Remove service entry from services.
-               (hashq-remove! services name))
+             ;; Only service provides this service; remove it.
+             (hashq-remove! services name)
              ;; ELSE: remove service from providing services.
              (hashq-set! services name
                          (remove

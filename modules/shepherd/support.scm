@@ -26,7 +26,6 @@
             assert
             label
             can-apply?
-            copy-hashq-table
 
             catch-system-error
             with-system-error-handling
@@ -101,16 +100,6 @@
           (and (>= num-args required)
                (or rest? (<= num-args (+ required optional)))))
          (_ #t))))
-
-;; Put the data from TABLE into a new hash-table of size SIZE.  Use
-;; `eq?' when inserting.  This will be dropped as soon as stable Guile
-;; supports resizable hash tables (it's in the Guile CVS already).
-(define (copy-hashq-table table size)
-  (hash-fold (lambda (key value new-table)
-	       (hashq-set! new-table key value)
-	       new-table)
-	     (make-hash-table size)
-	     table))
 
 ;; Evaluate `EXPR ...' until a system error occurs, then skip the
 ;; remaining code.
