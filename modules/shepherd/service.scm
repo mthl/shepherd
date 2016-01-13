@@ -31,6 +31,7 @@
   #:replace (system
              system*)
   #:export (<service>
+            service?
             canonical-name
             running?
             action-list
@@ -157,6 +158,10 @@ respawned, shows that it has been respawned more than TIMES in SECONDS."
 	       #:init-value #f)
   ;; The times of the last respawns, most recent first.
   (last-respawns #:init-form '()))
+
+(define (service? obj)
+  "Return true if OBJ is a service."
+  (is-a? obj <service>))
 
 (define action:name car)
 (define action:proc cadr)
@@ -542,11 +547,11 @@ clients."
 ;; one-element list.  If none is running, return a list of all
 ;; services which provide SYM.
 (define (lookup-running-or-providing sym)
-  (define (list-unless-false x)
-    (if x (list x) x))
-
-  (or (list-unless-false (lookup-running sym))
-      (lookup-services sym)))
+  (match (lookup-running sym)
+    ((? service? service)
+     (list service))
+    (#f
+     (lookup-services sym))))
 
 
 ;;;
