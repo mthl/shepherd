@@ -24,7 +24,7 @@ GUILE_PROGS
 AC_MSG_CHECKING([whether it is Guile 2.0])
 GUILE_CHECK(version_ok,
 (or (and (>= (string->number (major-version)) 2)
-         (>= (string->number (major-version)) 0))
+         (>= (string->number (minor-version)) 0))
     (quit 1))
 )
 if test $version_ok = 0; then
