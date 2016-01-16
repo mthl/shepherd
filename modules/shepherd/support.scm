@@ -2,6 +2,7 @@
 ;; Copyright (C) 2014 A.Sassmannshausen <alex.sassmannshausen@gmail.com>
 ;; Copyright (C) 2013, 2014, 2016 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
+;; Copyright (C) 2016 Mathieu Lirzin <mthl@gnu.org>
 ;;
 ;; This file is part of the GNU Shepherd.
 ;;
@@ -276,20 +277,18 @@ which has essential bindings pulled in."
        (set-current-module user-module)
        (primitive-load file)))))
 
-;; Check if the directory DIR exists and create it if it is the
-;; default directory, but does not exist.  If INSECURE is false, also
-;; checks for the permissions of the directory.
-(define (verify-dir dir insecure)
+(define* (verify-dir dir #:key (secure? #t))
+  "Check if the directory DIR exists and create it if it is the default
+directory, but does not exist.  If SECURE? is false, permissions of the
+directory are not checked."
   (and (string=? dir default-socket-dir)
        ;; If it exists already, this is fine, thus ignore errors.
        (catch-system-error
-	(mkdir default-socket-dir #o700)))
-
+        (mkdir default-socket-dir #o700)))
   ;; Check for permissions.
-  (or insecure
-      (let ((dir-stat (stat dir)))
-	(and (not (and (= (stat:uid dir-stat) (getuid))
-		       (= (stat:perms dir-stat) #o700)))
-	     (begin
-	       (local-output "Socket directory setup is insecure.")
-	       (quit 1))))))
+  (when secure?
+    (let ((dir-stat (stat dir)))
+      (unless (and (= (stat:uid dir-stat) (getuid))
+                   (= (stat:perms dir-stat) #o700))
+        (local-output "Socket directory setup is insecure.")
+        (exit 1)))))

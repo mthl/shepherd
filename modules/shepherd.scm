@@ -56,8 +56,8 @@
   (let ((config-file #f)
 	(socket-file default-socket-file)
         (pid-file    #f)
-	(insecure #f)
-	(logfile default-logfile))
+        (secure      #t)
+        (logfile     default-logfile))
     ;; Process command line arguments.
     (process-args program-name args
 		  ""
@@ -93,7 +93,7 @@
 		    #:takes-arg? #f
 		    #:description "don't ensure that the setup is secure"
 		    #:action (lambda ()
-			       (set! insecure #t)))
+                               (set! secure #f)))
 		  (make <option>
 		    #:long "logfile" #:short #\l
 		    #:takes-arg? #t #:optional-arg? #f #:arg-name "FILE"
@@ -135,7 +135,7 @@
 					      #f)))))))
     ;; We do this early so that we can abort early if necessary.
     (and socket-file
-	 (verify-dir (dirname socket-file) insecure))
+         (verify-dir (dirname socket-file) #:secure? secure))
     ;; Enable logging as first action.
     (start-logging logfile)
 
