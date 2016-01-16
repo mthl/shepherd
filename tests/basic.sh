@@ -18,7 +18,7 @@
 # along with the GNU Shepherd.  If not, see <http://www.gnu.org/licenses/>.
 
 shepherd --version
-deco --version
+herd --version
 
 socket="t-socket-$$"
 conf="t-conf-$$"
@@ -26,7 +26,7 @@ log="t-log-$$"
 stamp="t-stamp-$$"
 pid="t-pid-$$"
 
-deco="deco -s $socket"
+herd="herd -s $socket"
 
 trap "rm -f $socket $conf $stamp $log $pid;
       test -f $pid && kill \`cat $pid\` || true" EXIT
@@ -65,35 +65,35 @@ dmd_pid="`cat $pid`"
 
 kill -0 $dmd_pid
 test -S "$socket"
-pristine_status=`$deco status dmd` # Prep for 'reload' test.
+pristine_status=`$herd status dmd` # Prep for 'reload' test.
 echo $pristine_status | grep -E '(Start.*dmd|Stop.*test)'
 
-$deco start test
+$herd start test
 test -f "$stamp"
-$deco status test | grep started
+$herd status test | grep started
 
-$deco stop test
+$herd stop test
 ! test -f "$stamp"
 
-$deco status test | grep stopped
+$herd status test | grep stopped
 
-$deco start test-2
+$herd start test-2
 
-$deco status test-2 | grep started
+$herd status test-2 | grep started
 
 # Unload one service, make sure the other it still around.
-$deco unload dmd test
-$deco status | grep "Stopped: (test-2)"
+$herd unload dmd test
+$herd status | grep "Stopped: (test-2)"
 
-$deco reload dmd "$conf"
-test "`$deco status`" == "$pristine_status"
+$herd reload dmd "$conf"
+test "`$herd status`" == "$pristine_status"
 
 # Unload everything and make sure only 'dmd' is left.
-$deco unload dmd all
-$deco status | grep "Stopped: ()"
-$deco status | grep "Started: (dmd)"
+$herd unload dmd all
+$herd status | grep "Stopped: ()"
+$herd status | grep "Started: (dmd)"
 
-$deco stop dmd
+$herd stop dmd
 ! kill -0 $dmd_pid
 
 test -f "$log"

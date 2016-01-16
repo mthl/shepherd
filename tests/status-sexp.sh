@@ -17,14 +17,14 @@
 # along with the GNU Shepherd.  If not, see <http://www.gnu.org/licenses/>.
 
 shepherd --version
-deco --version
+herd --version
 
 socket="t-socket-$$"
 conf="t-conf-$$"
 log="t-log-$$"
 pid="t-pid-$$"
 
-deco="deco -s $socket"
+herd="herd -s $socket"
 
 trap "rm -f $socket $conf $stamp $log $pid;
       test -f $pid && kill \`cat $pid\` || true" EXIT
@@ -92,7 +92,7 @@ dmd_service_sexp="
 "
 
 # Unload everything and make sure only 'dmd' is left.
-$deco unload dmd all
+$herd unload dmd all
 
 "$GUILE" -c "
 (use-modules (shepherd comm))
@@ -101,7 +101,7 @@ $deco unload dmd all
   (equal? $fetch_status
           '(service-list (version 0) $dmd_service_sexp)))"
 
-$deco stop dmd
+$herd stop dmd
 ! kill -0 $dmd_pid
 
 test -f "$log"

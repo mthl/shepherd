@@ -1,4 +1,4 @@
-;; deco.scm -- The `DaEmon COntrol' program.
+;; herd.scm -- The program to herd the Shepherd.
 ;; Copyright (C) 2013, 2014, 2016 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
@@ -17,7 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with the GNU Shepherd.  If not, see <http://www.gnu.org/licenses/>.
 
-(define-module (deco)
+(define-module (herd)
   #:use-module (shepherd config)
   #:use-module (shepherd support)
   #:use-module (shepherd args)
@@ -29,7 +29,7 @@
   #:export (program-name
             main))
 
-(define program-name "deco")
+(define program-name "herd")
 
 
 (define (service-list-error services)
@@ -164,7 +164,7 @@ the daemon via SOCKET-FILE."
                     (string->symbol service) args))
       (_
        (format (current-error-port)
-               (l10n "Usage: deco ACTION [SERVICE [OPTIONS...]]~%"))
+               (l10n "Usage: herd ACTION [SERVICE [OPTIONS...]]~%"))
        (exit 1)))))
 
 ;; Local Variables:

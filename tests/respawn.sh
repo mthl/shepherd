@@ -17,7 +17,7 @@
 # along with the GNU Shepherd.  If not, see <http://www.gnu.org/licenses/>.
 
 shepherd --version
-deco --version
+herd --version
 
 socket="t-socket-$$"
 conf="t-conf-$$"
@@ -27,7 +27,7 @@ service1_pid="t-service1-pid-$$"
 service2_pid="t-service2-pid-$$"
 pid="t-pid-$$"
 
-deco="deco -s $socket"
+herd="herd -s $socket"
 
 trap "cat $log || true ;
   rm -f $socket $conf $stamp $log $pid $service1_pid $service2_pid ;
@@ -91,9 +91,9 @@ dmd_pid="`cat $pid`"
 
 kill -0 $dmd_pid
 test -S "$socket"
-$deco status
-$deco status test1 | grep started
-$deco status test2 | grep started
+$herd status
+$herd status test1 | grep started
+$herd status test2 | grep started
 
 # The services are started, but that does not mean that they have
 # written their PID file yet, so use 'wait_for_file' rather than
@@ -116,10 +116,10 @@ assert_killed_service_is_respawned "$service2_pid"
 # Make sure the respawnable service can be stopped.
 pid="`cat "$service1_pid"`"
 rm "$service1_pid"
-$deco stop test1
-$deco status test1 | grep stopped
+$herd stop test1
+$herd status test1 | grep stopped
 ! test -f "$service1_pid"
 ! kill -0 "$pid"
 
 cat $service2_pid
-$deco stop dmd
+$herd stop dmd

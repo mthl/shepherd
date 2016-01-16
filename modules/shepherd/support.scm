@@ -1,4 +1,4 @@
-;; support.scm -- Various support facilities, used by deco and dmd.
+;; support.scm -- Various support facilities, used by herd and dmd.
 ;; Copyright (C) 2014 A.Sassmannshausen <alex.sassmannshausen@gmail.com>
 ;; Copyright (C) 2013, 2014, 2016 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>

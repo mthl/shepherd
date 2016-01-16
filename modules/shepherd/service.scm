@@ -1014,7 +1014,7 @@ file when persistence is enabled."
     (make-actions
      (status
       "Return an s-expression showing information about all the services.
-Clients such as 'deco' can read it and format it in a human-readable way."
+Clients such as 'herd' can read it and format it in a human-readable way."
       (lambda (running)
         (local-output "~s~%"
                       `(service-list

@@ -225,7 +225,7 @@
      (chdir dir)
 
      ;; We have to catch `quit' so that we can send the terminator
-     ;; line to deco before we actually quit.
+     ;; line to herd before we actually quit.
      (catch 'quit
        (lambda ()
          (case the-action
@@ -249,7 +249,7 @@
 
 (define (process-textual-commands port)
   "Process textual commands from PORT.  'Textual' means that they're as you
-would write them on the 'deco' command line."
+would write them on the 'herd' command line."
   (let loop ((line (read-line port)))
     (if (eof-object? line)
 

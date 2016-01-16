@@ -116,7 +116,7 @@ return the socket."
   (make-parameter #f))
 
 ;; We provide our own output mechanism, because we have certain
-;; special needs; most importantly, we want to send output to deco
+;; special needs; most importantly, we want to send output to herd
 ;; sometimes.
 (define (make-dmd-output-port original-output-port)
   (make-soft-port
@@ -129,7 +129,7 @@ return the socket."
     ;; A string for output.
     (let ((buffer '())) ;; List of unwritten output strings.
       (lambda (str)
-        ;; When deco is connected, send it the output; otherwise, in the
+        ;; When herd is connected, send it the output; otherwise, in the
         ;; unlikely case nobody is listening, send to the standard output.
         (if (%current-client-socket)
             (catch-system-error

@@ -17,14 +17,14 @@
 # along with the GNU Shepherd.  If not, see <http://www.gnu.org/licenses/>.
 
 shepherd --version
-deco --version
+herd --version
 
 socket="t-socket-$$"
 conf="t-conf-$$"
 stamp="t-stamp-$$"
 pid="t-pid-$$"
 
-deco="deco -s $socket"
+herd="herd -s $socket"
 
 trap "rm -f $socket $conf $stamp $pid;
       test -f $pid && kill \`cat $pid\` || true" EXIT

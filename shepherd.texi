@@ -23,7 +23,7 @@ Documentation License''.
 @dircategory System software
 @direntry
 * shepherd: (shepherd). The Shepherd service manager.
-* deco: (shepherd)Invoking deco
+* herd: (shepherd)Invoking herd
                         Controlling the Shepherd service manager.
 * reboot: (shepherd)Invoking reboot
                         Rebooting a Shepherd-controlled system.
@@ -57,7 +57,7 @@ manager for the GNU system.
 @menu
 * Introduction::      Introduction to the Shepherd service manager.
 * Jump Start::        How to do simple things with the Shepherd.
-* deco and shepherd::      User interface to service management.
+* herd and shepherd:: User interface to service management.
 * Services::          Details on services.
 * Runlevels::         Details on runlevels.
 * Misc Facilities::   Generally useful things provided by the Shepherd.
@@ -97,8 +97,8 @@ the Shepherd is no different.  But don't worry: this manual should allow you to
 get started quickly.  Its first chapter is designed as a practical
 introduction to the Shepherd and should be all you need for everyday use
 (@pxref{Jump Start}).  In chapter two we will describe the
-@command{deco} and @command{shepherd} programs, and their relationship, in
-more detail (@ref{deco and shepherd}).  Subsequent chapters provide a full
+@command{herd} and @command{shepherd} programs, and their relationship, in
+more detail (@ref{herd and shepherd}).  Subsequent chapters provide a full
 reference manual and plenty of examples, covering all of Shepherd's
 capabilities.  Finally, the last chapter provides information for
 those souls brave enough to hack the Shepherd itself.
@@ -158,11 +158,11 @@ a daemon that (usually) runs in the
 background, so you will not interact with it directly.  After it is
 started, @command{shepherd} will listen on a socket special file, usually
 @code{/var/run/shepherd/socket}, for further commands.  You use the tool
-@dfn{deco} to send these commands to @command{shepherd}.  Usage of deco is simple and
+@dfn{herd} to send these commands to @command{shepherd}.  Usage of herd is simple and
 straightforward: To start a service called @code{apache}, you use:
 
 @example
-deco start apache
+herd start apache
 @end example
 
 @cindex Status (of services)
@@ -175,14 +175,14 @@ will automatically be started as well.  The current status of all the
 services defined in the configuration file can be queried like this:
 
 @example
-deco status
+herd status
 @end example
 
 @noindent
 Or, to get additional details about each service, run:
 
 @example
-deco detailed-status
+herd detailed-status
 @end example
 
 @noindent
@@ -191,7 +191,7 @@ services as started.  If you just want to know the status of the
 @code{apache} service, run:
 
 @example
-deco status apache
+herd status apache
 @end example
 
 @cindex Stopping a service
@@ -203,7 +203,7 @@ as it cannot work without the network being up.  To actually stop a
 service, you use the following, probably not very surprising, command:
 
 @example
-deco stop networking
+herd stop networking
 @end example
 
 There are two more actions you can perform on every service: The
@@ -217,8 +217,8 @@ caused it from being respawned too fast, you can start it again with
 the commands:
 
 @example
-deco enable foo
-deco start foo
+herd enable foo
+herd start foo
 @end example
 
 @cindex virtual services
@@ -243,7 +243,7 @@ reload its modules, therefore the action @code{reload-modules} might
 be available:
 
 @example
-deco reload-modules apache
+herd reload-modules apache
 @end example
 
 The service-specific actions can only be used when the service is
@@ -288,10 +288,10 @@ additional argument.  You can use @code{load} to load arbitrary code
 into the Shepherd at runtime, like this:
 
 @example
-deco load dmd ~/additional-services.scm
+herd load dmd ~/additional-services.scm
 @end example
 
-This is enough now about the @command{deco} and @command{shepherd} programs, we
+This is enough now about the @command{herd} and @command{shepherd} programs, we
 will now take a look at how to configure the Shepherd.  In the configuration
 file, we need mainly the definition of services.  We can also do
 various other things there, like starting a few services already.
@@ -306,7 +306,7 @@ Ok, to summarize:
 
 @itemize @bullet
 @item
-@command{shepherd} is a daemon, @command{deco} the program that controls it.
+@command{shepherd} is a daemon, @command{herd} the program that controls it.
 @item
 You can start, stop, restart, enable and disable every service, as
 well as display its status.
@@ -325,32 +325,37 @@ The @code{dmd} service is used to control @command{shepherd} itself.
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-@node deco and shepherd
-@chapter @command{deco} and @command{shepherd}
+@node herd and shepherd
+@chapter @command{herd} and @command{shepherd}
 
-@cindex deco
+@cindex herd
 @cindex shepherd
 @cindex daemon
 @cindex daemon controller
 @cindex relative file names
+@cindex herding, of daemons
 The daemon that runs in the background and is responsible for
-controlling the services is @command{shepherd}, while the user interface tool
-is called @command{deco}, the @dfn{DaEmon COntroller}@footnote{Some people
-might argue that it actually is short for ``decoration'', indicating
-that it is useless. :-)}.  To perform an action, like stopping a
-service or calling an action of a service, you use the deco program.
-It will communicate with shepherd over a Unix Domain Socket.
+controlling the services is @command{shepherd}, while the user interface
+tool is called @command{herd}: it's the command that allows you to
+actually @emph{herd} your daemons@footnote{
+@cindex deco, daemon controller
+In the past, when the
+GNU@tie{}Shepherd was known as GNU@tie{}dmd, the @command{herd} command
+was called @code{deco}, for @dfn{DaEmon COntroller}.}.  To perform an
+action, like stopping a service or calling an action of a service, you
+use the herd program.  It will communicate with shepherd over a Unix
+Domain Socket.
 
-Thus, you start @command{shepherd} once, and then always use deco whenever you want
-to do something service-related.  Since deco passes its current
+Thus, you start @command{shepherd} once, and then always use herd whenever you want
+to do something service-related.  Since herd passes its current
 working directory to @command{shepherd}, you can pass relative file names without
-trouble.  Both @command{shepherd} and deco understand the standard arguments
+trouble.  Both @command{shepherd} and herd understand the standard arguments
 @code{--help}, @code{--version} and @code{--usage}.
 
 
 @menu
 * Invoking shepherd::           How to start the service damon.
-* Invoking deco::               Controlling daemons.
+* Invoking herd::               Controlling daemons.
 * Invoking reboot::             Rebooting a shepherd-controlled system.
 * Invoking halt::               Turning off a shepherd-controlled system.
 @end menu
@@ -387,7 +392,7 @@ particular, this means that code in @var{file} may use
 @cindex security
 @cindex insecure
 Do not check if the directory where the socket---our communication
-rendez-vous with @command{deco}---is located has permissions @code{700}.
+rendez-vous with @command{herd}---is located has permissions @code{700}.
 If this option is not specified, @command{shepherd} will abort if the
 permissions are not as expected.
 
@@ -415,8 +420,8 @@ this option is not specified, @file{@var{localstatedir}/run/shepherd/socket} is
 taken.
 
 If @code{-} is specified as file name, commands will be read from
-standard input, one per line, as would be passed on a @command{deco}
-command line (@pxref{Invoking deco}).
+standard input, one per line, as would be passed on a @command{herd}
+command line (@pxref{Invoking herd}).
 
 @item --quiet
 Synonym for @code{--silent}.
@@ -425,23 +430,23 @@ Synonym for @code{--silent}.
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-@node Invoking deco
-@section Invoking deco
+@node Invoking herd
+@section Invoking herd
 
-@cindex deco
-The @command{deco} command is a generic client program to control a
+@cindex herd
+The @command{herd} command is a generic client program to control a
 running instance of @command{shepherd} (@pxref{Invoking shepherd}).  It has the
 following synopsis:
 
 @example
-deco [@var{option}@dots{}] @var{action} [@var{service} [@var{arg}@dots{}]]
+herd [@var{option}@dots{}] @var{action} [@var{service} [@var{arg}@dots{}]]
 @end example
 
 It causes the @var{action} of the @var{service} to be invoked.  When
 @var{service} is omitted and @var{action} is @code{status} or
 @code{detailed-status}, the @code{dmd} service is used@footnote{This
 shorthand does not work for other actions such as @code{stop}, because
-inadvertently typing @code{deco stop} would stop all the services, which
+inadvertently typing @code{herd stop} would stop all the services, which
 could be pretty annoying.} (@pxref{The dmd and unknown services}, for
 more information on the @code{dmd} service.)
 
@@ -452,9 +457,9 @@ that are available for every service are @code{start}, @code{stop},
 
 If you pass a file name as an @var{arg}, it will be passed as-is to
 the Shepherd, thus if it is not an absolute name, it is local to the current
-working directory of @command{shepherd}, not to deco.
+working directory of @command{shepherd}, not to herd.
 
-The @code{deco} command understands the following option:
+The @code{herd} command understands the following option:
 
 @table @samp
 
@@ -470,7 +475,7 @@ not specified, @file{@var{localstatedir}/run/shepherd/socket} is taken.
 @node Invoking reboot
 @section Invoking reboot
 
-@cindex deco
+@cindex herd
 The @command{reboot} command is a convenience client program to instruct
 the Shepherd (when used as an init system) to stop all running services and
 reboot the system.  It has the following synopsis:
@@ -479,7 +484,7 @@ reboot the system.  It has the following synopsis:
 reboot [@var{option}@dots{}]
 @end example
 
-It is equivalent to running @command{deco stop dmd}.  The @code{reboot}
+It is equivalent to running @command{herd stop dmd}.  The @code{reboot}
 command understands the following option:
 
 @table @samp
@@ -496,7 +501,7 @@ not specified, @file{@var{localstatedir}/run/shepherd/socket} is taken.
 @node Invoking halt
 @section Invoking halt
 
-@cindex deco
+@cindex herd
 The @command{halt} command is a convenience client program to instruct
 the Shepherd (when used as an init system) to stop all running services and turn
 off the system.  It has the following synopsis:
@@ -505,7 +510,7 @@ off the system.  It has the following synopsis:
 halt [@var{option}@dots{}]
 @end example
 
-It is equivalent to running @command{deco power-off dmd}.  As usual, the
+It is equivalent to running @command{herd power-off dmd}.  As usual, the
 @code{halt} command understands the following option:
 
 @table @samp
@@ -1049,7 +1054,7 @@ but also doing nothing about it.
 @section Communication
 
 The @code{(shepherd comm)} module provides primitives that allow clients such
-as @command{deco} to connect to @command{shepherd} and send it commands to
+as @command{herd} to connect to @command{shepherd} and send it commands to
 control or change its behavior (@pxref{Slots of services, actions of
 services}).
 

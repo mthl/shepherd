@@ -17,10 +17,10 @@
 # along with the GNU Shepherd.  If not, see <http://www.gnu.org/licenses/>.
 
 # The main programs.
-bin_SCRIPTS = shepherd deco
+bin_SCRIPTS = shepherd herd
 sbin_SCRIPTS = halt reboot
 templates =					\
-  shepherd.in deco.in halt.in reboot.in		\
+  shepherd.in herd.in halt.in reboot.in		\
   modules/shepherd/config.scm.in		\
   modules/shepherd/system.scm.in
 
@@ -30,7 +30,7 @@ BUILT_SOURCES = modules/shepherd/config.scm
 # The source files.
 shepherddir = ${datadir}/shepherd
 dist_shepherd_DATA =				\
-  modules/deco.scm				\
+  modules/herd.scm				\
   modules/shepherd.scm				\
   modules/halt.scm				\
   modules/reboot.scm

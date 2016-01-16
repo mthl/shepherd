@@ -30,7 +30,7 @@ fi
 socket="t-socket-$$"
 pid="t-pid-$$"
 
-deco="deco -s $socket"
+herd="herd -s $socket"
 
 trap "rm -f $socket $pid;
       test -f $pid && kill \`cat $pid\` || true" EXIT
@@ -43,8 +43,8 @@ dmd_pid="$!"
 while ! test -f "$pid" ; do kill -0 "$dmd_pid" ; done
 
 kill -0 `cat "$pid"`
-$deco status dmd
-$deco stop dmd
+$herd status dmd
+$herd stop dmd
 
 if kill `cat "$pid"`
 then
