@@ -139,12 +139,14 @@ instead, add this directory name in front of the absolute file names
 mentioned below.
 
 @cindex Configuration file
-When @command{shepherd} gets started, it reads and evaluates a configuration file.  When it is
-started with superuser priviledges, it tries to use
-@code{/etc/dmdconf.scm}, when started as normal user, it looks for a
-file called @code{.dmd.d/init.scm} in the user's home directory.  With the
-option @code{--config} (or, for short, @code{-c}), you can specify
-where to look instead.  So if you want to start @command{shepherd} with an
+When @command{shepherd} gets started, it reads and evaluates a
+configuration file.  When it is started with superuser priviledges, it
+tries to use @code{/etc/dmdconf.scm}.  When started as normal user, it
+looks for a file called @code{$XDG_CONFIG_HOME/shepherd/init.scm}.  If
+the @code{XDG_CONFIG_HOME} environment variable is not defined,
+@code{$HOME/.config/shepherd/init.scm} is used instead.  With the option
+@code{--config} (or, for short, @code{-c}), you can specify where to
+look instead.  So if you want to start @command{shepherd} with an
 alternative file, use one of the following commands:
 
 @example
@@ -402,7 +404,7 @@ permissions are not as expected.
 @cindex log file
 Log output into @var{file}, or if @var{file} is not given,
 @code{/var/log/shepherd.log} when running as superuser,
-@var{~/.dmd.d/shepherd.log} otherwise.
+@code{$XDG_CONFIG_HOME/shepherd/shepherd.log} otherwise.
 
 @item --pid[=@var{file}]
 When @command{shepherd} is ready to accept connections, write its PID to @var{file} or

@@ -32,6 +32,7 @@
             with-system-error-handling
             EINTR-safe
             with-atomic-file-output
+            mkdir-p
 
             l10n
             local-output
@@ -155,6 +156,33 @@ output port, and PROC's result is returned."
       (lambda (key . args)
         (catch-system-error (delete-file template))))))
 
+(define* (mkdir-p dir #:optional mode)  ;copied from Guix
+  "Create directory DIR and all its ancestors."
+  (define absolute?
+    (string-prefix? "/" dir))
+
+  (define not-slash
+    (char-set-complement (char-set #\/)))
+
+  (let loop ((components (string-tokenize dir not-slash))
+             (root       (if absolute?
+                             ""
+                             ".")))
+    (match components
+      ((head tail ...)
+       (let ((path (string-append root "/" head)))
+         (catch 'system-error
+           (lambda ()
+             (if mode
+                 (mkdir path mode)
+                 (mkdir path))
+             (loop tail path))
+           (lambda args
+             (if (= EEXIST (system-error-errno args))
+                 (loop tail path)
+                 (apply throw args))))))
+      (() #t))))
+
 
 
 ;; Localized version of STR.
@@ -186,8 +214,11 @@ There is NO WARRANTY, to the extent permitted by law.")))
       (false-if-exception (passwd:dir (getpwuid (getuid))))
       "/"))
 
-;; dmd default subdirectory if dmd is run as a normal user.
-(define user-dmddir (string-append user-homedir "/.dmd.d"))
+(define %user-config-dir
+  ;; Default config directory if shepherd is run as a normal user.
+  (string-append (or (getenv "XDG_CONFIG_HOME")
+                     (string-append user-homedir "/.config"))
+                 "/shepherd"))
 
 (define (make-bare-init-file target)
   "Return #t if a bare init file was created at TARGET; #f otherwise.
@@ -216,7 +247,7 @@ TARGET should be a string representing a filepath + name."
 (define default-logfile
   (if (zero? (getuid))
       (string-append %localstatedir "/log/shepherd.log")
-      (string-append user-dmddir "/shepherd.log")))
+      (string-append %user-config-dir "/shepherd.log")))
 
 ;; Configuration file.
 (define (default-config-file)
@@ -225,8 +256,8 @@ global system configuration file when running as 'root'.  As a side effect,
 create a template configuration file if non exists."
   (if (zero? (getuid))
       (string-append %sysconfdir "/dmdconf.scm")
-      (let ((config-file (string-append user-dmddir "/init.scm")))
-        (catch-system-error (mkdir user-dmddir))
+      (let ((config-file (string-append %user-config-dir "/init.scm")))
+        (mkdir-p %user-config-dir #o700)
         (if (not (file-exists? config-file))
             (make-bare-init-file config-file))
         config-file)))
@@ -239,7 +270,7 @@ create a template configuration file if non exists."
 (define default-socket-dir
   (if (zero? (getuid))
       %system-socket-dir
-      (string-append user-dmddir "/run")))
+      (string-append %user-config-dir "/run")))
 
 ;; Unix domain socket for receiving commands in dmd.
 (define default-socket-file
@@ -253,7 +284,7 @@ create a template configuration file if non exists."
 (define default-persistency-state-file
   (if (zero? (getuid))
       (string-append %localstatedir "/lib/misc/dmd-state")
-      (string-append user-dmddir "/dmd-state")))
+      (string-append %user-config-dir "/dmd-state")))
 
 ;; Global variables set from (dmd).
 (define persistency #f)
@@ -284,7 +315,7 @@ directory are not checked."
   (and (string=? dir default-socket-dir)
        ;; If it exists already, this is fine, thus ignore errors.
        (catch-system-error
-        (mkdir default-socket-dir #o700)))
+        (mkdir-p default-socket-dir #o700)))
   ;; Check for permissions.
   (when secure?
     (let ((dir-stat (stat dir)))

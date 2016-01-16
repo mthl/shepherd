@@ -1,5 +1,6 @@
 # GNU Shepherd --- Test basic communication capabilities.
 # Copyright © 2013, 2014, 2016 Ludovic Courtès <ludo@gnu.org>
+# Copyright © 2016 Mathieu Lirzin <mthl@gnu.org>
 # Copyright © 2014 Alex Sassmannshausen <alex.sassmannshausen@gmail.com>
 #
 # This file is part of the GNU Shepherd.
@@ -22,6 +23,7 @@ herd --version
 
 socket="t-socket-$$"
 conf="t-conf-$$"
+confdir="t-confdir-$$"
 log="t-log-$$"
 stamp="t-stamp-$$"
 pid="t-pid-$$"
@@ -97,3 +99,32 @@ $herd stop dmd
 ! kill -0 $dmd_pid
 
 test -f "$log"
+
+## ------------------------ ##
+## Usage of XDG variables.  ##
+## ------------------------ ##
+
+# Set XDG_CONFIG_HOME for configuration files.
+export XDG_CONFIG_HOME=$confdir
+mkdir -p $confdir/shepherd
+mv $conf $confdir/shepherd/init.scm
+rm -f "$pid"
+shepherd -I -s "$socket" --pid="$pid" &
+
+# Wait till it's ready.
+while ! test -f "$pid" ; do : ; done
+
+# Launch a service from $confdir/shepherd/init.scm.
+$herd start test
+test -f "$stamp"
+$herd status test | grep started
+
+$herd stop test
+! test -f "$stamp"
+
+dmd_pid="`cat $pid`"
+
+$herd stop dmd
+! kill -0 $dmd_pid
+
+rm -rf $confdir
