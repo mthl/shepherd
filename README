@@ -1,15 +1,17 @@
-* An -*- outline -*- of the GNU dmd service manager.
+* An -*- outline -*- of the GNU Daemon Shepherd.
 
-** What is `dmd'?
+** What is the Shepherd?
 
-The dmd program is a ``Daemon managing Daemons'' (or maybe a
-``Daemons-managing Daemon''?), i.e. a service manager, that is written
-in Guile, the extension language of the GNU project.  It provides a
-replacement for the service-managing capabillities of SysV-init (or
-any other init) with a both powerfull and beautiful dependency-based
-system with a convenient interface.  It is intended for use on
-GNU/Hurd, but it is supposed to work on every POSIX-like system where
-Guile is available.  In particular, it has been tested on GNU/Linux.
+The GNU Daemon Shepherd or GNU Shepherd is a service manager written in
+Guile that looks after the herd of system services, providing a
+replacement for the service-managing capabilities of SysV-init (or any
+other init) with a dependency-based system with a convenient interface.
+It is intended for use on GNU/Hurd, but it is supposed to work on every
+POSIX-like system where Guile is available.  In particular, it has been
+tested on GNU/Linux.
+
+In a previous life, the GNU Shepherd was known as GNU dmd, the
+daemon-managing daemon.
 
 ** Requirements
 
@@ -18,32 +20,34 @@ for Extension), version 2.x.  It uses GOOPS, but as GOOPS is part of
 Guile, a normal Guile installation is sufficient.  It also uses
 readline, though it does not really depend on it.
 
-GNU Make is required to build dmd.
+GNU Make is required to build the Shepherd.
 
 ** Getting started
 
-Despite the fact that this program is written in an interpreted
-language, you can install this program like all programs that use
-autoconf, but the recommended way in this case is:
+Like all GNU packages, this program can be installed using familiar
+incantations such as:
 
-  ./configure --prefix= --datadir=/usr/share
+  ./configure --prefix=/some/where
   make
+  make check
   make install
 
-Actually setting up `dmd' currently requires some work.  You should
-read the Texinfo manual for details.
+Actually setting up the Shepherd currently requires some work.  You
+should read the Texinfo manual for details:
+
+  info -f shepherd.info
 
 ** More information
 
-Detailed instructions on installing dmd are available in the file
-`INSTALL'.  A list of user-visible changes between releases can be
-found in the file `NEWS'.  Detailed information about changes on the
+Detailed instructions on installing the GNU Shepherd are available in
+the file `INSTALL'.  A list of user-visible changes between releases can
+be found in the file `NEWS'.  Detailed information about changes on the
 source code level are listed in `ChangeLog'.  Open issues on which I
 would like to receive comments are explained in the file `QUESTIONS'.
 
 A list of people who can be considered maintainers of this software is
 available in the file `AUTHORS'.  A list of people who have been
-helpful in improving dmd can be found in `THANKS'.
+helpful in improving the Shepherd can be found in `THANKS'.
 
 This program can be distributed under the terms of the GNU General
 Public License, version 3 or any later version, see the file `COPYING'
@@ -51,19 +55,19 @@ for details.  The Texinfo manual can be distributed under the terms of
 the GNU Free Documentation License, version 1.3 or any later version,
 see the manual for details.
 
-The GNU dmd home page is at:
+The GNU Shepherd home page is at:
 
-  http://www.gnu.org/software/dmd/
+  http://www.gnu.org/software/shepherd/
 
-GNU dmd is developed jointly with the GNU Guix project.  Both are
-essential components in putting the pieces together to build the
-GNU system.  Join us now!
+The GNU Shepherd is developed jointly with the GNU Guix project.  Both
+are essential components in putting the pieces together to build the GNU
+system.  Join us now!
 
 ** Bugs and Limitations
 
 There is no localization done yet.  Code from the user configuration is
-allowed to mess up everything.  Runlevels do not work yet.  A few bugs
-are already marked in the source code.
+allowed to mess up with everything.  Runlevels do not work yet.  A few
+bugs are already marked in the source code.
 
-Send bug reports to <bug-guix@gnu.org>, with "dmd" and the version
+Send bug reports to <bug-guix@gnu.org>, with "Shepherd" and the version
 number in the Subject line.
