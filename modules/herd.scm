@@ -97,7 +97,16 @@ of pairs."
        ;; (format #t (l10n "  Conflicts with ~a." (conflicts-with obj)))
        (if respawn?
            (format #t (l10n "  Will be respawned.~%"))
-           (format #t (l10n "  Will not be respawned.~%")))))))
+           (format #t (l10n "  Will not be respawned.~%")))))
+    (('error ('version 0 _ ...) 'service-not-found service)
+     (format (current-error-port)
+             (l10n "Service ~a could not be found.~%")
+             service)
+     (exit 1))
+    (('error . _)
+     (format (current-error-port)
+             (l10n "Something went wrong: ~s~%")
+             service))))
 
 (define (run-command socket-file action service args)
   "Perform ACTION with ARGS on SERVICE, and display the result.  Connect to

@@ -22,6 +22,8 @@
   #:use-module (oop goops)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-26)
+  #:use-module (srfi srfi-34)
+  #:use-module (srfi srfi-35)
   #:use-module (ice-9 match)
   #:use-module (ice-9 format)
   #:use-module (shepherd support)
@@ -68,7 +70,13 @@
             make-init.d-service
 
             dmd-service
-            make-actions))
+            make-actions
+
+            &service-error
+            service-error?
+            &missing-service-error
+            missing-service-error?
+            missing-service-name))
 
 ;; Conveniently create an actions object containing the actions for a
 ;; <service> object.  The current structure is a list of actions,
@@ -166,6 +174,15 @@ respawned, shows that it has been respawned more than TIMES in SECONDS."
 (define action:name car)
 (define action:proc cadr)
 (define action:doc cddr)
+
+;; Service errors.
+(define-condition-type &service-error &error service-error?)
+
+;; Error raised when looking up a service by name fails.
+(define-condition-type &missing-service-error &service-error
+  missing-service-error?
+  (name missing-service-name))
+
 
 ;; Return the canonical name of the service.
 (define-method (canonical-name (obj <service>))
@@ -428,7 +445,7 @@ clients."
 (define (launch-service name proc args)
   (match (lookup-services name)
     (()
-     (local-output "No service provides ~a." name))
+     (raise (condition (&missing-service-error (name name)))))
     ((possibilities ...)
      (or (first-running possibilities)
 
@@ -460,8 +477,8 @@ clients."
 	  (if (and unknown
 		   (defines-action? unknown 'stop))
 	      (apply action unknown 'stop obj args)
-	    (local-output "No service currently providing ~a." obj)))
-      (apply stop which args))))
+              (raise (condition (&missing-service-error (name obj))))))
+        (apply stop which args))))
 
 ;; Perform action THE-ACTION by name.
 (define-method (action (obj <symbol>) the-action . args)
@@ -471,7 +488,7 @@ clients."
 	  (if (and unknown
 		   (defines-action? unknown 'action))
 	      (apply action unknown 'action the-action args)
-	    (local-output "No service at all providing ~a." obj)))
+              (raise (condition (&missing-service-error (name obj))))))
       (for-each (lambda (s)
 		  (apply (case the-action
 			   ((enable) enable)
@@ -917,10 +934,9 @@ requested to be removed."
            ;; Removing only one service.
            (match (lookup-services name)
              (()                        ; unknown service
-              (local-output
-               "Not unloading: '~a' is an uknown service." name))
+              (raise (condition (&missing-service-error (name name)))))
              ((service)             ; only SERVICE provides NAME
-              ;; Are we removing a user service窶ｦ
+              ;; Are we removing a user service…
               (if (eq? (canonical-name service) name)
                   (local-output "Removing service '~a'..." name)
                   ;; or a virtual service?

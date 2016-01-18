@@ -91,6 +91,19 @@ dmd_service_sexp="
 		     (last-respawns ())))))
 "
 
+# Make sure we get an 'error' sexp when querying a nonexistent service.
+"$GUILE" -c "
+(use-modules (shepherd comm) (ice-9 match))
+
+(match (let ((sock (open-connection \"$socket\")))
+         (write-command (dmd-command 'status 'does-not-exist) sock)
+         (read sock))
+  (('error _ ... 'service-not-found 'does-not-exist)
+   #t)
+  (x
+   (pk 'wrong x)
+   (exit 1)))"
+
 # Unload everything and make sure only 'dmd' is left.
 $herd unload dmd all
 

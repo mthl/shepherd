@@ -24,6 +24,7 @@
   #:use-module (oop goops)      ;; Defining classes and methods.
   #:use-module (srfi srfi-1)    ;; List library.
   #:use-module (srfi srfi-26)
+  #:use-module (srfi srfi-34)
   #:use-module (shepherd config)
   #:use-module (shepherd support)
   #:use-module (shepherd service)
@@ -228,14 +229,25 @@
      ;; line to herd before we actually quit.
      (catch 'quit
        (lambda ()
-         (case the-action
-           ((start) (apply start service-symbol args))
-           ((stop) (apply stop service-symbol args))
-           ((enforce) (apply enforce service-symbol args))
+         (guard (c ((missing-service-error? c)
+                    (case the-action
+                      ((status)
+                       ;; For these actions, we must always return an sexp.
+                       ;; TODO: Extend this to all actions.
+                       (display `(error (version 0) service-not-found
+                                        ,(missing-service-name c))
+                                (%current-client-socket)))
+                      (else
+                       (local-output "Service ~a not found"
+                                     (missing-service-name c))))))
+           (case the-action
+             ((start) (apply start service-symbol args))
+             ((stop) (apply stop service-symbol args))
+             ((enforce) (apply enforce service-symbol args))
 
-           ;; Actions which have the semantics of `action' are
-           ;; handled there.
-           (else (apply action service-symbol the-action args))))
+             ;; Actions which have the semantics of `action' are
+             ;; handled there.
+             (else (apply action service-symbol the-action args)))))
        (lambda (key)
          ;; Most likely we're receiving 'quit' from the 'stop' method of
          ;; DMD-SERVICE.  So, if we're running as 'root', just reboot.
