@@ -40,7 +40,7 @@ shepherd -I -s "$socket" -c /dev/null -l /dev/null --pid="$pid" &
 dmd_pid="$!"
 
 # Wait until it's ready, or until it terminates.
-while ! test -f "$pid" ; do kill -0 "$dmd_pid" ; done
+while ! test -f "$pid" ; do kill -0 "$dmd_pid" ; sleep 0.3 ; done
 
 kill -0 `cat "$pid"`
 $herd status dmd

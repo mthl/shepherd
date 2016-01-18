@@ -61,7 +61,7 @@ rm -f "$pid"
 shepherd -I -s "$socket" -c "$conf" -l "$log" --pid="$pid" &
 
 # Wait till it's ready.
-while ! test -f "$pid" ; do : ; done
+while ! test -f "$pid" ; do sleep 0.3 ; done
 
 dmd_pid="`cat $pid`"
 
@@ -112,7 +112,7 @@ rm -f "$pid"
 shepherd -I -s "$socket" --pid="$pid" &
 
 # Wait till it's ready.
-while ! test -f "$pid" ; do : ; done
+while ! test -f "$pid" ; do sleep 0.3 ; done
 
 # Launch a service from $confdir/shepherd/init.scm.
 $herd start test
