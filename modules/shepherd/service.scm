@@ -380,33 +380,20 @@ respawned, shows that it has been respawned more than TIMES in SECONDS."
 ;; Return a list of canonical names of the services that conflict with
 ;; OBJ.
 (define-method (conflicts-with (obj <service>))
-  (let ((conflicts '()))
-    (for-each (lambda (sym)
-		(for-each (lambda (s)
-			    (set! conflicts (cons (canonical-name s)
-						  conflicts)))
-			  (lookup-services sym)))
-	      (provided-by obj))
-    ;; Clean up the result.
-    (delete! (canonical-name obj)
-	     (delete-duplicates! conflicts eq?)
-	     eq?)))
+  (delete-duplicates
+   (append-map (lambda (sym)
+                 (filter-map (lambda (service)
+                               (and (not (eq? service obj))
+                                    (canonical-name service)))
+                             (lookup-services sym)))
+               (provided-by obj))
+   eq?))
 
 ;; Check if this service provides a symbol that is already provided
 ;; by any other running services.  If so, return the canonical names
 ;; of the other services.  Otherwise, return the empty list.
 (define-method (conflicts-with-running (obj <service>))
-  (let ((conflicts '()))
-    (for-each-service
-     (lambda (serv)
-       (and (running? serv)
-	    (for-each (lambda (sym)
-			(and (memq sym (provided-by obj))
-			     (set! conflicts
-				   (cons (canonical-name serv)
-					 conflicts))))
-		      (provided-by serv)))))
-    conflicts))
+  (filter running? (conflicts-with obj)))
 
 ;; Start OBJ, but first kill all services which conflict with it.
 ;; FIXME-CRITICAL: Conflicts of indirect dependencies.  For this, we
