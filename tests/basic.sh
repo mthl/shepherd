@@ -91,6 +91,9 @@ do
     $herd $action does-not-exist 2>&1 | grep "does-not-exist.*not.*found"
 done
 
+if $herd an-action-that-does-not-exist dmd
+then false; else true; fi
+
 # Unload one service, make sure the other it still around.
 $herd unload dmd test
 $herd status | grep "Stopped: (test-2)"

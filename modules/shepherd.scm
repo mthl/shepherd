@@ -240,7 +240,7 @@
                             %not-newline))
 
          (parameterize ((%current-client-socket message-port))
-           (guard (c ((missing-service-error? c)
+           (guard (c ((service-error? c)
                       (write-reply (command-reply command #f
                                                   (condition->sexp c)
                                                   (get-messages))

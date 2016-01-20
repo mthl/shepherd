@@ -78,6 +78,11 @@
             missing-service-error?
             missing-service-name
 
+            &unknown-action-error
+            unknown-action-error?
+            unknown-action-name
+            unknown-action-service
+
             condition->sexp))
 
 ;; Conveniently create an actions object containing the actions for a
@@ -185,6 +190,11 @@ respawned, shows that it has been respawned more than TIMES in SECONDS."
   missing-service-error?
   (name missing-service-name))
 
+(define-condition-type &unknown-action-error &service-error
+  unknown-action-error?
+  (service unknown-action-service)
+  (action  unknown-action-name))
+
 (define (condition->sexp condition)
   "Turn the SRFI-35 error CONDITION into an sexp that can be sent over the
 wire."
@@ -192,6 +202,10 @@ wire."
     ((? missing-service-error?)
      `(error (version 0) service-not-found
              ,(missing-service-name condition)))
+    ((? unknown-action-error?)
+     `(error (version 0) action-not-found
+             ,(unknown-action-name condition)
+             ,(canonical-name (unknown-action-service condition))))
     ((? service-error?)
      `(error (version 0) service-error))))
 
@@ -331,7 +345,7 @@ wire."
       ((restart)
        (if running
 	   (stop obj)
-	 (local-output "~a was not running." (canonical-name obj)))
+           (local-output "~a was not running." (canonical-name obj)))
        (start obj))
       ((status)
        ;; Return the service itself.  It is automatically converted to an sexp
@@ -339,14 +353,14 @@ wire."
        obj)
       (else
        ;; FIXME: Unknown service.
-       (local-output "Service ~a does not have a ~a action."
-		     (canonical-name obj)
-		     the-action))))
+       (raise (condition (&unknown-action-error
+                          (service obj)
+                          (action the-action)))))))
 
   (define (apply-if-pair obj proc)
     (if (pair? obj)
 	(proc obj)
-      obj))
+        obj))
 
   (let ((proc (or (apply-if-pair (lookup-action obj the-action)
 				 action:proc)
@@ -356,22 +370,25 @@ wire."
     ;; information.
     ;; FIXME: Why should the user-implementations not be allowed to be
     ;; called this way?
-    (if (and (not (eq? proc default-action))
-	     (not (running? obj)))
-	(local-output "Service ~a is not running." (canonical-name obj))
-      (catch #t
-	(lambda ()
-	  (if (can-apply? proc (+ 1 (length args)))
-	      (apply proc (slot-ref obj 'running) args)
-	    ;; FIXME: Better message.
-	    (local-output "Action ~a of service ~a can't take ~a arguments."
-			  the-action (canonical-name obj) (length args))))
-	(lambda (key . args)
-	  ;; Special case: `dmd' may quit.
-	  (and (eq? dmd-service obj)
-	       (eq? key 'quit)
-	       (apply quit args))
-	  (caught-error key args))))))
+    (cond ((eq? proc default-action)
+           (apply default-action (slot-ref obj 'running) args))
+          ((not (running? obj))
+           (local-output "Service ~a is not running." (canonical-name obj))
+           #f)
+          (else
+           (catch #t
+             (lambda ()
+               (if (can-apply? proc (+ 1 (length args)))
+                   (apply proc (slot-ref obj 'running) args)
+                   ;; FIXME: Better message.
+                   (local-output "Action ~a of service ~a can't take ~a arguments."
+                                 the-action (canonical-name obj) (length args))))
+             (lambda (key . args)
+               ;; Special case: `dmd' may quit.
+               (and (eq? dmd-service obj)
+                    (eq? key 'quit)
+                    (apply quit args))
+               (caught-error key args)))))))
 
 ;; Display documentation about the service.
 (define-method (doc (obj <service>) . args)
