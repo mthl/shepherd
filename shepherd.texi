@@ -472,6 +472,12 @@ not specified, @file{@var{localstatedir}/run/shepherd/socket} is taken.
 
 @end table
 
+The @code{herd} command returns zero on success, and a non-zero exit
+code on failure.  In particular, it returns a non-zero exit code when
+@var{action} or @var{service} does not exist and when the given action
+failed.
+
+
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 @node Invoking reboot
