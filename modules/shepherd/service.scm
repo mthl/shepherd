@@ -195,6 +195,24 @@ respawned, shows that it has been respawned more than TIMES in SECONDS."
   (service unknown-action-service)
   (action  unknown-action-name))
 
+;; Report of an action throwing an exception in user code.
+(define-condition-type &action-runtime-error &service-error
+  action-runtime-error?
+  (service   action-runtime-error-service)
+  (action    action-runtime-error-action)
+  (key       action-runtime-error-key)
+  (arguments action-runtime-error-arguments))
+
+
+(define (report-exception action service key args)
+  "Report an exception of type KEY in user code ACTION of SERVICE."
+  ;; FIXME: Would be nice to log it without sending the message to the client.
+  (raise (condition (&action-runtime-error
+                     (service service)
+                     (action action)
+                     (key key)
+                     (arguments args)))))
+
 (define (condition->sexp condition)
   "Turn the SRFI-35 error CONDITION into an sexp that can be sent over the
 wire."
@@ -206,6 +224,12 @@ wire."
      `(error (version 0) action-not-found
              ,(unknown-action-name condition)
              ,(canonical-name (unknown-action-service condition))))
+    ((? action-runtime-error?)
+     `(error (version 0) action-exception
+             ,(action-runtime-error-action condition)
+             ,(canonical-name (action-runtime-error-service condition))
+             ,(action-runtime-error-key condition)
+             ,(map result->sexp (action-runtime-error-arguments condition))))
     ((? service-error?)
      `(error (version 0) service-error))))
 
@@ -277,8 +301,8 @@ wire."
                                               (apply (slot-ref obj 'start)
                                                      args))
                                             (lambda (key . args)
-                                              (caught-error key args)
-                                              #f))))))
+                                              (report-exception 'start obj
+                                                                key args)))))))
 
 	   ;; Status message.
 	   (local-output (if (running? obj)
@@ -378,17 +402,13 @@ wire."
           (else
            (catch #t
              (lambda ()
-               (if (can-apply? proc (+ 1 (length args)))
-                   (apply proc (slot-ref obj 'running) args)
-                   ;; FIXME: Better message.
-                   (local-output "Action ~a of service ~a can't take ~a arguments."
-                                 the-action (canonical-name obj) (length args))))
+               (apply proc (slot-ref obj 'running) args))
              (lambda (key . args)
                ;; Special case: `dmd' may quit.
                (and (eq? dmd-service obj)
                     (eq? key 'quit)
                     (apply quit args))
-               (caught-error key args)))))))
+               (report-exception the-action obj key args)))))))
 
 ;; Display documentation about the service.
 (define-method (doc (obj <service>) . args)
@@ -988,13 +1008,7 @@ requested to be removed."
   (local-output "Loading ~a." file-name)
   ;; Every action is protected anyway, so no need for a `catch'
   ;; here.  FIXME: What about `quit'?
-  (catch 'system-error
-    (lambda ()
-      (load-in-user-module file-name))
-    (lambda args
-      (local-output "Failed to load from '~a': ~a."
-                    file-name (strerror (system-error-errno args)))
-      #f)))
+  (load-in-user-module file-name))
 
 ;;; Tests for validity of the slots of <service> objects.
 

@@ -26,7 +26,6 @@
             caught-error
             assert
             label
-            can-apply?
 
             catch-system-error
             with-system-error-handling
@@ -92,16 +91,6 @@
   (lambda args
     (letrec ((NAME PROC))
       (apply NAME args))))
-
-;; Check whether a list of NUM-ARGS arguments can successfully be
-;; applied to PROC.
-(define (can-apply? proc num-args)
-  (and (procedure? proc)
-       (match (procedure-minimum-arity proc)
-         ((required optional rest?)
-          (and (>= num-args required)
-               (or rest? (<= num-args (+ required optional)))))
-         (_ #t))))
 
 ;; Evaluate `EXPR ...' until a system error occurs, then skip the
 ;; remaining code.

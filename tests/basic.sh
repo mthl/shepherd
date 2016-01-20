@@ -100,6 +100,14 @@ done
 if $herd an-action-that-does-not-exist dmd
 then false; else true; fi
 
+# Wrong number of arguments for an action.
+if $herd status dmd foo bar baz;
+then false; else true; fi
+
+# Loading nonexistent file.
+if $herd load dmd /does/not/exist.scm;
+then false; else true; fi
+
 # Unload one service, make sure the other it still around.
 $herd unload dmd test
 $herd status | grep "Stopped: (test-2)"

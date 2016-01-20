@@ -152,6 +152,13 @@ the daemon via SOCKET-FILE."
            (format (current-error-port)
                    (l10n "Service ~a does not have an action ~a.~%")
                    service action))
+          (('error ('version 0 _ ...) 'action-exception action service
+                   key (args ...))
+           (format (current-error-port)
+                   (l10n "Exception caught while executing '~a' \
+on service '~a':~%")
+                   action service)
+           (print-exception (current-error-port) #f key args))
           (('error . _)
            (format (current-error-port)
                    (l10n "Something went wrong: ~s~%")
