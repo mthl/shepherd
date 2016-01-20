@@ -473,9 +473,9 @@ clients."
 
 
 
-;; Try to start (with PROC) a service providing NAME.  Used by `start'
-;; and `enforce'.
 (define (launch-service name proc args)
+  "Try to start (with PROC) a service providing NAME; return #f on failure.
+Used by `start' and `enforce'."
   (match (lookup-services name)
     (()
      (raise (condition (&missing-service-error (name name)))))
@@ -492,7 +492,7 @@ clients."
            (if (and unknown
                     (defines-action? unknown 'start))
                (apply action unknown 'start name args)
-               (local-output "Providing ~a impossible." name)))))))
+               #f))))))
 
 ;; Starting by name.
 (define-method (start (obj <symbol>) . args)

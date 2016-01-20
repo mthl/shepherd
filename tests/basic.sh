@@ -79,6 +79,12 @@ $herd stop test
 
 $herd status test | grep stopped
 
+# Disable a service and make sure it cannot be started.
+$herd disable test-2
+if $herd start test-2
+then false; else true; fi
+
+$herd enable test-2
 $herd start test-2
 
 $herd status test-2 | grep started

@@ -130,6 +130,12 @@ the daemon via SOCKET-FILE."
            ;; We get a list of statuses, in case several services have the
            ;; same name.
            (for-each display-service-status result))
+          (('start _)
+           (unless result
+             (format (current-error-port)
+                     (l10n "Failed to start service ~a~%")
+                     service)
+             (exit 1)))
           (_
            ;; For other commands, we don't do any interpretation.
            #t)))
