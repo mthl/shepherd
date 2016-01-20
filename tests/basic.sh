@@ -83,10 +83,13 @@ $herd start test-2
 
 $herd status test-2 | grep started
 
-if $herd status does-not-exist
-then false; else true; fi
+for action in status start stop
+do
+    if $herd $action does-not-exist
+    then false; else true; fi
 
-$herd status does-not-exist 2>&1 | grep "does-not-exist.*not.*found"
+    $herd $action does-not-exist 2>&1 | grep "does-not-exist.*not.*found"
+done
 
 # Unload one service, make sure the other it still around.
 $herd unload dmd test

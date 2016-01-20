@@ -53,29 +53,21 @@ of pairs."
 
 (define (display-status-summary services)
   "Display a summary of the status of all of SERVICES."
-  (match services
-    (('service-list ('version 0) services ...)
-     (call-with-values
-         (lambda ()
-           (partition (match-lambda
-                        (('service ('version 0 _ ...) properties ...)
-                         (car (assoc-ref properties 'running))))
-                      services))
-       (lambda (started stopped)
-         (format #t (l10n "Started: ~a~%")
-                 (map service-canonical-name started))
-         (format #t (l10n "Stopped: ~a~%")
-                 (map service-canonical-name stopped)))))
-    (_
-     (service-list-error services))))
+  (call-with-values
+      (lambda ()
+        (partition (match-lambda
+                     (('service ('version 0 _ ...) properties ...)
+                      (car (assoc-ref properties 'running))))
+                   services))
+    (lambda (started stopped)
+      (format #t (l10n "Started: ~a~%")
+              (map service-canonical-name started))
+      (format #t (l10n "Stopped: ~a~%")
+              (map service-canonical-name stopped)))))
 
 (define (display-detailed-status services)
   "Display the detailed status of SERVICES."
-  (match services
-    (('service-list ('version 0) services ...)
-     (for-each display-service-status services))
-    (_
-     (service-list-error services))))
+  (for-each display-service-status services))
 
 (define (display-service-status service)
   "Display the status of SERVICE, an sexp."
@@ -97,16 +89,11 @@ of pairs."
        ;; (format #t (l10n "  Conflicts with ~a." (conflicts-with obj)))
        (if respawn?
            (format #t (l10n "  Will be respawned.~%"))
-           (format #t (l10n "  Will not be respawned.~%")))))
-    (('error ('version 0 _ ...) 'service-not-found service)
-     (format (current-error-port)
-             (l10n "Service ~a could not be found.~%")
-             service)
-     (exit 1))
-    (('error . _)
-     (format (current-error-port)
-             (l10n "Something went wrong: ~s~%")
-             service))))
+           (format #t (l10n "  Will not be respawned.~%")))))))
+
+(define (println message)
+  (display message)
+  (newline))
 
 (define (run-command socket-file action service args)
   "Perform ACTION with ARGS on SERVICE, and display the result.  Connect to
@@ -125,20 +112,49 @@ the daemon via SOCKET-FILE."
 
      ;; Interpret the command's output when possible and format it in a
      ;; human-readable way.
-     (match (list action service)
-       (('status 'dmd)
-        (display-status-summary (read sock)))
-       (('detailed-status 'dmd)
-        (display-detailed-status (read sock)))
-       (('status _)
-        (display-service-status (read sock)))
-       (_
-        ;; For other commands, we don't do any interpretation.
-        (let loop ((line (read-line sock)))
-          (unless (eof-object? line)
-            (display line)
-            (newline)
-            (loop (read-line sock))))))
+     (match (read sock)
+       (('reply ('version 0 _ ...)                ;no errors
+                ('result result) (error #f)
+                ('messages messages))
+        ;; First, display raw messages coming from the daemon.  Since they are
+        ;; not translated in the user's locale, they should be avoided!
+        (for-each println messages)
+
+        ;; Then interpret the result
+        (match (list action service)
+          (('status 'dmd)
+           (display-status-summary (first result)))
+          (('detailed-status 'dmd)
+           (display-detailed-status (first result)))
+          (('status _)
+           ;; We get a list of statuses, in case several services have the
+           ;; same name.
+           (for-each display-service-status result))
+          (_
+           ;; For other commands, we don't do any interpretation.
+           #t)))
+       (('reply ('version 0 _ ...)                ;an error
+                ('result _) ('error error)
+                ('messages messages))
+        (for-each println messages)
+        (match error
+          (('error ('version 0 _ ...) 'service-not-found service)
+           (format (current-error-port)
+                   (l10n "Service ~a could not be found.~%")
+                   service)
+           (exit 1))
+          (('error . _)
+           (format (current-error-port)
+                   (l10n "Something went wrong: ~s~%")
+                   service)))
+        (exit 1))
+       ((? eof-object?)
+        ;; When stopping shepherd, we may get an EOF in lieu of a real reply,
+        ;; and that's fine.  In other cases, a premature EOF is an error.
+        (unless (and (eq? action 'stop) (eq? service 'dmd))
+          (format (current-error-port)
+                  (l10n "premature end-of-file while talking to shepherd~%"))
+          (exit 1))))
 
      (close-port sock))))
 

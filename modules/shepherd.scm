@@ -209,18 +209,20 @@
 
 (define (process-connection sock)
   "Process client connection SOCK, reading and processing commands."
-  (parameterize ((%current-client-socket sock))
-    (catch 'system-error
-      (lambda ()
-        (process-command (read-command sock))
-        ;; Currently we assume one command per connection.
-        (false-if-exception (close sock)))
-      (lambda args
-        (false-if-exception (close sock))))))
+  (catch 'system-error
+    (lambda ()
+      (process-command (read-command sock) sock)
+      ;; Currently we assume one command per connection.
+      (false-if-exception (close sock)))
+    (lambda args
+      (false-if-exception (close sock)))))
 
-(define (process-command command)
+(define %not-newline
+  (char-set-complement (char-set #\newline)))
+
+(define (process-command command port)
   "Interpret COMMAND, a command sent by the user, represented as a
-<dmd-command> object."
+<dmd-command> object.  Send the reply to PORT."
   (match command
     (($ <dmd-command> the-action service-symbol (args ...) dir)
      (chdir dir)
@@ -229,25 +231,33 @@
      ;; line to herd before we actually quit.
      (catch 'quit
        (lambda ()
-         (guard (c ((missing-service-error? c)
-                    (case the-action
-                      ((status)
-                       ;; For these actions, we must always return an sexp.
-                       ;; TODO: Extend this to all actions.
-                       (display `(error (version 0) service-not-found
-                                        ,(missing-service-name c))
-                                (%current-client-socket)))
-                      (else
-                       (local-output "Service ~a not found"
-                                     (missing-service-name c))))))
-           (case the-action
-             ((start) (apply start service-symbol args))
-             ((stop) (apply stop service-symbol args))
-             ((enforce) (apply enforce service-symbol args))
+         (define message-port
+           (with-fluids ((%default-port-encoding "UTF-8"))
+             (open-output-string)))
 
-             ;; Actions which have the semantics of `action' are
-             ;; handled there.
-             (else (apply action service-symbol the-action args)))))
+         (define (get-messages)
+           (string-tokenize (get-output-string message-port)
+                            %not-newline))
+
+         (parameterize ((%current-client-socket message-port))
+           (guard (c ((missing-service-error? c)
+                      (write-reply (command-reply command #f
+                                                  (condition->sexp c)
+                                                  (get-messages))
+                                   port)))
+
+             (define result
+               (case the-action
+                 ((start) (apply start service-symbol args))
+                 ((stop) (apply stop service-symbol args))
+                 ((enforce) (apply enforce service-symbol args))
+
+                 ;; Actions which have the semantics of `action' are
+                 ;; handled there.
+                 (else (apply action service-symbol the-action args))))
+
+             (write-reply (command-reply command result #f (get-messages))
+                          port))))
        (lambda (key)
          ;; Most likely we're receiving 'quit' from the 'stop' method of
          ;; DMD-SERVICE.  So, if we're running as 'root', just reboot.
@@ -273,7 +283,8 @@ would write them on the 'herd' command line."
             ((action service arguments ...)
              (process-command (dmd-command (string->symbol action)
                                            (string->symbol service)
-                                           #:arguments arguments)))
+                                           #:arguments arguments)
+                              port))
             (_
              (local-output "invalid command line" line)))
           (loop (read-line port))))))

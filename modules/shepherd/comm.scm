@@ -1,6 +1,6 @@
 ;; comm.scm -- Communication between processes and general output.
-;; Copyright (C) 2013, 2014 Ludovic Courtès <ludo@gnu.org>
-;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
+;; Copyright (C) 2013, 2014, 2016 Ludovic CourtÃ¨s <ludo@gnu.org>
+;; Copyright (C) 2002, 2003 Wolfgang JÃ¤hrling <wolfgang@pro-linux.de>
 ;;
 ;; This file is part of the GNU Shepherd.
 ;;
@@ -33,8 +33,19 @@
             dmd-command-service
             dmd-command-arguments
 
+            <command-reply>
+            command-reply
+            command-reply?
+            command-reply-command
+            command-reply-result
+            command-reply-error
+            command-reply-messages
+
             write-command
             read-command
+
+            write-reply
+            result->sexp
 
             start-logging
             stop-logging
@@ -97,6 +108,42 @@ return the socket."
                           (arguments ,@arguments)
                           (directory ,directory))
             port))))
+
+
+;; Replies to commands.
+
+(define-record-type <command-reply>
+  (command-reply command result error messages)
+  command-reply?
+  (command  command-reply-command)                ;command
+  (result   command-reply-result)                 ;sexp | #f
+  (error    command-reply-error)                  ;#f | sexp
+  (messages command-reply-messages))              ;list of strings
+
+(define (write-reply reply port)
+  "Write REPLY to PORT."
+  (match reply
+    (($ <command-reply> command result error (messages ...))
+     ;; Use 'result->sexp' to convert RESULT to an sexp.  We don't do that for
+     ;; ERROR because using GOOPS methods doesn't work for SRFI-35 error
+     ;; conditions, and that's what we're using here. (XXX)
+     (write `(reply (version 0)
+                    (result ,(result->sexp result))
+                    (error ,error)
+                    (messages ,messages))
+            port))))
+
+;; This generic function must be extended to provide sexp representations of
+;; results that go in <command-reply> objects.
+(define-generic result->sexp)
+
+(define-method (result->sexp (bool <boolean>)) bool)
+(define-method (result->sexp (number <number>)) number)
+(define-method (result->sexp (symbol <symbol>)) symbol)
+(define-method (result->sexp (string <string>)) string)
+(define-method (result->sexp (list <list>)) (map result->sexp list))
+(define-method (result->sexp (kw <keyword>)) kw)
+(define-method (result->sexp (obj <top>)) (object->string obj))
 
 
 

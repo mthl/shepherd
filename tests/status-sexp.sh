@@ -73,22 +73,24 @@ dmd_service_sexp="
       (enabled? #t) (running #t) (last-respawns ()))"
 
 "$GUILE" -c "
-(use-modules (shepherd comm) (srfi srfi-1))
+(use-modules (shepherd comm) (srfi srfi-1) (ice-9 match))
 
 (exit
- (lset= equal? $fetch_status
-	       '(service-list (version 0)
-                  $dmd_service_sexp
-		  (service (version 0)
-		     (provides (foo)) (requires ())
-		     (respawn? #t) (docstring \"Foo!\")
-		     (enabled? #t) (running 42)
-		     (last-respawns ()))
-		  (service (version 0)
-		     (provides (bar)) (requires (foo))
-		     (respawn? #f) (docstring \"Bar!\")
-		     (enabled? #t) (running #f)
-		     (last-respawns ())))))
+ (match $fetch_status
+   (('reply _ ('result (services)) ('error #f) ('messages ()))
+    (lset= equal?
+            services
+	   '($dmd_service_sexp
+	     (service (version 0)
+	       (provides (foo)) (requires ())
+	       (respawn? #t) (docstring \"Foo!\")
+	       (enabled? #t) (running 42)
+	       (last-respawns ()))
+	     (service (version 0)
+	       (provides (bar)) (requires (foo))
+	       (respawn? #f) (docstring \"Bar!\")
+	       (enabled? #t) (running #f)
+	       (last-respawns ())))))))
 "
 
 # Make sure we get an 'error' sexp when querying a nonexistent service.
@@ -98,7 +100,9 @@ dmd_service_sexp="
 (match (let ((sock (open-connection \"$socket\")))
          (write-command (dmd-command 'status 'does-not-exist) sock)
          (read sock))
-  (('error _ ... 'service-not-found 'does-not-exist)
+  (('reply _ ...
+    ('error ('error _ 'service-not-found 'does-not-exist))
+    ('messages ()))
    #t)
   (x
    (pk 'wrong x)
@@ -112,7 +116,10 @@ $herd unload dmd all
 
 (exit
   (equal? $fetch_status
-          '(service-list (version 0) $dmd_service_sexp)))"
+          '(reply
+            (version 0)
+            (result (($dmd_service_sexp)))
+            (error #f) (messages ()))))"
 
 $herd stop dmd
 ! kill -0 $dmd_pid

@@ -76,7 +76,9 @@
             service-error?
             &missing-service-error
             missing-service-error?
-            missing-service-name))
+            missing-service-name
+
+            condition->sexp))
 
 ;; Conveniently create an actions object containing the actions for a
 ;; <service> object.  The current structure is a list of actions,
@@ -183,6 +185,15 @@ respawned, shows that it has been respawned more than TIMES in SECONDS."
   missing-service-error?
   (name missing-service-name))
 
+(define (condition->sexp condition)
+  "Turn the SRFI-35 error CONDITION into an sexp that can be sent over the
+wire."
+  (match condition
+    ((? missing-service-error?)
+     `(error (version 0) service-not-found
+             ,(missing-service-name condition)))
+    ((? service-error?)
+     `(error (version 0) service-error))))
 
 ;; Return the canonical name of the service.
 (define-method (canonical-name (obj <service>))
@@ -323,8 +334,9 @@ respawned, shows that it has been respawned more than TIMES in SECONDS."
 	 (local-output "~a was not running." (canonical-name obj)))
        (start obj))
       ((status)
-       ;; Return the raw sexp and let the client present it nicely.
-       (local-output "~s" (service->sexp obj)))
+       ;; Return the service itself.  It is automatically converted to an sexp
+       ;; via 'result->sexp' and sent to the client.
+       obj)
       (else
        ;; FIXME: Unknown service.
        (local-output "Service ~a does not have a ~a action."
@@ -420,7 +432,7 @@ respawned, shows that it has been respawned more than TIMES in SECONDS."
   (for-each stop (conflicts-with-running obj))
   (apply start obj args))
 
-(define-method (service->sexp (service <service>))
+(define (service->sexp service)
   "Return a representation of SERVICE as an sexp meant to be consumed by
 clients."
   `(service (version 0)                           ;protocol version
@@ -433,6 +445,10 @@ clients."
             (enabled? ,(enabled? service))
             (running ,(slot-ref service 'running))
             (last-respawns ,(slot-ref service 'last-respawns))))
+
+(define-method (result->sexp (service <service>))
+  ;; Serialize SERVICE to an sexp.
+  (service->sexp service))
 
 ;; Return whether OBJ requires something that is not yet running.
 (define-method (depends-resolved? (obj <service>))
@@ -480,8 +496,9 @@ clients."
               (raise (condition (&missing-service-error (name obj))))))
         (apply stop which args))))
 
-;; Perform action THE-ACTION by name.
 (define-method (action (obj <symbol>) the-action . args)
+  "Perform THE-ACTION on all the services named OBJ.  Return the list of
+results."
   (let ((which-services (lookup-running-or-providing obj)))
     (if (null? which-services)
 	(let ((unknown (lookup-running 'unknown)))
@@ -489,17 +506,17 @@ clients."
 		   (defines-action? unknown 'action))
 	      (apply action unknown 'action the-action args)
               (raise (condition (&missing-service-error (name obj))))))
-      (for-each (lambda (s)
-		  (apply (case the-action
-			   ((enable) enable)
-			   ((disable) disable)
-			   ((doc) doc)
-			   (else
-			    (lambda (s . further-args)
-			      (apply action s the-action further-args))))
-			 s
-			 args))
-		which-services))))
+        (map (lambda (s)
+               (apply (case the-action
+                        ((enable) enable)
+                        ((disable) disable)
+                        ((doc) doc)
+                        (else
+                         (lambda (s . further-args)
+                           (apply action s the-action further-args))))
+                      s
+                      args))
+             which-services))))
 
 ;; EINTR-safe versions of 'system' and 'system*'.
 
@@ -1019,10 +1036,8 @@ file when persistence is enabled."
       "Return an s-expression showing information about all the services.
 Clients such as 'herd' can read it and format it in a human-readable way."
       (lambda (running)
-        (local-output "~s~%"
-                      `(service-list
-                        (version 0)               ;protocol version
-                        ,@(map service->sexp (service-list))))))
+        ;; Return the list of services.
+        (service-list)))
 
      ;; Halt.
      (halt
