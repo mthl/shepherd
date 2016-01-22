@@ -51,7 +51,7 @@
             start-logging
             stop-logging
             %current-client-socket
-            dmd-output-port))
+            shepherd-output-port))
 
 
 ;; Command for dmd.
@@ -188,7 +188,7 @@ on service '~a':")
 ;; We provide our own output mechanism, because we have certain
 ;; special needs; most importantly, we want to send output to herd
 ;; sometimes.
-(define (make-dmd-output-port original-output-port)
+(define (make-shepherd-output-port original-output-port)
   (make-soft-port
    (vector
 
@@ -245,5 +245,5 @@ on service '~a':")
    ;; It's an output-only port.
    "w"))
 
-(define dmd-output-port
-  (make-dmd-output-port (current-output-port)))
+(define shepherd-output-port
+  (make-shepherd-output-port (current-output-port)))

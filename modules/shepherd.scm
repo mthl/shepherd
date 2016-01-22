@@ -138,7 +138,7 @@
     (start-logging logfile)
 
     ;; Send output to log and clients.
-    (set-current-output-port dmd-output-port)
+    (set-current-output-port shepherd-output-port)
 
     ;; Start the dmd service.
     (start dmd-service)
