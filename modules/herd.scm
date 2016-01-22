@@ -31,12 +31,19 @@
 
 (define program-name "herd")
 
-
-(define (service-list-error services)
-  (format (current-error-port)
-          (l10n "~a: error: received an invalid service list:~%~s~%")
-          program-name services))
+(define-syntax report-error
+  (lambda (s)
+    "Report an error to stderr."
+    (syntax-case s ()
+      ((_ (p message) args ...)
+       (string? (syntax->datum #'message))
 
+       (with-syntax ((message (string-append
+                               "~a: " (syntax->datum #'message) "~%")))
+         #'(format (current-error-port) message
+                   program-name args ...))))))
+
+
 (define-syntax alist-let*
   (syntax-rules ()
     "Bind the given KEYs in EXP to the corresponding items in ALIST.  ALIST
@@ -132,9 +139,8 @@ the daemon via SOCKET-FILE."
            (for-each display-service-status result))
           (('start _)
            (unless result
-             (format (current-error-port)
-                     (l10n "Failed to start service ~a~%")
-                     service)
+             (report-error (l10n "failed to start service ~a")
+                           service)
              (exit 1)))
           (_
            ;; For other commands, we don't do any interpretation.
@@ -145,31 +151,27 @@ the daemon via SOCKET-FILE."
         (for-each println messages)
         (match error
           (('error ('version 0 _ ...) 'service-not-found service)
-           (format (current-error-port)
-                   (l10n "Service ~a could not be found.~%")
-                   service))
+           (report-error (l10n "service ~a could not be found")
+                         service))
           (('error ('version 0 _ ...) 'action-not-found action service)
-           (format (current-error-port)
-                   (l10n "Service ~a does not have an action ~a.~%")
-                   service action))
+           (report-error (l10n "service ~a does not have an action ~a")
+                         service action))
           (('error ('version 0 _ ...) 'action-exception action service
                    key (args ...))
-           (format (current-error-port)
-                   (l10n "Exception caught while executing '~a' \
-on service '~a':~%")
-                   action service)
+           (report-error (l10n "exception caught while executing '~a' \
+on service '~a':")
+                         action service)
            (print-exception (current-error-port) #f key args))
           (('error . _)
-           (format (current-error-port)
-                   (l10n "Something went wrong: ~s~%")
-                   error)))
+           (report-error (l10n "something went wrong: ~s")
+                         error)))
         (exit 1))
        ((? eof-object?)
         ;; When stopping shepherd, we may get an EOF in lieu of a real reply,
         ;; and that's fine.  In other cases, a premature EOF is an error.
         (unless (and (eq? action 'stop) (eq? service 'dmd))
-          (format (current-error-port)
-                  (l10n "premature end-of-file while talking to shepherd~%"))
+          (report-error (l10n "premature end-of-file while \
+talking to shepherd"))
           (exit 1))))
 
      (close-port sock))))
