@@ -1066,16 +1066,17 @@ as @command{herd} to connect to @command{shepherd} and send it commands to
 control or change its behavior (@pxref{Slots of services, actions of
 services}).
 
-@tindex <dmd-command>
+@tindex <shepherd-command>
 Currently, clients may only send @dfn{commands}, represented by the
-@code{<dmd-command>} type.  Each command specifies a service it applies
-to, an action name, a list of strings to be used as arguments, and a
-working directory.  Commands are instantiated with @code{dmd-command}:
+@code{<shepherd-command>} type.  Each command specifies a service it
+applies to, an action name, a list of strings to be used as arguments,
+and a working directory.  Commands are instantiated with
+@code{shepherd-command}:
 
-@deffn {procedure} dmd-command @var{action} @var{service} @
+@deffn {procedure} shepherd-command @var{action} @var{service} @
          [#:@var{arguments} '()] [#:@var{directory} (getcwd)]
-Return a new command (a @code{<dmd-command>}) object for @var{action} on
-@var{service}.
+Return a new command (a @code{<shepherd-command>}) object for
+@var{action} on @var{service}.
 @end deffn
 
 @noindent

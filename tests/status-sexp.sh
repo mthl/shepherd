@@ -62,7 +62,7 @@ test -S "$socket"
 # Code to fetch service status info.
 fetch_status="
   (let ((sock (open-connection \"$socket\")))
-    (write-command (dmd-command 'status 'dmd) sock)
+    (write-command (shepherd-command 'status 'dmd) sock)
     (read sock))"
 
 dmd_service_sexp="
@@ -98,7 +98,7 @@ dmd_service_sexp="
 (use-modules (shepherd comm) (ice-9 match))
 
 (match (let ((sock (open-connection \"$socket\")))
-         (write-command (dmd-command 'status 'does-not-exist) sock)
+         (write-command (shepherd-command 'status 'does-not-exist) sock)
          (read sock))
   (('reply _ ...
     ('error ('error _ 'service-not-found 'does-not-exist))

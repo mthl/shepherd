@@ -224,9 +224,9 @@
 
 (define (process-command command port)
   "Interpret COMMAND, a command sent by the user, represented as a
-<dmd-command> object.  Send the reply to PORT."
+<shepherd-command> object.  Send the reply to PORT."
   (match command
-    (($ <dmd-command> the-action service-symbol (args ...) dir)
+    (($ <shepherd-command> the-action service-symbol (args ...) dir)
      (chdir dir)
 
      ;; We have to catch `quit' so that we can send the terminator
@@ -283,9 +283,9 @@ would write them on the 'herd' command line."
         (begin
           (match (string-tokenize line)
             ((action service arguments ...)
-             (process-command (dmd-command (string->symbol action)
-                                           (string->symbol service)
-                                           #:arguments arguments)
+             (process-command (shepherd-command (string->symbol action)
+                                                (string->symbol service)
+                                                #:arguments arguments)
                               port))
             (_
              (local-output "invalid command line" line)))

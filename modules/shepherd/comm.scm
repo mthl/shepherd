@@ -25,13 +25,13 @@
   #:use-module (ice-9 match)
   #:export (open-connection
 
-            <dmd-command>
-            dmd-command?
-            dmd-command
-            dmd-command-directory
-            dmd-command-action
-            dmd-command-service
-            dmd-command-arguments
+            <shepherd-command>
+            shepherd-command?
+            shepherd-command
+            shepherd-command-directory
+            shepherd-command-action
+            shepherd-command-service
+            shepherd-command-arguments
 
             <command-reply>
             command-reply
@@ -54,19 +54,19 @@
             shepherd-output-port))
 
 
-;; Command for dmd.
-(define-record-type <dmd-command>
-  (%dmd-command action service args directory)
-  dmd-command?
-  (action    dmd-command-action)                  ; symbol
-  (service   dmd-command-service)                 ; symbol
-  (args      dmd-command-arguments)               ; list of strings
-  (directory dmd-command-directory))              ; directory name
+;; Command for shepherd.
+(define-record-type <shepherd-command>
+  (%shepherd-command action service args directory)
+  shepherd-command?
+  (action    shepherd-command-action)             ; symbol
+  (service   shepherd-command-service)            ; symbol
+  (args      shepherd-command-arguments)          ; list of strings
+  (directory shepherd-command-directory))         ; directory name
 
-(define* (dmd-command action service
-                      #:key (arguments '()) (directory (getcwd)))
+(define* (shepherd-command action service
+                           #:key (arguments '()) (directory (getcwd)))
   "Return a new command for ACTION on SERVICE."
-  (%dmd-command action service arguments directory))
+  (%shepherd-command action service arguments directory))
 
 (define* (open-connection #:optional (file default-socket-file))
   "Open a connection to the daemon, using the Unix-domain socket at FILE, and
@@ -90,24 +90,24 @@ return the socket."
 (define (read-command port)
   "Receive a command from PORT."
   (match (read port)
-    (('dmd-command ('version 0 _ ...)
-                   ('action action)
-                   ('service service)
-                   ('arguments args ...)
-                   ('directory directory))
-     (dmd-command action service
-                  #:arguments args
-                  #:directory directory))))
+    (('shepherd-command ('version 0 _ ...)
+                        ('action action)
+                        ('service service)
+                        ('arguments args ...)
+                        ('directory directory))
+     (shepherd-command action service
+                       #:arguments args
+                       #:directory directory))))
 
 (define (write-command command port)
   "Write COMMAND to PORT."
   (match command
-    (($ <dmd-command> action service (arguments ...) directory)
-     (write `(dmd-command (version 0)             ; protocol version
-                          (action ,action)
-                          (service ,service)
-                          (arguments ,@arguments)
-                          (directory ,directory))
+    (($ <shepherd-command> action service (arguments ...) directory)
+     (write `(shepherd-command (version 0)        ; protocol version
+                               (action ,action)
+                               (service ,service)
+                               (arguments ,@arguments)
+                               (directory ,directory))
             port))))
 
 

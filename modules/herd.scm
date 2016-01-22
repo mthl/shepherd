@@ -92,7 +92,7 @@ the daemon via SOCKET-FILE."
                       'status
                       action)))
      ;; Send the command.
-     (write-command (dmd-command action* service #:arguments args)
+     (write-command (shepherd-command action* service #:arguments args)
                     sock)
 
      ;; Receive output.
