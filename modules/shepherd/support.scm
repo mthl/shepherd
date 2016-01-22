@@ -36,6 +36,8 @@
             l10n
             local-output
             display-version
+            program-name
+            report-error
 
             user-homedir
             default-logfile
@@ -183,12 +185,28 @@ output port, and PROC's result is returned."
     (format #t (gettext format-string) args ...)
     (newline)))
 
-(define* (display-version #:optional (program-name "dmd"))
+(define* (display-version #:optional (program-name (program-name)))
   (local-output "~a (~a) ~a" program-name package-name Version)
   (local-output (l10n "Copyright (C) 2016 the Shepherd authors
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.")))
+
+(define program-name
+  ;; Name of the program currently executing.
+  (make-parameter "shepherd"))
+
+(define-syntax report-error
+  (lambda (s)
+    "Report the given error message to stderr in standard GNU error format."
+    (syntax-case s ()
+      ((_ (p message) args ...)
+       (string? (syntax->datum #'message))
+
+       (with-syntax ((message (string-append
+                               "~a: " (syntax->datum #'message) "~%")))
+         #'(format (current-error-port) message
+                   (program-name) args ...))))))
 
 
 

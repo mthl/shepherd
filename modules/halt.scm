@@ -22,10 +22,7 @@
   #:use-module (shepherd comm)
   #:use-module (oop goops)
   #:use-module (ice-9 rdelim)
-  #:export (program-name
-            main))
-
-(define program-name "halt")
+  #:export (main))
 
 
 
@@ -33,29 +30,30 @@
 (define (main . args)
   (false-if-exception (setlocale LC_ALL ""))
 
-  (let ((socket-file %system-socket-file)
-	(command-args '()))
-    (process-args program-name args
-		  ""
-		  "Halt or power off the system."
-		  not ;; Fail on unknown args.
-		  (make <option>
-		    #:long "socket" #:short #\s
-		    #:takes-arg? #t #:optional-arg? #f #:arg-name "FILE"
-		    #:description "send commands to FILE"
-		    #:action (lambda (file)
-			       (set! socket-file file))))
+  (parameterize ((program-name "halt"))
+    (let ((socket-file %system-socket-file)
+          (command-args '()))
+      (process-args (program-name) args
+                    ""
+                    "Halt or power off the system."
+                    not ;; Fail on unknown args.
+                    (make <option>
+                      #:long "socket" #:short #\s
+                      #:takes-arg? #t #:optional-arg? #f #:arg-name "FILE"
+                      #:description "send commands to FILE"
+                      #:action (lambda (file)
+                                 (set! socket-file file))))
 
-    (set! command-args (reverse command-args))
-    (with-system-error-handling
-     (let ((sock (open-connection socket-file)))
-       ;; Send the command without further ado.
-       (write-command (dmd-command 'power-off 'dmd) sock)
+      (set! command-args (reverse command-args))
+      (with-system-error-handling
+       (let ((sock (open-connection socket-file)))
+         ;; Send the command without further ado.
+         (write-command (dmd-command 'power-off 'dmd) sock)
 
-       ;; Receive output.
-       (setvbuf sock _IOLBF)
-       (let loop ((line (read-line sock)))
-         (unless (eof-object? line)
-           (display line)
-           (newline)
-           (loop (read-line sock))))))))
+         ;; Receive output.
+         (setvbuf sock _IOLBF)
+         (let loop ((line (read-line sock)))
+           (unless (eof-object? line)
+             (display line)
+             (newline)
+             (loop (read-line sock)))))))))

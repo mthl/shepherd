@@ -32,10 +32,7 @@
   #:use-module (shepherd runlevel)
   #:use-module (shepherd args)
   #:use-module (shepherd comm)
-  #:export (program-name
-            main))
-
-(define program-name "shepherd")
+  #:export (main))
 
 
 
@@ -60,7 +57,7 @@
         (secure      #t)
         (logfile     default-logfile))
     ;; Process command line arguments.
-    (process-args program-name args
+    (process-args (program-name) args
 		  ""
 		  "This is a service manager for Unix and GNU."
 		  not ;; Fail on unknown args.

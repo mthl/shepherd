@@ -26,22 +26,7 @@
   #:use-module (ice-9 rdelim)
   #:use-module (ice-9 match)
   #:use-module (srfi srfi-1)
-  #:export (program-name
-            main))
-
-(define program-name "herd")
-
-(define-syntax report-error
-  (lambda (s)
-    "Report an error to stderr."
-    (syntax-case s ()
-      ((_ (p message) args ...)
-       (string? (syntax->datum #'message))
-
-       (with-syntax ((message (string-append
-                               "~a: " (syntax->datum #'message) "~%")))
-         #'(format (current-error-port) message
-                   program-name args ...))))))
+  #:export (main))
 
 
 (define-syntax alist-let*
@@ -121,7 +106,7 @@ the daemon via SOCKET-FILE."
      ;; human-readable way.
      (match (read sock)
        (('reply ('version 0 _ ...)                ;no errors
-                ('result result) (error #f)
+                ('result result) ('error #f)
                 ('messages messages))
         ;; First, display raw messages coming from the daemon.  Since they are
         ;; not translated in the user's locale, they should be avoided!
@@ -181,34 +166,35 @@ talking to shepherd"))
 (define (main . args)
   (false-if-exception (setlocale LC_ALL ""))
 
-  (let ((socket-file default-socket-file)
-	(command-args '()))
-    (process-args program-name args
-		  "ACTION SERVICE [ARG...]"
-		  (string-append
-		   "Apply ACTION (start, stop, status, etc.) on SERVICE"
-		   " with the ARGs.")
-		  (lambda (arg)
-		    ;; Collect unknown args.
-		    (set! command-args (cons arg command-args)))
-		  (make <option>
-		    #:long "socket" #:short #\s
-		    #:takes-arg? #t #:optional-arg? #f #:arg-name "FILE"
-		    #:description "send commands to FILE"
-		    #:action (lambda (file)
-			       (set! socket-file file))))
+  (parameterize ((program-name "herd"))
+    (let ((socket-file default-socket-file)
+          (command-args '()))
+      (process-args (program-name) args
+                    "ACTION SERVICE [ARG...]"
+                    (string-append
+                     "Apply ACTION (start, stop, status, etc.) on SERVICE"
+                     " with the ARGs.")
+                    (lambda (arg)
+                      ;; Collect unknown args.
+                      (set! command-args (cons arg command-args)))
+                    (make <option>
+                      #:long "socket" #:short #\s
+                      #:takes-arg? #t #:optional-arg? #f #:arg-name "FILE"
+                      #:description "send commands to FILE"
+                      #:action (lambda (file)
+                                 (set! socket-file file))))
 
-    (match (reverse command-args)
-      (((and action (or "status" "detailed-status"))) ;one argument
-       (run-command socket-file (string->symbol action) 'dmd '()))
-      ((action service args ...)
-       (run-command socket-file
-                    (string->symbol action)
-                    (string->symbol service) args))
-      (_
-       (format (current-error-port)
-               (l10n "Usage: herd ACTION [SERVICE [OPTIONS...]]~%"))
-       (exit 1)))))
+      (match (reverse command-args)
+        (((and action (or "status" "detailed-status"))) ;one argument
+         (run-command socket-file (string->symbol action) 'dmd '()))
+        ((action service args ...)
+         (run-command socket-file
+                      (string->symbol action)
+                      (string->symbol service) args))
+        (_
+         (format (current-error-port)
+                 (l10n "Usage: herd ACTION [SERVICE [OPTIONS...]]~%"))
+         (exit 1))))))
 
 ;; Local Variables:
 ;; eval: (put 'alist-let* 'scheme-indent-function 2)
