@@ -21,6 +21,7 @@
   #:use-module (shepherd args)
   #:use-module (shepherd comm)
   #:use-module (oop goops)
+  #:use-module (ice-9 match)
   #:use-module (ice-9 rdelim)
   #:export (main))
 
@@ -50,10 +51,14 @@
          ;; Send the command without further ado.
          (write-command (dmd-command 'stop 'dmd) sock)
 
-         ;; Receive output.
-         (setvbuf sock _IOLBF)
-         (let loop ((line (read-line sock)))
-           (unless (eof-object? line)
-             (display line)
-             (newline)
-             (loop (read-line sock)))))))))
+         ;; Receive output if we're not already dead.
+         (match (read sock)
+           (('reply ('version 0 _ ...)
+                    ('result _) ('error error)
+                    ('messages messages))
+            (for-each display-line messages)
+            (when error
+              (report-command-error error)
+              (exit 1)))
+           ((? eof-object?)
+            #t)))))))
