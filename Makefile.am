@@ -140,6 +140,7 @@ SUFFIXES = .go
 TESTS =						\
   tests/basic.sh				\
   tests/respawn.sh				\
+  tests/misbehaved-client.sh			\
   tests/no-home.sh				\
   tests/status-sexp.sh				\
   tests/sigint.sh

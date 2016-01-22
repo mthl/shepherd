@@ -177,6 +177,10 @@
       (lambda _
         (stop dmd-service)))
 
+    ;; Ignore SIGPIPE so that we don't die if a client closes the connection
+    ;; prematurely.
+    (sigaction SIGPIPE SIG_IGN)
+
     (if (not socket-file)
 	;; Get commands from the standard input port.
         (process-textual-commands (current-input-port))
@@ -212,6 +216,7 @@
       ;; Currently we assume one command per connection.
       (false-if-exception (close sock)))
     (lambda args
+      ;; Maybe we got EPIPE while writing to SOCK, or something like that.
       (false-if-exception (close sock)))))
 
 (define %not-newline
