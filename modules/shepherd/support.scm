@@ -38,6 +38,7 @@
             display-version
             program-name
             report-error
+            display-line
 
             user-homedir
             default-logfile
@@ -207,6 +208,11 @@ There is NO WARRANTY, to the extent permitted by law.")))
                                "~a: " (syntax->datum #'message) "~%")))
          #'(format (current-error-port) message
                    (program-name) args ...))))))
+
+(define* (display-line message #:optional (port (current-output-port)))
+  "Display MESSAGE followed by a newline to PORT."
+  (display message port)
+  (newline port))
 
 
 

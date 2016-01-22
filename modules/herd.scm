@@ -83,10 +83,6 @@ of pairs."
            (format #t (l10n "  Will be respawned.~%"))
            (format #t (l10n "  Will not be respawned.~%")))))))
 
-(define (println message)
-  (display message)
-  (newline))
-
 (define (run-command socket-file action service args)
   "Perform ACTION with ARGS on SERVICE, and display the result.  Connect to
 the daemon via SOCKET-FILE."
@@ -110,7 +106,7 @@ the daemon via SOCKET-FILE."
                 ('messages messages))
         ;; First, display raw messages coming from the daemon.  Since they are
         ;; not translated in the user's locale, they should be avoided!
-        (for-each println messages)
+        (for-each display-line messages)
 
         ;; Then interpret the result
         (match (list action service)
@@ -133,7 +129,7 @@ the daemon via SOCKET-FILE."
        (('reply ('version 0 _ ...)                ;an error
                 ('result _) ('error error)
                 ('messages messages))
-        (for-each println messages)
+        (for-each display-line messages)
         (match error
           (('error ('version 0 _ ...) 'service-not-found service)
            (report-error (l10n "service ~a could not be found")
