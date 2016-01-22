@@ -46,6 +46,7 @@
 
             write-reply
             result->sexp
+            report-command-error
 
             start-logging
             stop-logging
@@ -144,6 +145,28 @@ return the socket."
 (define-method (result->sexp (list <list>)) (map result->sexp list))
 (define-method (result->sexp (kw <keyword>)) kw)
 (define-method (result->sexp (obj <top>)) (object->string obj))
+
+(define (report-command-error error)
+  "Report ERROR, an sexp received by a shepherd client in reply to COMMAND, a
+command object."
+  (match error
+    (('error ('version 0 _ ...) 'service-not-found service)
+     (report-error (l10n "service '~a' could not be found")
+                   service))
+    (('error ('version 0 _ ...) 'action-not-found action service)
+     (report-error (l10n "service '~a' does not have an action ~a")
+                   service action))
+    (('error ('version 0 _ ...) 'action-exception action service
+             key (args ...))
+     (report-error (l10n "exception caught while executing '~a' \
+on service '~a':")
+                   action service)
+     (print-exception (current-error-port) #f key args))
+    (('error . _)
+     (report-error (l10n "something went wrong: ~s")
+                   error))
+    (#f                                           ;not an error
+     #t)))
 
 
 

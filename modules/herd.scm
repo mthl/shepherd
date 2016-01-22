@@ -130,22 +130,7 @@ the daemon via SOCKET-FILE."
                 ('result _) ('error error)
                 ('messages messages))
         (for-each display-line messages)
-        (match error
-          (('error ('version 0 _ ...) 'service-not-found service)
-           (report-error (l10n "service ~a could not be found")
-                         service))
-          (('error ('version 0 _ ...) 'action-not-found action service)
-           (report-error (l10n "service ~a does not have an action ~a")
-                         service action))
-          (('error ('version 0 _ ...) 'action-exception action service
-                   key (args ...))
-           (report-error (l10n "exception caught while executing '~a' \
-on service '~a':")
-                         action service)
-           (print-exception (current-error-port) #f key args))
-          (('error . _)
-           (report-error (l10n "something went wrong: ~s")
-                         error)))
+        (report-command-error error)
         (exit 1))
        ((? eof-object?)
         ;; When stopping shepherd, we may get an EOF in lieu of a real reply,
