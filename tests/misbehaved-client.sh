@@ -26,8 +26,8 @@ pid="t-pid-$$"
 
 herd="herd -s $socket"
 
-trap "rm -f $socket $conf $stamp $log $pid;
-      test -f $pid && kill \`cat $pid\` || true" EXIT
+trap "rm -f $socket $conf $stamp $log;
+      test -f $pid && kill \`cat $pid\` || true; rm -f $pid" EXIT
 
 rm -f "$pid"
 shepherd -I -s "$socket" -c /dev/null -l "$log" --pid="$pid" &

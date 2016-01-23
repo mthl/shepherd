@@ -32,8 +32,8 @@ pid="t-pid-$$"
 
 herd="herd -s $socket"
 
-trap "rm -f $socket $pid;
-      test -f $pid && kill \`cat $pid\` || true" EXIT
+trap "rm -f $socket;
+      test -f $pid && kill \`cat $pid\` || true; rm -f $pid" EXIT
 
 # Make sure 'dmd' starts even though $HOME is not writable.
 shepherd -I -s "$socket" -c /dev/null -l /dev/null --pid="$pid" &

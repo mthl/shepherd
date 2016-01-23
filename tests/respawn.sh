@@ -30,8 +30,8 @@ pid="t-pid-$$"
 herd="herd -s $socket"
 
 trap "cat $log || true ;
-  rm -f $socket $conf $stamp $log $pid $service1_pid $service2_pid ;
-  test -f $pid && kill \`cat $pid\` || true ;
+  rm -f $socket $conf $stamp $log ;
+  test -f $pid && kill \`cat $pid\` || true ; rm -f $pid ;
   test -f $service1_pid && kill \`cat $service1_pid\` || true ;
   test -f $service2_pid && kill \`cat $service2_pid\` || true ;
   rm -f $service1_pid $service2_pid" EXIT

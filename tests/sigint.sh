@@ -1,5 +1,5 @@
 # GNU Shepherd --- Make sure SIGINT is correctly handled.
-# Copyright © 2014 Ludovic Courtès <ludo@gnu.org>
+# Copyright © 2014, 2016 Ludovic Courtès <ludo@gnu.org>
 #
 # This file is part of the GNU Shepherd.
 #
@@ -26,8 +26,8 @@ pid="t-pid-$$"
 
 herd="herd -s $socket"
 
-trap "rm -f $socket $conf $stamp $pid;
-      test -f $pid && kill \`cat $pid\` || true" EXIT
+trap "rm -f $socket $conf $stamp;
+      test -f $pid && kill \`cat $pid\` || true; rm -f $pid" EXIT
 
 cat > "$conf"<<EOF
 (use-modules (srfi srfi-26))
