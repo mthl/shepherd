@@ -40,6 +40,14 @@ dmd_pid="`cat $pid`"
 "$GUILE" -c "
 (use-modules (shepherd comm))
 
+;; Close without even talking.
+(close-port (open-connection \"$socket\"))"
+
+$herd status			# still here?
+
+"$GUILE" -c "
+(use-modules (shepherd comm))
+
 (let ((sock (open-connection \"$socket\")))
   (setvbuf sock _IOFBF 5000)
   (write-command (shepherd-command 'status 'dmd) sock)

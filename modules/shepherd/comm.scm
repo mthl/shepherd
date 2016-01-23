@@ -88,7 +88,7 @@ return the socket."
       sock)))
 
 (define (read-command port)
-  "Receive a command from PORT."
+  "Receive a command from PORT; return the command the EOF object."
   (match (read port)
     (('shepherd-command ('version 0 _ ...)
                         ('action action)
@@ -97,7 +97,9 @@ return the socket."
                         ('directory directory))
      (shepherd-command action service
                        #:arguments args
-                       #:directory directory))))
+                       #:directory directory))
+    ((? eof-object? eof)
+     eof)))
 
 (define (write-command command port)
   "Write COMMAND to PORT."

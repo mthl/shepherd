@@ -212,7 +212,12 @@
   "Process client connection SOCK, reading and processing commands."
   (catch 'system-error
     (lambda ()
-      (process-command (read-command sock) sock)
+      (match (read-command sock)
+        ((? shepherd-command? command)
+         (process-command command sock))
+        ((? eof-object?)
+         #f))
+
       ;; Currently we assume one command per connection.
       (false-if-exception (close sock)))
     (lambda args
