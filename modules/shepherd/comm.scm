@@ -101,7 +101,7 @@ wrong---premature end-of-file, invalid sexp, etc."
          (shepherd-command action service
                            #:arguments args
                            #:directory directory))
-        ((? eof-object? eof)
+        (_                                        ;EOF or unmatched sexp
          #f)))
     (lambda _
       ;; Invalid sexp.

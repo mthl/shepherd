@@ -58,6 +58,15 @@ $herd status			# still here?
 "$GUILE" -c "
 (use-modules (shepherd comm))
 
+;; Send an unrecognized sexp.
+(let ((sock (open-connection \"$socket\")))
+  (display \"(hi there)\" sock))"
+
+$herd status			# still here?
+
+"$GUILE" -c "
+(use-modules (shepherd comm))
+
 (let ((sock (open-connection \"$socket\")))
   (setvbuf sock _IOFBF 5000)
   (write-command (shepherd-command 'status 'dmd) sock)
