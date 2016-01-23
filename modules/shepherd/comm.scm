@@ -162,7 +162,7 @@ command object."
      (report-error (l10n "service '~a' could not be found")
                    service))
     (('error ('version 0 _ ...) 'action-not-found action service)
-     (report-error (l10n "service '~a' does not have an action ~a")
+     (report-error (l10n "service '~a' does not have an action '~a'")
                    service action))
     (('error ('version 0 _ ...) 'action-exception action service
              key (args ...))
