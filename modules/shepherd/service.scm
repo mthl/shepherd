@@ -426,14 +426,13 @@ wire."
        ;; Display documentation of given actions.
        (for-each
 	(lambda (the-action)
-	  (local-output "~a: ~a"
-			the-action
-			(let ((action-object
-			       (lookup-action obj
-					      (string->symbol the-action))))
-			  (if action-object
-			      (action:doc action-object)
-                              (gettext "This action does not exist.")))))
+          (let ((action-object
+                 (lookup-action obj (string->symbol the-action))))
+            (unless action-object
+              (raise (condition (&unknown-action-error
+                                 (action the-action)
+                                 (service obj)))))
+            (local-output "~a: ~a" the-action (action:doc action-object))))
         (cdr args)))
       ((list-actions)
        (local-output "~a ~a"

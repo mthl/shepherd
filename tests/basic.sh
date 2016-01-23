@@ -104,6 +104,11 @@ then false; else true; fi
 if $herd status dmd foo bar baz;
 then false; else true; fi
 
+# Asking for the doc of specific actions.
+$herd doc dmd action status
+if $herd doc dmd action an-action-that-does-not-exist
+then false; else true; fi
+
 # Loading nonexistent file.
 if $herd load dmd /does/not/exist.scm;
 then false; else true; fi
