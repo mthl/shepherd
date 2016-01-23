@@ -88,18 +88,24 @@ return the socket."
       sock)))
 
 (define (read-command port)
-  "Receive a command from PORT; return the command the EOF object."
-  (match (read port)
-    (('shepherd-command ('version 0 _ ...)
-                        ('action action)
-                        ('service service)
-                        ('arguments args ...)
-                        ('directory directory))
-     (shepherd-command action service
-                       #:arguments args
-                       #:directory directory))
-    ((? eof-object? eof)
-     eof)))
+  "Receive a command from PORT; return the command of #f if something went
+wrong---premature end-of-file, invalid sexp, etc."
+  (catch 'read-error
+    (lambda ()
+      (match (read port)
+        (('shepherd-command ('version 0 _ ...)
+                            ('action action)
+                            ('service service)
+                            ('arguments args ...)
+                            ('directory directory))
+         (shepherd-command action service
+                           #:arguments args
+                           #:directory directory))
+        ((? eof-object? eof)
+         #f)))
+    (lambda _
+      ;; Invalid sexp.
+      #f)))
 
 (define (write-command command port)
   "Write COMMAND to PORT."

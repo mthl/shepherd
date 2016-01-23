@@ -48,6 +48,16 @@ $herd status			# still here?
 "$GUILE" -c "
 (use-modules (shepherd comm))
 
+;; Send an unbalanced sexp, then quit.
+(let ((sock (open-connection \"$socket\")))
+  (display \"(ah ha!\" sock)
+  (close-port sock))"
+
+$herd status			# still here?
+
+"$GUILE" -c "
+(use-modules (shepherd comm))
+
 (let ((sock (open-connection \"$socket\")))
   (setvbuf sock _IOFBF 5000)
   (write-command (shepherd-command 'status 'dmd) sock)

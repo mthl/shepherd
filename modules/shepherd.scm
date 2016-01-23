@@ -215,7 +215,7 @@
       (match (read-command sock)
         ((? shepherd-command? command)
          (process-command command sock))
-        ((? eof-object?)
+        (#f                                    ;failed to read a valid command
          #f))
 
       ;; Currently we assume one command per connection.
