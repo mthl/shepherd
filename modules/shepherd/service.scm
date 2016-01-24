@@ -25,6 +25,7 @@
   #:use-module (srfi srfi-26)
   #:use-module (srfi srfi-34)
   #:use-module (srfi srfi-35)
+  #:use-module (rnrs io ports)
   #:use-module (ice-9 match)
   #:use-module (ice-9 format)
   #:use-module (shepherd support)
@@ -66,6 +67,7 @@
             make-kill-destructor
             exec-command
             fork+exec-command
+            read-pid-file
             make-system-constructor
             make-system-destructor
             make-init.d-service
@@ -636,6 +638,29 @@ results."
 set when starting a service."
   (environ))
 
+(define* (read-pid-file file #:key (max-delay 5))
+  "Wait for MAX-DELAY seconds for FILE to show up, and read its content as a
+number.  Return #f if FILE does not contain a number; otherwise return the
+number that was read (a PID)."
+  (define start (current-time))
+  (let loop ()
+    (catch 'system-error
+      (lambda ()
+        (string->number
+         (string-trim-both
+          (call-with-input-file file get-string-all))))
+      (lambda args
+        (let ((errno (system-error-errno args)))
+          (if (and (= ENOENT errno)
+                   (< (current-time) (+ start max-delay)))
+              (begin
+                ;; FILE does not exist yet, so wait and try again.
+                ;; XXX: Ideally we would yield to the main event loop
+                ;; and/or use inotify.
+                (sleep 1)
+                (loop))
+              (apply throw args)))))))
+
 (define* (exec-command command
                        #:key
                        (user #f)
@@ -735,27 +760,46 @@ its PID."
             "This 'make-forkexec-constructor' form is deprecated; use
  (make-forkexec-constructor '(\"PROGRAM\" \"ARGS\"...)."))))
     (case-lambda*
-     "Produce a constructor that execs COMMAND, a program name/argument list,
-in a child process and returns its PID.  COMMAND is started with
-DIRECTORY as its current directory, and ENVIRONMENT-VARIABLES as its
-environment variables.  If USER and/or GROUP are given, switch to the
-given USER and/or GROUP to run COMMAND."
+     "Return a procedure that forks a child process, closes all file
+descriptors except the standard output and standard error descriptors, sets
+the current directory to @var{directory}, changes the environment to
+@var{environment-variables} (using the @code{environ} procedure), sets the
+current user to @var{user} and the current group to @var{group} unless they
+are @code{#f}, and executes @var{command} (a list of strings.)  The result of
+the procedure will be the PID of the child process.
+
+When @var{pid-file} is true, it must be the name of a PID file associated with
+the process being launched; the return value is the PID read from that file,
+once that file has been created."
      ((command #:key
                (user #f)
                (group #f)
                (directory (default-service-directory))
-               (environment-variables (default-environment-variables)))
+               (environment-variables (default-environment-variables))
+               (pid-file #f))
       (let ((command (if (string? command)
                          (begin
                            (warn-deprecated-form)
                            (list command))
                          command)))
         (lambda args
-          (fork+exec-command command
-                             #:user user
-                             #:group group
-                             #:directory directory
-                             #:environment-variables environment-variables))))
+          (when pid-file
+            (catch 'system-error
+              (lambda ()
+                (delete-file pid-file))
+              (lambda args
+                (unless (= ENOENT (system-error-errno args))
+                  (apply throw args)))))
+
+          (let ((pid (fork+exec-command command
+                                        #:user user
+                                        #:group group
+                                        #:directory directory
+                                        #:environment-variables
+                                        environment-variables)))
+            (if pid-file
+                (read-pid-file pid-file)
+                pid)))))
      ((program . program-args)
       ;; The old form, documented until 0.1 included.
       (warn-deprecated-form)

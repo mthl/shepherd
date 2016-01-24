@@ -73,12 +73,15 @@ cat > "$conf"<<EOF
  (make <service>
    #:provides '(test2)
    #:start (make-forkexec-constructor
+            ;; The 'sleep' below is just to make it more likely
+            ;; that synchronization issues in handling #:pid-file
+            ;; would be caught.
 	    '("$SHELL" "-c"
-	      "echo \$\$ > $PWD/$service2_pid ; while true ; do sleep 1 ; done"))
+	      "sleep 0.7 ; echo \$\$ > $PWD/$service2_pid ; while true ; do sleep 1 ; done")
+            #:pid-file "$PWD/$service2_pid")
    #:stop  (make-kill-destructor)
    #:respawn? #t))
 (start 'test1)
-(start 'test2)
 EOF
 
 rm -f "$pid"
@@ -93,13 +96,16 @@ kill -0 $dmd_pid
 test -S "$socket"
 $herd status
 $herd status test1 | grep started
+
+$herd start test2
 $herd status test2 | grep started
 
-# The services are started, but that does not mean that they have
-# written their PID file yet, so use 'wait_for_file' rather than
-# 'test -f'.
+# When 'herd start test2' returns, the PID file must already be created.
+test -f "$service2_pid"
+
+# Conversely, 'test1' may not have written its PID file yet, so use
+# 'wait_for_file' rather than 'test -f'.
 wait_for_file "$service1_pid"
-wait_for_file "$service2_pid"
 
 # Make sure the PIDs are valid.
 kill -0 `cat "$service1_pid"`

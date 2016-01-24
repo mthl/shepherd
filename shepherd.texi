@@ -833,15 +833,20 @@ execution of the @var{command} was successful, @code{#t} if not.
 @deffn {procedure} make-forkexec-constructor @var{command} @
   [#:user #f] @
   [#:group #f] @
+  [#:pid-file #f] @
   [#:directory (default-service-directory)] @
   [#:environment-variables (default-environment-variables)]
-Return a procedure that forks a child process, close all file
-descriptors except the standard output and standard error descriptors,
-sets the current directory to @var{directory}, changes the environment
-to @var{environment-variables} (using the @code{environ} procedure),
-sets the current user to @var{user} and the current group to
-@var{group}, and executes @var{command} (a list of strings.)  The
-result of the procedure will be the PID of the child process.
+Return a procedure that forks a child process, closes all file
+descriptors except the standard output and standard error descriptors, sets
+the current directory to @var{directory}, changes the environment to
+@var{environment-variables} (using the @code{environ} procedure), sets the
+current user to @var{user} and the current group to @var{group} unless they
+are @code{#f}, and executes @var{command} (a list of strings.)  The result of
+the procedure will be the PID of the child process.
+
+When @var{pid-file} is true, it must be the name of a PID file
+associated with the process being launched; the return value is the PID
+read from that file, once that file has been created.
 @end deffn
 
 @deffn {procedure} make-kill-destructor [@var{signal}]
