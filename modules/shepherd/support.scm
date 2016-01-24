@@ -247,8 +247,8 @@ TARGET should be a string representing a filepath + name."
 ;; providing them as arguments to 'register-services'.
 ""(register-services)
 
-;; Send dmd into the background
-""(action 'dmd 'daemonize)
+;; Send shepherd into the background
+""(action 'shepherd 'daemonize)
 
 ;; Services to start when dmd starts:
 ;; Add the name of each service that should be started to the list

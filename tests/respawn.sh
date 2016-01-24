@@ -122,4 +122,4 @@ $herd status test1 | grep stopped
 ! kill -0 "$pid"
 
 cat $service2_pid
-$herd stop dmd
+$herd stop root

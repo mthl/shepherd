@@ -62,14 +62,15 @@ test -S "$socket"
 # Code to fetch service status info.
 fetch_status="
   (let ((sock (open-connection \"$socket\")))
-    (write-command (shepherd-command 'status 'dmd) sock)
+    (write-command (shepherd-command 'status 'root) sock)
     (read sock))"
 
-dmd_service_sexp="
+root_service_sexp="
    (service (version 0)
-      (provides (dmd)) (requires ())
+      (provides (root shepherd))
+      (requires ())
       (respawn? #f)
-      (docstring \"The dmd service is used to operate on dmd itself.\")
+      (docstring \"The root service is used to operate on shepherd itself.\")
       (enabled? #t) (running #t) (last-respawns ()))"
 
 "$GUILE" -c "
@@ -80,7 +81,7 @@ dmd_service_sexp="
    (('reply _ ('result (services)) ('error #f) ('messages ()))
     (lset= equal?
             services
-	   '($dmd_service_sexp
+	   '($root_service_sexp
 	     (service (version 0)
 	       (provides (foo)) (requires ())
 	       (respawn? #t) (docstring \"Foo!\")
@@ -108,8 +109,8 @@ dmd_service_sexp="
    (pk 'wrong x)
    (exit 1)))"
 
-# Unload everything and make sure only 'dmd' is left.
-$herd unload dmd all
+# Unload everything and make sure only 'root' is left.
+$herd unload root all
 
 "$GUILE" -c "
 (use-modules (shepherd comm))
@@ -118,10 +119,10 @@ $herd unload dmd all
   (equal? $fetch_status
           '(reply
             (version 0)
-            (result (($dmd_service_sexp)))
+            (result (($root_service_sexp)))
             (error #f) (messages ()))))"
 
-$herd stop dmd
+$herd stop root
 ! kill -0 $dmd_pid
 
 test -f "$log"

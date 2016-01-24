@@ -67,8 +67,8 @@ dmd_pid="`cat $pid`"
 
 kill -0 $dmd_pid
 test -S "$socket"
-pristine_status=`$herd status dmd` # Prep for 'reload' test.
-echo $pristine_status | grep -E '(Start.*dmd|Stop.*test)'
+pristine_status=`$herd status root` # Prep for 'reload' test.
+echo $pristine_status | grep -E '(Start.*root|Stop.*test)'
 
 $herd start test
 test -f "$stamp"
@@ -97,35 +97,35 @@ do
     $herd $action does-not-exist 2>&1 | grep "does-not-exist.*not.*found"
 done
 
-if $herd an-action-that-does-not-exist dmd
+if $herd an-action-that-does-not-exist root
 then false; else true; fi
 
 # Wrong number of arguments for an action.
-if $herd status dmd foo bar baz;
+if $herd status root foo bar baz;
 then false; else true; fi
 
 # Asking for the doc of specific actions.
-$herd doc dmd action status
-if $herd doc dmd action an-action-that-does-not-exist
+$herd doc root action status
+if $herd doc root action an-action-that-does-not-exist
 then false; else true; fi
 
 # Loading nonexistent file.
-if $herd load dmd /does/not/exist.scm;
+if $herd load root /does/not/exist.scm;
 then false; else true; fi
 
 # Unload one service, make sure the other it still around.
-$herd unload dmd test
+$herd unload root test
 $herd status | grep "Stopped: (test-2)"
 
-$herd reload dmd "$conf"
+$herd reload root "$conf"
 test "`$herd status`" == "$pristine_status"
 
-# Unload everything and make sure only 'dmd' is left.
-$herd unload dmd all
+# Unload everything and make sure only 'root' is left.
+$herd unload root all
 $herd status | grep "Stopped: ()"
-$herd status | grep "Started: (dmd)"
+$herd status | grep "Started: (root)"
 
-$herd stop dmd
+$herd stop root
 ! kill -0 $dmd_pid
 
 test -f "$log"
@@ -154,7 +154,7 @@ $herd stop test
 
 dmd_pid="`cat $pid`"
 
-$herd stop dmd
+$herd stop root
 ! kill -0 $dmd_pid
 
 rm -rf $confdir

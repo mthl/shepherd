@@ -88,7 +88,8 @@ of pairs."
 the daemon via SOCKET-FILE."
   (with-system-error-handling
    (let ((sock    (open-connection socket-file))
-         (action* (if (and (eq? service 'dmd) (eq? action 'detailed-status))
+         (action* (if (and (eq? action 'detailed-status)
+                           (memq service '(root shepherd)))
                       'status
                       action)))
      ;; Send the command.
@@ -110,9 +111,9 @@ the daemon via SOCKET-FILE."
 
         ;; Then interpret the result
         (match (list action service)
-          (('status 'dmd)
+          (('status (or 'root 'shepherd))
            (display-status-summary (first result)))
-          (('detailed-status 'dmd)
+          (('detailed-status (or 'root 'shepherd))
            (display-detailed-status (first result)))
           (('status _)
            ;; We get a list of statuses, in case several services have the
@@ -135,7 +136,8 @@ the daemon via SOCKET-FILE."
        ((? eof-object?)
         ;; When stopping shepherd, we may get an EOF in lieu of a real reply,
         ;; and that's fine.  In other cases, a premature EOF is an error.
-        (unless (and (eq? action 'stop) (eq? service 'dmd))
+        (unless (and (eq? action 'stop)
+                     (memq service '(root shepherd)))
           (report-error (l10n "premature end-of-file while \
 talking to shepherd"))
           (exit 1))))
@@ -167,7 +169,7 @@ talking to shepherd"))
 
       (match (reverse command-args)
         (((and action (or "status" "detailed-status"))) ;one argument
-         (run-command socket-file (string->symbol action) 'dmd '()))
+         (run-command socket-file (string->symbol action) 'root '()))
         ((action service args ...)
          (run-command socket-file
                       (string->symbol action)

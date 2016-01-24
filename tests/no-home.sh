@@ -43,8 +43,8 @@ dmd_pid="$!"
 while ! test -f "$pid" ; do kill -0 "$dmd_pid" ; sleep 0.3 ; done
 
 kill -0 `cat "$pid"`
-$herd status dmd
-$herd stop dmd
+$herd status root
+$herd stop root
 
 if kill `cat "$pid"`
 then

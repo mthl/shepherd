@@ -70,7 +70,7 @@
             make-system-destructor
             make-init.d-service
 
-            dmd-service
+            root-service
             make-actions
 
             &service-error
@@ -344,8 +344,8 @@ wire."
                           (slot-ref obj 'running)
                           args))
                  (lambda (key . args)
-                   ;; Special case: `dmd' may quit.
-                   (and (eq? dmd-service obj)
+                   ;; Special case: 'root' may quit.
+                   (and (eq? root-service obj)
                         (eq? key 'quit)
                         (apply quit args))
                    (caught-error key args)))
@@ -405,8 +405,8 @@ wire."
              (lambda ()
                (apply proc (slot-ref obj 'running) args))
              (lambda (key . args)
-               ;; Special case: `dmd' may quit.
-               (and (eq? dmd-service obj)
+               ;; Special case: 'root' may quit.
+               (and (eq? root-service obj)
                     (eq? key 'quit)
                     (apply quit args))
                (report-exception the-action obj key args)))))))
@@ -441,7 +441,7 @@ wire."
 		     (action-list obj)))
       (else
        ;; FIXME: Implement doc-help.
-       (local-output "Unknown keyword.  Try `doc dmd help'.")))))
+       (local-output "Unknown keyword.  Try 'doc root help'.")))))
 
 ;; Return a list of canonical names of the services that conflict with
 ;; OBJ.
@@ -947,7 +947,7 @@ otherwise by updating its state."
 (define (deregister-service service-name)
   "For each string in SERVICE-NAME, stop the associated service if
 necessary and remove it from the services table.  If SERVICE-NAME is
-the special string 'all', remove all services except for dmd.
+the special string 'all', remove all services except of 'root'.
 
 This will remove a service either if it is identified by its canonical
 name, or if it is the only service providing the service that is
@@ -978,7 +978,7 @@ requested to be removed."
                (match value
                  ((service)     ; only one service associated with KEY
                   (and (eq? key (canonical-name service))
-                       (not (eq? key 'dmd))
+                       (not (memq key '(root shepherd)))
                        (cons key service)))
                  (_ #f)))               ; all other cases: #f.
              %services)))
@@ -1029,7 +1029,7 @@ requested to be removed."
 
 
 
-;; The `dmd' service.
+;; The 'root' service.
 
 (define (shutdown-services)
   "Shut down all the currently running services; update the persistent state
@@ -1049,10 +1049,10 @@ file when persistence is enabled."
         (lambda (p)
           (format p "~{~a ~}~%" running-services))))))
 
-(define dmd-service
+(define root-service
   (make <service>
-    #:docstring "The dmd service is used to operate on dmd itself."
-    #:provides '(dmd)
+    #:docstring "The root service is used to operate on shepherd itself."
+    #:provides '(root shepherd)
     #:requires '()
     #:respawn #f
     #:start (lambda args
@@ -1060,9 +1060,9 @@ file when persistence is enabled."
                 (display-version))
 	      #t)
     #:stop (lambda (unused . args)
-	     (local-output "Exiting dmd...")
+	     (local-output "Exiting shepherd...")
 	     ;; Prevent that we try to stop ourself again.
-	     (slot-set! dmd-service 'running #f)
+	     (slot-set! root-service 'running #f)
              (shutdown-services)
 	     (quit))
     ;; All actions here need to take care that they do not invoke any
@@ -1082,7 +1082,7 @@ Clients such as 'herd' can read it and format it in a human-readable way."
       "Halt the system."
       (lambda (running)
         (catch 'quit
-          (cut stop dmd-service)
+          (cut stop root-service)
           (lambda (key)
             (local-output "Halting...")
             (halt)))))
@@ -1091,25 +1091,25 @@ Clients such as 'herd' can read it and format it in a human-readable way."
       "Halt the system and turn it off."
       (lambda (running)
         (catch 'quit
-          (cut stop dmd-service)
+          (cut stop root-service)
           (lambda (key)
             (local-output "Shutting down...")
             (power-off)))))
      ;; Load a configuration file.
      (load
-      "Load the Scheme code from FILE into dmd.  This is potentially
+      "Load the Scheme code from FILE into shepherd.  This is potentially
 dangerous.  You have been warned."
       (lambda (running file-name)
         (load-config file-name)))
      ;; Unload a service
      (unload
       "Unload the service identified by SERVICE-NAME or all services
-except for dmd if SERVICE-NAME is 'all'.  Stop services before
+except for 'root' if SERVICE-NAME is 'all'.  Stop services before
 removing them if needed."
       (lambda (running service-name)
         (deregister-service service-name)))
      (reload
-      "Unload all services, then load from FILE-NAME into dmd.  This
+      "Unload all services, then load from FILE-NAME into shepherd.  This
 is potentialy dangerous.  You have been warned."
       (lambda (running file-name)
         (and (deregister-service "all") ; unload all services
@@ -1117,7 +1117,7 @@ is potentialy dangerous.  You have been warned."
      ;; Go into the background.
      (daemonize
       "Go into the background.  Be careful, this means that a new
-process will be created, so dmd will not get SIGCHLD signals anymore
+process will be created, so shepherd will not get SIGCHLD signals anymore
 if previously spawned childs terminate.  Therefore, this action should
 usually only be used (if at all) *before* childs get spawned for which
 we want to receive these signals."
@@ -1143,7 +1143,7 @@ name as argument that will be used to store the status."
       (lambda (running)
 	(set! persistency #f)))
      (cd
-      "Change the working directory of dmd.  This only makes sense
+      "Change the working directory of shepherd.  This only makes sense
 when in interactive mode, i.e. with `--socket=none'."
       (lambda (running dir)
 	(chdir dir)))
@@ -1151,8 +1151,8 @@ when in interactive mode, i.e. with `--socket=none'."
      ;; we're better off by implementing it due to the
      ;; default action.
      (restart
-      "This does not work for dmd."
+      "This does not work for the 'root' service."
       (lambda (running)
 	(local-output "You must be kidding."))))))
 
-(register-services dmd-service)
+(register-services root-service)

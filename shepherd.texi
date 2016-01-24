@@ -278,19 +278,19 @@ of the additional actions a service provides; obviously, it can also
 be called when the service is not running.  Services cannot provide
 their own implementation of @code{list-actions}.
 
-A special service is @code{dmd}, which is used for controlling the Shepherd
-itself.  It implements various actions.  For example, the
-@code{status} action displays which services are started and which
-ones are stopped, whereas @code{detailed-status} has the effect of
-applying the default implementation of @code{status} to all services
-one after another.  The @code{load}
-action is unusual insofar as it shows a feature that is actually
-available to all services, but which we have not seen yet: It takes an
-additional argument.  You can use @code{load} to load arbitrary code
-into the Shepherd at runtime, like this:
+A special service is @code{root}, which is used for controlling the
+Shepherd itself.  You can also reference to this service as
+@code{shepherd}.  It implements various actions.  For example, the
+@code{status} action displays which services are started and which ones
+are stopped, whereas @code{detailed-status} has the effect of applying
+the default implementation of @code{status} to all services one after
+another.  The @code{load} action is unusual insofar as it shows a
+feature that is actually available to all services, but which we have
+not seen yet: It takes an additional argument.  You can use @code{load}
+to load arbitrary code into the Shepherd at runtime, like this:
 
 @example
-herd load dmd ~/additional-services.scm
+herd load shepherd ~/additional-services.scm
 @end example
 
 This is enough now about the @command{herd} and @command{shepherd} programs, we
@@ -322,7 +322,8 @@ You can display the status of a service, even if the service does not
 provide a specific implementation for this action.  The same is true
 for restarting.
 @item
-The @code{dmd} service is used to control @command{shepherd} itself.
+The @code{root}/@code{shepherd} service is used to control
+@command{shepherd} itself.
 @end itemize
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -446,11 +447,11 @@ herd [@var{option}@dots{}] @var{action} [@var{service} [@var{arg}@dots{}]]
 
 It causes the @var{action} of the @var{service} to be invoked.  When
 @var{service} is omitted and @var{action} is @code{status} or
-@code{detailed-status}, the @code{dmd} service is used@footnote{This
+@code{detailed-status}, the @code{root} service is used@footnote{This
 shorthand does not work for other actions such as @code{stop}, because
 inadvertently typing @code{herd stop} would stop all the services, which
-could be pretty annoying.} (@pxref{The dmd and unknown services}, for
-more information on the @code{dmd} service.)
+could be pretty annoying.} (@pxref{The root and unknown services}, for
+more information on the @code{root} service.)
 
 For each action, you should pass the appropriate @var{arg}s.  Actions
 that are available for every service are @code{start}, @code{stop},
@@ -492,8 +493,8 @@ reboot the system.  It has the following synopsis:
 reboot [@var{option}@dots{}]
 @end example
 
-It is equivalent to running @command{herd stop dmd}.  The @code{reboot}
-command understands the following option:
+It is equivalent to running @command{herd stop shepherd}.  The
+@code{reboot} command understands the following option:
 
 @table @samp
 
@@ -518,8 +519,8 @@ off the system.  It has the following synopsis:
 halt [@var{option}@dots{}]
 @end example
 
-It is equivalent to running @command{herd power-off dmd}.  As usual, the
-@code{halt} command understands the following option:
+It is equivalent to running @command{herd power-off shepherd}.  As
+usual, the @code{halt} command understands the following option:
 
 @table @samp
 
@@ -555,7 +556,7 @@ defined in the @code{(shepherd service)} module.
 * Service De- and Constructors:: Commonly used ways of starting and
                                    stopping services.
 * Service Examples::             Examples that show how services are used.
-* The dmd and unknown services:: Special services in the Shepherd.
+* The root and unknown services:: Special services in the Shepherd.
 @end menu
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -749,7 +750,7 @@ terminates.
 Display status information about @var{obj}.  This method is called
 when the user performs the action @code{status} on @var{obj}, but
 there is no specific implementation given for it.  It is also called
-when @code{detailed-status} is applied on @code{dmd}.
+when @code{detailed-status} is applied on the @code{root} service.
 @end deffn
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -917,15 +918,15 @@ also specifies some more initial values for the slots:
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-@node The dmd and unknown services
-@section The @code{dmd} and @code{unknown} services
+@node The root and unknown services
+@section The @code{root} and @code{unknown} services
 
-@cindex dmd service
+@cindex root service
 @cindex special services
-The service @code{dmd} is special, because it is used to control the Shepherd
-itself.  It provides the following actions (in addition to
-@code{enable}, @code{disable} and @code{restart} which do not make
-sense here).
+The service @code{root} is special, because it is used to control the
+Shepherd itself.  It has an alias @code{shepherd}.  It provides the
+following actions (in addition to @code{enable}, @code{disable} and
+@code{restart} which do not make sense here).
 
 @table @code
 @item status

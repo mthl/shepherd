@@ -140,8 +140,8 @@
     ;; Send output to log and clients.
     (set-current-output-port shepherd-output-port)
 
-    ;; Start the dmd service.
-    (start dmd-service)
+    ;; Start the 'root' service.
+    (start root-service)
     ;; This _must_ succeed.  (We could also put the `catch' around
     ;; `main', but it is often useful to get the backtrace, and
     ;; `caught-error' does not do this yet.)
@@ -175,7 +175,7 @@
     ;; ctrlaltdel(8).
     (sigaction SIGINT
       (lambda _
-        (stop dmd-service)))
+        (stop root-service)))
 
     ;; Ignore SIGPIPE so that we don't die if a client closes the connection
     ;; prematurely.
@@ -267,7 +267,7 @@
                           port))))
        (lambda (key)
          ;; Most likely we're receiving 'quit' from the 'stop' method of
-         ;; DMD-SERVICE.  So, if we're running as 'root', just reboot.
+         ;; ROOT-SERVICE.  So, if we're running as 'root', just reboot.
          (if (zero? (getuid))
              (begin
                (local-output "Rebooting...")
@@ -283,7 +283,7 @@ would write them on the 'herd' command line."
     (if (eof-object? line)
 
         ;; Exit on `C-d'.
-        (stop dmd-service)
+        (stop root-service)
 
         (begin
           (match (string-tokenize line)
