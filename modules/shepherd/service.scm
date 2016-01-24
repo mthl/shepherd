@@ -845,9 +845,8 @@ Return #f if service is not found."
                 %services)
      #f)))
 
-;; Lookup the services that provide NAME.  Returns a (possibly empty)
-;; list of those.
 (define (lookup-services name)
+  "Return a (possibly empty) list of services that provide NAME."
   (hashq-ref %services name '()))
 
 (define waitpid*
