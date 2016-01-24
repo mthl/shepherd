@@ -806,7 +806,7 @@ given USER and/or GROUP to run COMMAND."
 ;;; Registered services.
 
 ;; All registered services.
-(define services (make-hash-table 75))
+(define %services (make-hash-table 75))
 
 ;;; Perform actions with services:
 
@@ -816,14 +816,14 @@ given USER and/or GROUP to run COMMAND."
 	       (and (eq? key (canonical-name (car value)))
 		    (proc (car value))))
 	     #f ;; Unused
-	     services))
+	     %services))
 
 (define (service-list)
   "Return the list of services currently defined."
   (hash-fold (lambda (key services result)
                (append services result))
              '()
-             services))
+             %services))
 
 (define (find-service pred)
   "Return the first service that matches PRED, or #f if none was found."
@@ -833,13 +833,13 @@ given USER and/or GROUP to run COMMAND."
                   (and=> (find pred services)
                          return))
                 #f
-                services)
+                %services)
      #f)))
 
 ;; Lookup the services that provide NAME.  Returns a (possibly empty)
 ;; list of those.
 (define (lookup-services name)
-  (hashq-ref services name '()))
+  (hashq-ref %services name '()))
 
 (define waitpid*
   (let ((waitpid (EINTR-safe waitpid)))
@@ -931,7 +931,7 @@ otherwise by updating its state."
     (for-each (lambda (name)
 		(let ((old (lookup-services name)))
 		  ;; Actually add the new service now.
-		  (hashq-set! services name (cons new old))))
+		  (hashq-set! %services name (cons new old))))
 	      (provided-by new)))
 
   (for-each register-single-service new-services))
@@ -953,9 +953,9 @@ requested to be removed."
        (let ((old (lookup-services name)))
          (if (= 1 (length old))
              ;; Only service provides this service; remove it.
-             (hashq-remove! services name)
+             (hashq-remove! %services name)
              ;; ELSE: remove service from providing services.
-             (hashq-set! services name
+             (hashq-set! %services name
                          (remove
                           (lambda (lk-service)
                             (eq? (canonical-name service)
@@ -973,7 +973,7 @@ requested to be removed."
                        (not (eq? key 'dmd))
                        (cons key service)))
                  (_ #f)))               ; all other cases: #f.
-             services)))
+             %services)))
 
   (let ((name (string->symbol service-name)))
     (cond ((eq? name 'all)
