@@ -2,6 +2,7 @@
 ;; Copyright (C) 2013, 2014, 2015, 2016 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Järling <wolfgang@pro-linux.de>
 ;; Copyright (C) 2014 Alex Sassmannshausen <alex.sassmannshausen@gmail.com>
+;; Copyright (C) 2016 Alex Kost <alezost@gmail.com>
 ;;
 ;; This file is part of the GNU Shepherd.
 ;;
@@ -810,13 +811,19 @@ given USER and/or GROUP to run COMMAND."
 
 ;;; Perform actions with services:
 
-;; Call PROC once for each registered service.
+(define (lookup-canonical-service name services)
+  "Return service with canonical NAME from SERVICES list.
+Return #f if service is not found."
+  (find (lambda (service)
+          (eq? name (canonical-name service)))
+        services))
+
 (define (for-each-service proc)
-  (hash-fold (lambda (key value unused)
-	       (and (eq? key (canonical-name (car value)))
-		    (proc (car value))))
-	     #f ;; Unused
-	     %services))
+  "Call PROC for each registered service."
+  (hash-for-each (lambda (name services)
+                   (and=> (lookup-canonical-service name services)
+                          proc))
+                 %services))
 
 (define (service-list)
   "Return the list of services currently defined."
