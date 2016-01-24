@@ -1,7 +1,12 @@
-GNU dmd was initially written by Wolfgang Jährling ca. 2003.
-Others have since contributed.
+The GNU Shepherd was initially written by Wolfgang Jährling ca. 2003,
+when it was known as GNU dmd.  Others have since contributed:
 
-Ludovic Courtès <ludo@gnu.org>
-Wolfgang Jährling <wolfgang@pro-linux.de>
-Alex Sassmannshausen <alex.sassmannshausen@gmail.com>
-Andy Wingo <wingo@pobox.com>
+	  Ludovic Courtès <ludo@gnu.org>
+           Fabian Harfert <fhmgufs@web.de>
+         Wolfgang Jährling <wolfgang@pro-linux.de>
+             Alex Kost <alezost@gmail.com>
+          Mathieu Lirzin <mthl@gnu.org>
+            David Michael <fedora.dm0@gmail.com>
+             Alex Sassmannshausen <alex.sassmannshausen@gmail.com>
+            David Thompson <dthompson2@worcester.edu>
+             Andy Wingo <wingo@pobox.com>
