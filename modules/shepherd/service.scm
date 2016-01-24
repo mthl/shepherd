@@ -1070,6 +1070,20 @@ file when persistence is enabled."
     ;; allowed to quit, while user-supplied code shouldn't be.
     #:actions
     (make-actions
+     (help
+      "Show the help message for the 'root' service."
+      (lambda _
+        ;; A rudimentary attempt to have 'herd help' return something
+        ;; sensible.
+        "\
+This is the help message for the 'root' service of the Shepherd.  The 'root'
+service is used to control the Shepherd itself and it supports several
+actions.  For instance, running 'herd status root' or simply 'herd status'
+returns a summary of each service.
+
+Try 'herd doc root list-actions' to see the list of available actions.
+Run 'info shepherd' to access the user manual."))
+
      (status
       "Return an s-expression showing information about all the services.
 Clients such as 'herd' can read it and format it in a human-readable way."

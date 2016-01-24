@@ -115,6 +115,11 @@ the daemon via SOCKET-FILE."
            (display-status-summary (first result)))
           (('detailed-status (or 'root 'shepherd))
            (display-detailed-status (first result)))
+          (('help (or 'root 'shepherd))
+           (match result
+             ((help-text)
+              (display (gettext help-text))
+              (newline))))
           (('status _)
            ;; We get a list of statuses, in case several services have the
            ;; same name.
@@ -168,7 +173,7 @@ talking to shepherd"))
                                  (set! socket-file file))))
 
       (match (reverse command-args)
-        (((and action (or "status" "detailed-status"))) ;one argument
+        (((and action (or "status" "detailed-status" "help"))) ;one argument
          (run-command socket-file (string->symbol action) 'root '()))
         ((action service args ...)
          (run-command socket-file
