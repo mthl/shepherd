@@ -827,10 +827,12 @@ Return #f if service is not found."
 
 (define (service-list)
   "Return the list of services currently defined."
-  (hash-fold (lambda (key services result)
-               (append services result))
-             '()
-             %services))
+  (delete-duplicates
+   (hash-fold (lambda (key services result)
+                (append services result))
+              '()
+              %services)
+   eq?))
 
 (define (find-service pred)
   "Return the first service that matches PRED, or #f if none was found."
