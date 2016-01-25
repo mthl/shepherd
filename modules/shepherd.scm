@@ -232,7 +232,6 @@
 <shepherd-command> object.  Send the reply to PORT."
   (match command
     (($ <shepherd-command> the-action service-symbol (args ...) dir)
-     (chdir dir)
 
      ;; We have to catch `quit' so that we can send the terminator
      ;; line to herd before we actually quit.
@@ -254,14 +253,15 @@
                                    port)))
 
              (define result
-               (case the-action
-                 ((start) (apply start service-symbol args))
-                 ((stop) (apply stop service-symbol args))
-                 ((enforce) (apply enforce service-symbol args))
+               (with-directory-excursion dir
+                 (case the-action
+                   ((start) (apply start service-symbol args))
+                   ((stop) (apply stop service-symbol args))
+                   ((enforce) (apply enforce service-symbol args))
 
-                 ;; Actions which have the semantics of `action' are
-                 ;; handled there.
-                 (else (apply action service-symbol the-action args))))
+                   ;; Actions which have the semantics of `action' are
+                   ;; handled there.
+                   (else (apply action service-symbol the-action args)))))
 
              (write-reply (command-reply command result #f (get-messages))
                           port))))

@@ -32,6 +32,7 @@
             EINTR-safe
             with-atomic-file-output
             mkdir-p
+            with-directory-excursion
 
             l10n
             local-output
@@ -174,6 +175,17 @@ output port, and PROC's result is returned."
                  (loop tail path)
                  (apply throw args))))))
       (() #t))))
+
+(define-syntax-rule (with-directory-excursion dir body ...) ;copied from Guix
+  "Run BODY with DIR as the process's current directory."
+  (let ((init (getcwd)))
+   (dynamic-wind
+     (lambda ()
+       (chdir dir))
+     (lambda ()
+       body ...)
+     (lambda ()
+       (chdir init)))))
 
 
 

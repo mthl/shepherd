@@ -120,6 +120,32 @@ $herd status | grep "Stopped: (test-2)"
 $herd reload root "$conf"
 test "`$herd status`" == "$pristine_status"
 
+# Dynamically loading code.
+
+mkdir -p "$confdir"
+cat > "$confdir/some-conf.scm" <<EOF
+(register-services
+ (make <service>
+   #:provides '(test-loaded)
+   #:start (const 42)
+   #:stop (const #f)))
+EOF
+
+if $herd status test-loaded
+then false; else true; fi
+
+# Pass a relative file name and makes sure it's properly resolved.
+(cd "$confdir" && herd -s "../$socket" load root "some-conf.scm")
+rm "$confdir/some-conf.scm"
+
+# The new service should be loaded now.
+$herd status test-loaded
+$herd status test-loaded | grep stopped
+
+$herd start test-loaded
+$herd status test-loaded | grep -i 'running.*42'
+$herd stop test-loaded
+
 # Unload everything and make sure only 'root' is left.
 $herd unload root all
 $herd status | grep "Stopped: ()"
