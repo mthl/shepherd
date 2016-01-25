@@ -1140,11 +1140,13 @@ utillity, so it can by used by everyone.
 
 This chapter contains information about the design and the
 implementation details of the Shepherd for people who want to hack it.
-If you want your work to get included in the Shepherd, please contact me and
-say what you intend to do so that I can give advice on how to do it
-and we can avoid duplicating work.  My development version is usually
-a bit ahead of what I release, as I only want to publish code that got
-some testing.
+
+The GNU@tie{}Shepherd is developed by a group of people in connection
+with @uref{https://www.gnu.org/software/guix/, GuixSD}, GNU's advanced
+distribution, but it can be used on other distros as well.  You're very
+much welcome to join us!  You can report bugs to
+@email{bug-guix@@gnu.org} and send patches or suggestions to
+@email{guix-devel@@gnu.org}.
 
 @menu
 * Coding standards::    How to properly hack the Shepherd.
@@ -1160,12 +1162,20 @@ some testing.
 
 About formatting: Use common sense and GNU Emacs (which actually is
 the same, of course), and you almost can't get the formatting wrong.
-Formatting should be as in Guile and Guix, basically.
+Formatting should be as in Guile and Guix, basically.  @xref{Coding
+Style,,, guix, GNU Guix Reference Manual}, for more info.
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 @node Design decisions
 @section Design decisions
+
+@quotation Note
+This section was written by Wolfgang Jährling back in 2003 and documents
+the original design of what was then known as GNU@tie{}dmd.  The main
+ideas remain valid but some implementation details and goals have
+changed.
+@end quotation
 
 The general idea of a service manager that uses dependencies, similar
 to those of a Makefile, came from the developers of the GNU Hurd, but
@@ -1308,6 +1318,11 @@ understand it), you are welcome to do so, of course@dots{}
 
 @node Runlevel evolution
 @section Runlevel evolution
+
+@quotation Note
+This section was written by Wolfgang Jährling back in 2003 and is kept
+mostly for historians to read.
+@end quotation
 
 This section describes how the runlevel concept evolved over time.
 This is basically a collection of mistakes, but is provided here for
