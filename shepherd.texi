@@ -141,7 +141,7 @@ mentioned below.
 @cindex Configuration file
 When @command{shepherd} gets started, it reads and evaluates a
 configuration file.  When it is started with superuser priviledges, it
-tries to use @code{/etc/dmdconf.scm}.  When started as normal user, it
+tries to use @code{/etc/shepherd.conf.scm}.  When started as normal user, it
 looks for a file called @code{$XDG_CONFIG_HOME/shepherd/init.scm}.  If
 the @code{XDG_CONFIG_HOME} environment variable is not defined,
 @code{$HOME/.config/shepherd/init.scm} is used instead.  With the option
@@ -150,8 +150,8 @@ look instead.  So if you want to start @command{shepherd} with an
 alternative file, use one of the following commands:
 
 @example
-shepherd --config=/etc/dmdconf.scm.old
-shepherd -c /etc/dmdconf.scm.old
+shepherd --config=/etc/shepherd.conf.scm.old
+shepherd -c /etc/shepherd.conf.scm.old
 @end example
 
 @cindex Starting a service
