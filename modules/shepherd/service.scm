@@ -871,12 +871,13 @@ Return #f if service is not found."
 
 (define (service-list)
   "Return the list of services currently defined."
-  (delete-duplicates
-   (hash-fold (lambda (key services result)
-                (append services result))
-              '()
-              %services)
-   eq?))
+  (hash-fold (lambda (name services result)
+               (let ((service (lookup-canonical-service name services)))
+                 (if service
+                     (cons service result)
+                     result)))
+             '()
+             %services))
 
 (define (find-service pred)
   "Return the first service that matches PRED, or #f if none was found."
