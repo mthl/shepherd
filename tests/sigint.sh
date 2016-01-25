@@ -48,7 +48,7 @@ shepherd -I -s "$socket" -c "$conf" --pid="$pid" &
 
 while [ ! -f "$pid" ] ; do sleep 0.5 ; done
 
-# Send SIGINT to dmd.
+# Send SIGINT to shepherd.
 kill -INT "`cat "$pid"`"
 while kill -0 "`cat "$pid"`" ; do sleep 0.5 ; done
 

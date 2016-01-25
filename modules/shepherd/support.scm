@@ -1,4 +1,4 @@
-;; support.scm -- Various support facilities, used by herd and dmd.
+;; support.scm -- Various support facilities, used by herd and shepherd.
 ;; Copyright (C) 2014 A.Sassmannshausen <alex.sassmannshausen@gmail.com>
 ;; Copyright (C) 2013, 2014, 2016 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
@@ -231,7 +231,7 @@ There is NO WARRANTY, to the extent permitted by law.")))
 ;; Home directory of the user.
 (define user-homedir
   ;; Look for $HOME first, to allow users to override the defaults.  This is
-  ;; notably useful when dmd is built in a Guix chroot.
+  ;; notably useful when shepherd is built in a Guix chroot.
   (or (getenv "HOME")
 
       ;; When bootstrapping and running as PID 1, /etc/{passwd,shadow} may be
@@ -252,17 +252,17 @@ TARGET should be a string representing a filepath + name."
   (with-output-to-file target
     (lambda ()
       (display (string-append
-                ";; init.scm -- default dmd configuration file.
+                ";; init.scm -- default shepherd configuration file.
 
-;; Services known to dmd:
-;; Add new services (defined using 'make <service>') to dmd here by
+;; Services known to shepherd:
+;; Add new services (defined using 'make <service>') to shepherd here by
 ;; providing them as arguments to 'register-services'.
 ""(register-services)
 
 ;; Send shepherd into the background
 ""(action 'shepherd 'daemonize)
 
-;; Services to start when dmd starts:
+;; Services to start when shepherd starts:
 ;; Add the name of each service that should be started to the list
 ;; below passed to 'for-each'.
 ""(for-each start '())
@@ -297,7 +297,7 @@ create a template configuration file if non exists."
       %system-socket-dir
       (string-append %user-config-dir "/run")))
 
-;; Unix domain socket for receiving commands in dmd.
+;; Unix domain socket for receiving commands in shepherd.
 (define default-socket-file
   (string-append default-socket-dir "/socket"))
 
@@ -311,7 +311,7 @@ create a template configuration file if non exists."
       (string-append %localstatedir "/lib/shepherd/state")
       (string-append %user-config-dir "/state")))
 
-;; Global variables set from (dmd).
+;; Global variables set from (shepherd).
 (define persistency #f)
 (define persistency-state-file default-persistency-state-file)
 

@@ -34,7 +34,7 @@ else
 fi
 AC_MSG_RESULT($recent_version)
 if test $recent_version = no; then
-  AC_MSG_WARN(your Guile is probably too old to run dmd)
+  AC_MSG_WARN(your Guile is probably too old to run shepherd)
 fi
 
 AC_PATH_PROG([GUILD], [guild])
