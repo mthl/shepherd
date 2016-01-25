@@ -42,6 +42,8 @@ Makefile
 /test-suite.log
 /tests/basic.log
 /tests/basic.trs
+/tests/misbehaved-client.log
+/tests/misbehaved-client.trs
 /tests/respawn.log
 /tests/respawn.trs
 /tests/no-home.log
