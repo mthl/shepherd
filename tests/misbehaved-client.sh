@@ -69,7 +69,7 @@ $herd status			# still here?
 
 (let ((sock (open-connection \"$socket\")))
   (setvbuf sock _IOFBF 5000)
-  (write-command (shepherd-command 'status 'dmd) sock)
+  (write-command (shepherd-command 'status 'root) sock)
 
   ;; Close prematurely, right after sending the command.
   (close-port sock))"
