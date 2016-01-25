@@ -49,7 +49,7 @@
       (with-system-error-handling
        (let ((sock (open-connection socket-file)))
          ;; Send the command without further ado.
-         (write-command (shepherd-command 'stop 'dmd) sock)
+         (write-command (shepherd-command 'stop 'root) sock)
 
          ;; Receive output if we're not already dead.
          (match (read sock)
