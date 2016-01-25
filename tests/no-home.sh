@@ -37,10 +37,10 @@ trap "rm -f $socket;
 
 # Make sure 'dmd' starts even though $HOME is not writable.
 shepherd -I -s "$socket" -c /dev/null -l /dev/null --pid="$pid" &
-dmd_pid="$!"
+shepherd_pid="$!"
 
 # Wait until it's ready, or until it terminates.
-while ! test -f "$pid" ; do kill -0 "$dmd_pid" ; sleep 0.3 ; done
+while ! test -f "$pid" ; do kill -0 "$shepherd_pid" ; sleep 0.3 ; done
 
 kill -0 `cat "$pid"`
 $herd status root

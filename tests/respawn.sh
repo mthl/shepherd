@@ -90,9 +90,9 @@ shepherd -I -s "$socket" -c "$conf" -l "$log" --pid="$pid" &
 # Wait till it's ready.
 wait_for_file "$pid"
 
-dmd_pid="`cat $pid`"
+shepherd_pid="`cat $pid`"
 
-kill -0 $dmd_pid
+kill -0 $shepherd_pid
 test -S "$socket"
 $herd status
 $herd status test1 | grep started

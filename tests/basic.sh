@@ -63,9 +63,9 @@ shepherd -I -s "$socket" -c "$conf" -l "$log" --pid="$pid" &
 # Wait till it's ready.
 while ! test -f "$pid" ; do sleep 0.3 ; done
 
-dmd_pid="`cat $pid`"
+shepherd_pid="`cat $pid`"
 
-kill -0 $dmd_pid
+kill -0 $shepherd_pid
 test -S "$socket"
 pristine_status=`$herd status root` # Prep for 'reload' test.
 echo $pristine_status | grep -E '(Start.*root|Stop.*test)'
@@ -152,7 +152,7 @@ $herd status | grep "Stopped: ()"
 $herd status | grep "Started: (root)"
 
 $herd stop root
-! kill -0 $dmd_pid
+! kill -0 $shepherd_pid
 
 test -f "$log"
 
@@ -178,9 +178,9 @@ $herd status test | grep started
 $herd stop test
 ! test -f "$stamp"
 
-dmd_pid="`cat $pid`"
+shepherd_pid="`cat $pid`"
 
 $herd stop root
-! kill -0 $dmd_pid
+! kill -0 $shepherd_pid
 
 rm -rf $confdir

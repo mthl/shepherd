@@ -35,7 +35,7 @@ shepherd -I -s "$socket" -c /dev/null -l "$log" --pid="$pid" &
 # Wait till it's ready.
 while ! test -f "$pid" ; do sleep 0.3 ; done
 
-dmd_pid="`cat $pid`"
+shepherd_pid="`cat $pid`"
 
 "$GUILE" -c "
 (use-modules (shepherd comm))

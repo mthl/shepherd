@@ -54,9 +54,9 @@ shepherd -I -s "$socket" -c "$conf" -l "$log" --pid="$pid" &
 # Wait till it's ready.
 while ! test -f "$pid" ; do sleep 0.3 ; done
 
-dmd_pid="`cat $pid`"
+shepherd_pid="`cat $pid`"
 
-kill -0 $dmd_pid
+kill -0 $shepherd_pid
 test -S "$socket"
 
 # Code to fetch service status info.
@@ -123,6 +123,6 @@ $herd unload root all
             (error #f) (messages ()))))"
 
 $herd stop root
-! kill -0 $dmd_pid
+! kill -0 $shepherd_pid
 
 test -f "$log"
