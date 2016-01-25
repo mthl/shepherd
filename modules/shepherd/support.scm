@@ -308,8 +308,8 @@ create a template configuration file if non exists."
 ;; Saving the state on exit.
 (define default-persistency-state-file
   (if (zero? (getuid))
-      (string-append %localstatedir "/lib/misc/dmd-state")
-      (string-append %user-config-dir "/dmd-state")))
+      (string-append %localstatedir "/lib/shepherd/state")
+      (string-append %user-config-dir "/state")))
 
 ;; Global variables set from (dmd).
 (define persistency #f)
