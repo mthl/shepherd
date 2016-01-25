@@ -315,7 +315,7 @@ create a template configuration file if non exists."
 (define persistency #f)
 (define persistency-state-file default-persistency-state-file)
 
-(define (make-dmd-user-module)
+(define (make-user-module)
   "Return a new module, for use when evaluating the user's configuration,
 which has essential bindings pulled in."
   (let ((m (make-fresh-user-module)))
@@ -327,7 +327,7 @@ which has essential bindings pulled in."
 
 (define (load-in-user-module file)
   "Load FILE in a fresh user module that has essential bindings pulled in."
-  (let ((user-module (make-dmd-user-module)))
+  (let ((user-module (make-user-module)))
     (save-module-excursion
      (lambda ()
        (set-current-module user-module)
