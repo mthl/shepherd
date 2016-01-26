@@ -287,7 +287,8 @@ wire."
 	((let ((conflicts (conflicts-with-running obj)))
 	   (or (null? conflicts)
 	       (local-output "Service ~a conflicts with running services ~a."
-			     (canonical-name obj) conflicts))
+			     (canonical-name obj)
+			     (map canonical-name conflicts)))
 	   (not (null? conflicts)))
 	 #f) ;; Dummy.
 	(else
@@ -451,21 +452,20 @@ wire."
        ;; FIXME: Implement doc-help.
        (local-output "Unknown keyword.  Try 'doc root help'.")))))
 
-;; Return a list of canonical names of the services that conflict with
-;; OBJ.
+;; Return a list of services that conflict with OBJ.
 (define-method (conflicts-with (obj <service>))
   (delete-duplicates
    (append-map (lambda (sym)
                  (filter-map (lambda (service)
                                (and (not (eq? service obj))
-                                    (canonical-name service)))
+                                    service))
                              (lookup-services sym)))
                (provided-by obj))
    eq?))
 
 ;; Check if this service provides a symbol that is already provided
-;; by any other running services.  If so, return the canonical names
-;; of the other services.  Otherwise, return the empty list.
+;; by any other running services.  If so, return these services.
+;; Otherwise, return the empty list.
 (define-method (conflicts-with-running (obj <service>))
   (filter running? (conflicts-with obj)))
 
