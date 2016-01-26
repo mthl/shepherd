@@ -21,12 +21,13 @@ herd --version
 
 socket="t-socket-$$"
 conf="t-conf-$$"
+log="t-log-$$"
 stamp="t-stamp-$$"
 pid="t-pid-$$"
 
 herd="herd -s $socket"
 
-trap "rm -f $socket $conf $stamp;
+trap "rm -f $socket $conf $stamp $log;
       test -f $pid && kill \`cat $pid\` || true; rm -f $pid" EXIT
 
 cat > "$conf"<<EOF
@@ -44,7 +45,7 @@ cat > "$conf"<<EOF
 EOF
 
 rm -f "$pid" "$stamp"
-shepherd -I -s "$socket" -c "$conf" --pid="$pid" &
+shepherd -I -s "$socket" -c "$conf" --pid="$pid" --log="$log" &
 
 while [ ! -f "$pid" ] ; do sleep 0.5 ; done
 
