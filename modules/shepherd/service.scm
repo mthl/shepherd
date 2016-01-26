@@ -22,6 +22,7 @@
 (define-module (shepherd service)
   #:use-module (oop goops)
   #:use-module (srfi srfi-1)
+  #:use-module (srfi srfi-9)
   #:use-module (srfi srfi-26)
   #:use-module (srfi srfi-34)
   #:use-module (srfi srfi-35)
@@ -41,6 +42,9 @@
             action-list
             lookup-action
             defines-action?
+
+            action?
+
             enable
             disable
             start
@@ -88,16 +92,23 @@
 
             condition->sexp))
 
-;; Conveniently create an actions object containing the actions for a
-;; <service> object.  The current structure is a list of actions,
-;; where every action has the format ``(name . (proc . doc))''.
+;; Type of service actions.
+(define-record-type <action>
+  (make-action name proc doc)
+  action?
+  (name action-name)
+  (proc action-procedure)
+  (doc  action-documentation))
+
+;; Conveniently create a list of <action> objects containing the actions for a
+;; <service> object.
 (define-syntax make-actions
   (syntax-rules ()
     ((_ (name docstring proc) rest ...)
-     (cons (cons 'name (cons proc docstring))
+     (cons (make-action 'name proc docstring)
            (make-actions rest ...)))
     ((_ (name proc) rest ...)
-     (cons (cons 'name (cons proc "[No documentation.]"))
+     (cons (make-action 'name proc "[No documentation.]")
            (make-actions rest ...)))
     ((_)
      '())))
@@ -181,10 +192,6 @@ respawned, shows that it has been respawned more than TIMES in SECONDS."
   "Return true if OBJ is a service."
   (is-a? obj <service>))
 
-(define action:name car)
-(define action:proc cadr)
-(define action:doc cddr)
-
 ;; Service errors.
 (define-condition-type &service-error &error service-error?)
 
@@ -246,11 +253,14 @@ wire."
 
 ;; Return a list of all actions implemented by OBJ. 
 (define-method (action-list (obj <service>))
-  (map action:name (slot-ref obj 'actions)))
+  (map action-name (slot-ref obj 'actions)))
 
-;; Return the action ACTION.
+;; Return the action ACTION or #f if none was found.
 (define-method (lookup-action (obj <service>) action)
-  (assq action (slot-ref obj 'actions)))
+  (find (match-lambda
+          (($ <action> name)
+           (eq? name action)))
+        (slot-ref obj 'actions)))
 
 ;; Return whether OBJ implements the action ACTION.
 (define-method (defines-action? (obj <service>) action)
@@ -384,13 +394,8 @@ wire."
                           (service obj)
                           (action the-action)))))))
 
-  (define (apply-if-pair obj proc)
-    (if (pair? obj)
-	(proc obj)
-        obj))
-
-  (let ((proc (or (apply-if-pair (lookup-action obj the-action)
-				 action:proc)
+  (let ((proc (or (and=> (lookup-action obj the-action)
+                         action-procedure)
 		  default-action)))
     ;; Calling default-action will be allowed even when the service is
     ;; not running, as it provides generally useful functionality and
@@ -435,7 +440,8 @@ wire."
               (raise (condition (&unknown-action-error
                                  (action the-action)
                                  (service obj)))))
-            (local-output "~a: ~a" the-action (action:doc action-object))))
+            (local-output "~a: ~a" the-action
+                          (action-documentation action-object))))
         (cdr args)))
       ((list-actions)
        (local-output "~a ~a"
