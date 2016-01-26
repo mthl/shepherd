@@ -9,7 +9,6 @@
 /herd
 /shepherd
 /examples/Makefile
-/utils/Makefile
 /autom4te.cache
 /build-aux/*
 Makefile.in

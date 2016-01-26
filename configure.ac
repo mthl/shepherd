@@ -90,7 +90,6 @@ AC_MSG_RESULT([done])
 dnl Finish.
 AC_CONFIG_FILES([Makefile
                  examples/Makefile
-		 utils/Makefile
 		 modules/shepherd/system.scm])
 
 AC_OUTPUT

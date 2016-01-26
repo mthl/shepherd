@@ -56,7 +56,7 @@ CLEANFILES =						\
 
 # Documentation.
 info_TEXINFOS = shepherd.texi
-SUBDIRS = examples utils
+SUBDIRS = examples
 
 # Things not automatically included in the distribution.
 EXTRA_DIST = $(templates) QUESTIONS fdl-1.3.texi ChangeLog-2003
