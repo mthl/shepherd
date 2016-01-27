@@ -51,8 +51,8 @@ Documentation License''.
 @node Top
 @top The GNU Shepherd Manual
 
-This manual documents the Shepherd version @value{VERSION}, a service
-manager for the GNU system.
+This manual documents the GNU@tie{}Shepherd version @value{VERSION}, a
+service manager for the GNU system.
 
 @menu
 * Introduction::      Introduction to the Shepherd service manager.
@@ -77,8 +77,8 @@ manager for the GNU system.
 @chapter Introduction
 
 @cindex service manager
-This manual documents the Shepherd service manager.  The Shepherd looks
-after system services, typically @dfn{daemons}.
+This manual documents the GNU@tie{}Daemon Shepherd, or GNU@tie{}Shepherd
+for short.  The Shepherd looks after system services, typically @dfn{daemons}.
 It is used to start and stop them in a reliable
 fashion.  For instance it will dynamically determine and start any
 other services that our desired service depends upon.  As another
@@ -92,7 +92,7 @@ as @code{root}.  Normally the purpose of init systems is to manage all
 system-wide services, but the Shepherd can also be a useful tool assisting
 unprivileged users in the management of their own daemons.
 
-Unfortunately all flexible software requires some time to master and
+Flexible software requires some time to master and
 the Shepherd is no different.  But don't worry: this manual should allow you to
 get started quickly.  Its first chapter is designed as a practical
 introduction to the Shepherd and should be all you need for everyday use
@@ -110,10 +110,11 @@ Managing Daemons} (or @dfn{Daemons-Managing Daemon}?).
 @cindex Guile
 @cindex Scheme
 @cindex GOOPS
-This program is written in @dfn{Guile}, an implementation of the
-Scheme programming language, using the @dfn{GOOPS} extension for
-object-orientation.  Guile is also the Shepherd's configuration language
-(@pxref{Top,,, guile, GNU Guile Reference Manual}).  We have tried to
+This program is written in Guile, an implementation of the
+Scheme programming language, using the GOOPS extension for
+object-orientation.  Guile is also the Shepherd's configuration language.
+@xref{Introduction,,, guile, GNU Guile Reference Manual}, for an
+introduction to Guile.  We have tried to
 make the Shepherd's basic features as accessible as possible---you should be
 able to use these even if you do not know how to program in Scheme.  A
 basic grasp of Guile and GOOPS is required only if you wish to make
