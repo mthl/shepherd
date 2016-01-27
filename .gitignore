@@ -2,8 +2,6 @@
 *~
 ,*
 .dirstamp
-/*.1
-/*.8
 /INSTALL
 /aclocal.m4
 /autom4te.cache
@@ -13,6 +11,8 @@
 /config.scm
 /config.status
 /configure
+/doc/*.1
+/doc/*.8
 /doc/shepherd.info
 /doc/stamp-vti
 /doc/version.texi

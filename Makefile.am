@@ -70,27 +70,20 @@ AM_V_HELP2MAN_ = $(AM_V_HELP2MAN_$(AM_DEFAULT_VERBOSITY))
 AM_V_HELP2MAN_0 = @echo "  HELP2MAN" $@;
 
 HELP2MANFLAGS = --source=GNU --info-page=$(PACKAGE_TARNAME)
+gen_man = $(AM_V_HELP2MAN)LANGUAGE= $(HELP2MAN) $(HELP2MANFLAGS)
 
-define man-page-target
+doc/shepherd.1: modules/shepherd.scm
+	$(gen_man) --output="$@" "$(top_builddir)/`basename "$@" .1`"
 
-%.$(1): modules/shepherd/scripts/%.scm
-	-$$(AM_V_HELP2MAN)LANGUAGE=				\
-	  $(HELP2MAN) --output="$$@" --section=$(1)		\
-	              $(HELP2MANFLAGS)				\
-	              "$(top_builddir)/`basename "$$@" .$(1)`"
+doc/%.1: modules/shepherd/scripts/%.scm
+	$(gen_man) --output="$@" "$(top_builddir)/`basename "$@" .1`"
 
-endef
+doc/%.8: modules/shepherd/scripts/%.scm
+	$(gen_man) --section=8 --output="$@"	\
+	  "$(top_builddir)/`basename "$@" .8`"
 
-# Create targets for sections 1 and 8.
-$(eval $(foreach section,1 8,$(call man-page-target,$(section))))
-
-shepherd.1: modules/shepherd.scm
-	-$(AM_V_HELP2MAN)LANGUAGE=			\
-	  $(HELP2MAN) --output="$@" $(HELP2MANFLAGS)	\
-	              "$(top_builddir)/shepherd"
-
-dist_man1_MANS = shepherd.1 herd.1
-dist_man8_MANS = halt.8 reboot.8
+dist_man1_MANS = doc/shepherd.1 doc/herd.1
+dist_man8_MANS = doc/halt.8 doc/reboot.8
 
 # Things not automatically included in the distribution.
 EXTRA_DIST =				\
