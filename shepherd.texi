@@ -1119,6 +1119,35 @@ inserts a newline.  It writes to whatever is the main output target of
 the Shepherd, which might be multiple at the same time in future versions.
 @end deffn
 
+@cindex protocol, between @command{shepherd} and its clients
+Under the hood, @code{write-command} and @code{read-command} write/read
+commands as s-expressions (sexps).  Each sexp is intelligible and
+specifies a protocol version.  The idea is that users can write their
+own clients rather than having to invoke @command{herd}.  For instance,
+when you type @command{herd status}, what is sent over the wire is the
+following sexp:
+
+@lisp
+(shepherd-command
+  (version 0)
+  (action status) (service root)
+  (arguments ()) (directory "/data/src/dmd"))
+@end lisp
+
+The reply is also an sexp, along these lines:
+
+@lisp
+(reply (version 0)
+       (result (((service @dots{}) @dots{})))
+       (error #f) (messages ()))
+@end lisp
+
+This reply indicates that the @code{status} action was successful,
+because @code{error} is @code{#f}, and gives a list of sexps denoting
+the status of services as its @code{result}.  The @code{messages} field
+is a possibly-empty list of strings meant to be displayed as is to the
+user.
+
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
