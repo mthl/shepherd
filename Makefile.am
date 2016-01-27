@@ -62,7 +62,8 @@ CLEANFILES =						\
   $(bin_SCRIPTS) $(sbin_SCRIPTS)
 
 # Documentation.
-info_TEXINFOS = shepherd.texi
+info_TEXINFOS = doc/shepherd.texi
+doc_shepherd_TEXINFOS = doc/fdl-1.3.texi
 
 AM_V_HELP2MAN = $(AM_V_HELP2MAN_$(V))
 AM_V_HELP2MAN_ = $(AM_V_HELP2MAN_$(AM_DEFAULT_VERBOSITY))
@@ -94,7 +95,6 @@ dist_man8_MANS = halt.8 reboot.8
 # Things not automatically included in the distribution.
 EXTRA_DIST =				\
   ChangeLog-2003			\
-  fdl-1.3.texi				\
   QUESTIONS				\
   $(templates)				\
   doc/examples/README			\
