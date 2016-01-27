@@ -43,6 +43,9 @@ if test "x$GUILD" = "x"; then
 fi
 AC_SUBST([GUILD])
 
+guilemoduledir="${datarootdir}/guile/site/2.0"
+AC_SUBST([guilemoduledir])
+
 dnl
 dnl Low-level operating system interface.
 dnl

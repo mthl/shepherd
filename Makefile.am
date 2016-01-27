@@ -30,12 +30,11 @@ BUILT_SOURCES = modules/shepherd/config.scm
 
 # The source files.
 # XXX: we can't use 'nobase_' because of the modules/ subdirectory.
-shepherddir = ${datadir}/shepherd
-dist_shepherd_DATA =				\
+dist_guilemodule_DATA =				\
   modules/shepherd.scm
-nodist_shepherd_DATA = $(dist_shepherd_DATA:%.scm=%.go)
+nodist_guilemodule_DATA = $(dist_guilemodule_DATA:%.scm=%.go)
 
-shepherdsubdir = $(shepherddir)/shepherd
+shepherdsubdir = $(guilemoduledir)/shepherd
 dist_shepherdsub_DATA =				\
   modules/shepherd/args.scm			\
   modules/shepherd/service.scm			\
@@ -58,7 +57,7 @@ nodist_scripts_DATA =				\
   $(dist_scripts_DATA:%.scm=%.go)
 
 CLEANFILES =						\
-  $(nodist_shepherd_DATA) $(nodist_shepherdsub_DATA)	\
+  $(nodist_guilemodule_DATA) $(nodist_shepherdsub_DATA)	\
   $(nodist_scripts_DATA)				\
   $(bin_SCRIPTS) $(sbin_SCRIPTS)
 
@@ -83,8 +82,8 @@ install-exec-hook: install-executable-symlinks
 	   $(bin_SCRIPTS:%=$(DESTDIR)$(bindir)/%)			\
 	   $(sbin_SCRIPTS:%=$(DESTDIR)$(sbindir)/%) ;			\
 	do								\
-	  $(SED) -e's|$(abs_top_srcdir)/modules|$(shepherddir)|g'	\
-	         -e's|$(abs_top_builddir)/modules|$(shepherddir)|g'	\
+	  $(SED) -e's|$(abs_top_srcdir)/modules|$(guilemoduledir)|g'	\
+	         -e's|$(abs_top_builddir)/modules|$(guilemoduledir)|g'	\
 	         -i $$script ;						\
 	done
 
