@@ -1,15 +1,57 @@
                                                               -*- org -*-
-#+TITLE: GNU dmd NEWS – history of user-visible changes
+#+TITLE: GNU Shepherd NEWS — history of user-visible changes
 #+STARTUP: content hidestars
 
 Copyright © 2002, 2003 Wolfgang Jährling
-Copyright © 2013, 2014 Ludovic Courtès <ludo@gnu.org>
+Copyright © 2013, 2014, 2016 Ludovic Courtès <ludo@gnu.org>
 
   Copying and distribution of this file, with or without modification,
   are permitted in any medium without royalty provided the copyright
   notice and this notice are preserved.
 
 Please send dmd bug reports to bug-guix@gnu.org.
+
+* Changes in version 0.3
+
+** GNU dmd becomes the GNU Shepherd
+
+The GNU Shepherd herds your daemons!
+See http://www.gnu.org/software/shepherd/#history for details.
+As a side effect, many incompatible changes were made:
+
+  - The ‘dmd’ command was renamed to ‘shepherd’.
+  - The ‘deco’ command was renamed to ‘herd’.
+  - The default system-wide config file is now /etc/shepherd.scm.
+  - The default per-user config file is now ~/.config/shepherd/init.scm.
+  - The special ‘dmd’ service is now called ‘root’ and ‘shepherd’.  Thus,
+    instead of:
+       deco load dmd foo.scm
+    you would now type:
+       herd load root foo.scm
+  - Guile modules now live in the (shepherd …) name space.
+
+** ‘herd status’ and ‘herd detailed-status’ assumes the ‘root’ service
+
+That is, ‘herd status’ is equivalent to ‘herd status root’.
+
+** ‘herd help’ returns a meaningful help message
+** ‘shepherd’ stops itself when it receives SIGINT
+
+This is what happens when ‘shepherd’ is running as PID 1 on GNU/Linux and
+ctrl-alt-del is pressed (see ctrlaltdel(8)).
+
+** ‘halt’ and ‘reboot’ connect to the system socket unconditionally
+** ‘herd’ uses a non-zero exit code upon errors
+** Basic man pages are now provided
+** ‘make-forkexec-constructor’ has new #:group and #:user parameters
+** ‘make-forkexec-constructor’ has a new #:pid-file parameter
+** (shepherd services) now exports ‘make-actions’ and ‘provided-by’
+** ‘shepherd --pid=FILE’ writes FILE atomically
+** The communication protocol is now entirely sexp-based (see the manual)
+** ‘shepherd’ is more robust to misbehaving clients
+** Cross-compilation is now supported
+** The build system uses “silent rules” by default
+** Internally, the coding style of various parts has been improved
 
 * Changes in version 0.2
 
