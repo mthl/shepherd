@@ -280,7 +280,7 @@ TARGET should be a string representing a filepath + name."
 global system configuration file when running as 'root'.  As a side effect,
 create a template configuration file if non exists."
   (if (zero? (getuid))
-      (string-append %sysconfdir "/shepherd.conf.scm")
+      (string-append %sysconfdir "/shepherd.scm")
       (let ((config-file (string-append %user-config-dir "/init.scm")))
         (mkdir-p %user-config-dir #o700)
         (if (not (file-exists? config-file))
