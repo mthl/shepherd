@@ -17,7 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with the GNU Shepherd.  If not, see <http://www.gnu.org/licenses/>.
 
-(define-module (herd)
+(define-module (shepherd scripts herd)
   #:use-module (shepherd config)
   #:use-module (shepherd support)
   #:use-module (shepherd args)

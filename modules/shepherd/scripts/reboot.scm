@@ -1,4 +1,4 @@
-;; halt.scm -- Halt or power off the system.
+;; reboot.scm -- Reboot the system.
 ;; Copyright (C) 2013, 2014, 2015, 2016 Ludovic Courtès <ludo@gnu.org>
 ;;
 ;; This file is part of the GNU Shepherd.
@@ -16,7 +16,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with the GNU Shepherd.  If not, see <http://www.gnu.org/licenses/>.
 
-(define-module (halt)
+(define-module (shepherd scripts reboot)
   #:use-module (shepherd support)
   #:use-module (shepherd args)
   #:use-module (shepherd comm)
@@ -31,12 +31,12 @@
 (define (main . args)
   (false-if-exception (setlocale LC_ALL ""))
 
-  (parameterize ((program-name "halt"))
+  (parameterize ((program-name "reboot"))
     (let ((socket-file %system-socket-file)
           (command-args '()))
       (process-args (program-name) args
                     ""
-                    "Halt or power off the system."
+                    "Reboot the system."
                     not ;; Fail on unknown args.
                     (make <option>
                       #:long "socket" #:short #\s
@@ -49,7 +49,7 @@
       (with-system-error-handling
        (let ((sock (open-connection socket-file)))
          ;; Send the command without further ado.
-         (write-command (shepherd-command 'power-off 'root) sock)
+         (write-command (shepherd-command 'stop 'root) sock)
 
          ;; Receive output if we're not already dead.
          (match (read sock)

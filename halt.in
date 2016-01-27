@@ -4,4 +4,4 @@
 
 (set! %load-path (cons "%modsrcdir%" %load-path))
 (set! %load-compiled-path (cons "%modbuilddir%" %load-compiled-path))
-(apply (@ (halt) main) (cdr (command-line)))
+(apply (@ (shepherd scripts halt) main) (cdr (command-line)))

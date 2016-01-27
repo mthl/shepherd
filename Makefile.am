@@ -1,5 +1,6 @@
 # Makefile.am -- How to build and install the Shepherd.
-# Copyright (C) 2002, 2003 Wolfgang J�hrling <wolfgang@pro-linux.de>
+# Copyright © 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
+# Copyright © 2013, 2014, 2015, 2016 Ludovic Courtès <ludo@gnu.org>
 #
 # This file is part of the GNU Shepherd.
 #
@@ -28,12 +29,10 @@ templates =					\
 BUILT_SOURCES = modules/shepherd/config.scm
 
 # The source files.
+# XXX: we can't use 'nobase_' because of the modules/ subdirectory.
 shepherddir = ${datadir}/shepherd
 dist_shepherd_DATA =				\
-  modules/herd.scm				\
-  modules/shepherd.scm				\
-  modules/halt.scm				\
-  modules/reboot.scm
+  modules/shepherd.scm
 nodist_shepherd_DATA = $(dist_shepherd_DATA:%.scm=%.go)
 
 shepherdsubdir = $(shepherddir)/shepherd
@@ -50,8 +49,17 @@ nodist_shepherdsub_DATA =			\
   modules/shepherd/system.go			\
   $(dist_shepherdsub_DATA:%.scm=%.go)
 
+scriptsdir = $(shepherdsubdir)/scripts
+dist_scripts_DATA =				\
+  modules/shepherd/scripts/halt.scm		\
+  modules/shepherd/scripts/herd.scm		\
+  modules/shepherd/scripts/reboot.scm
+nodist_scripts_DATA =				\
+  $(dist_scripts_DATA:%.scm=%.go)
+
 CLEANFILES =						\
   $(nodist_shepherd_DATA) $(nodist_shepherdsub_DATA)	\
+  $(nodist_scripts_DATA)				\
   $(bin_SCRIPTS) $(sbin_SCRIPTS)
 
 # Documentation.
