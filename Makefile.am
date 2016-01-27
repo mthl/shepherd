@@ -197,9 +197,17 @@ AM_SH_LOG_FLAGS = -x -e
 # files.  See
 # <http://lists.gnu.org/archive/html/guile-devel/2010-07/msg00125.html>
 # for details.
-shepherd_install_go_files = install-nobase_nodist_guilemoduleDATA
-$(shepherd_install_go_files): install-nobase_dist_guilemoduleDATA
+shepherd_install_go_files = install-nodist_guilemoduleDATA
+$(shepherd_install_go_files): install-dist_guilemoduleDATA
 
+shepherdsub_install_go_files = install-nodist_shepherdsubDATA
+$(shepherdsub_install_go_files): install-dist_shepherdsubDATA
+
+scripts_install_go_files = install-nodist_scriptsDATA
+$(scripts_install_go_files): install-dist_scriptsDATA
+
+
+
 gen-ChangeLog:
 	if test -d .git; then				\
 	  $(top_srcdir)/build-aux/gitlog-to-changelog	\
