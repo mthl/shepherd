@@ -51,3 +51,5 @@ Makefile
 /tests/sigint.trs
 /tests/status-sexp.log
 /tests/status-sexp.trs
+/*.1
+/*.8

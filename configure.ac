@@ -89,6 +89,8 @@ AC_SUBST([RB_POWER_OFF])
 
 AC_MSG_RESULT([done])
 
+dnl Manual pages.
+AM_MISSING_PROG([HELP2MAN], [help2man])
 
 dnl Finish.
 AC_CONFIG_FILES([Makefile

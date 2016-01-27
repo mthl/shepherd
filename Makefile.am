@@ -65,6 +65,33 @@ CLEANFILES =						\
 info_TEXINFOS = shepherd.texi
 SUBDIRS = examples
 
+AM_V_HELP2MAN = $(AM_V_HELP2MAN_$(V))
+AM_V_HELP2MAN_ = $(AM_V_HELP2MAN_$(AM_DEFAULT_VERBOSITY))
+AM_V_HELP2MAN_0 = @echo "  HELP2MAN" $@;
+
+HELP2MANFLAGS = --source=GNU --info-page=$(PACKAGE_TARNAME)
+
+define man-page-target
+
+%.$(1): modules/shepherd/scripts/%.scm
+	-$$(AM_V_HELP2MAN)LANGUAGE=				\
+	  $(HELP2MAN) --output="$$@" --section=$(1)		\
+	              $(HELP2MANFLAGS)				\
+	              "$(top_builddir)/`basename "$$@" .$(1)`"
+
+endef
+
+# Create targets for sections 1 and 8.
+$(eval $(foreach section,1 8,$(call man-page-target,$(section))))
+
+shepherd.1: modules/shepherd.scm
+	-$(AM_V_HELP2MAN)LANGUAGE=			\
+	  $(HELP2MAN) --output="$@" $(HELP2MANFLAGS)	\
+	              "$(top_builddir)/shepherd"
+
+dist_man1_MANS = shepherd.1 herd.1
+dist_man8_MANS = halt.8 reboot.8
+
 # Things not automatically included in the distribution.
 EXTRA_DIST = $(templates) QUESTIONS fdl-1.3.texi ChangeLog-2003
 
