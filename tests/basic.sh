@@ -145,6 +145,22 @@ $herd status test-loaded | grep stopped
 $herd start test-loaded
 $herd status test-loaded | grep -i 'running.*42'
 $herd stop test-loaded
+$herd unload root test-loaded
+
+# Load a service whose running value does not have a valid read syntax, and
+# make sure that the running value is clamped before being sent over the wire.
+cat > "$confdir/some-conf.scm" <<EOF
+(register-services
+ (make <service>
+   #:provides '(test-loaded)
+   #:start (const (if #f #f))  ;#<undefined>
+   #:stop (const #f)))
+EOF
+
+$herd load root "$confdir/some-conf.scm"
+$herd start test-loaded
+$herd status test-loaded | grep -i "running.*#<unspecified>"
+$herd stop test-loaded
 
 # Unload everything and make sure only 'root' is left.
 $herd unload root all

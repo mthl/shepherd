@@ -486,9 +486,11 @@ clients."
             (respawn? ,(respawn? service))
             (docstring ,(slot-ref service 'docstring))
 
-            ;; Status.
+            ;; Status.  Use 'result->sexp' for the running value to make sure
+            ;; that whole thing is valid read syntax; we do not want things
+            ;; like #<undefined> to be sent to the client.
             (enabled? ,(enabled? service))
-            (running ,(slot-ref service 'running))
+            (running ,(result->sexp (slot-ref service 'running)))
             (last-respawns ,(slot-ref service 'last-respawns))))
 
 (define-method (result->sexp (service <service>))
