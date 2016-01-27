@@ -63,7 +63,6 @@ CLEANFILES =						\
 
 # Documentation.
 info_TEXINFOS = shepherd.texi
-SUBDIRS = examples
 
 AM_V_HELP2MAN = $(AM_V_HELP2MAN_$(V))
 AM_V_HELP2MAN_ = $(AM_V_HELP2MAN_$(AM_DEFAULT_VERBOSITY))
@@ -93,7 +92,14 @@ dist_man1_MANS = shepherd.1 herd.1
 dist_man8_MANS = halt.8 reboot.8
 
 # Things not automatically included in the distribution.
-EXTRA_DIST = $(templates) QUESTIONS fdl-1.3.texi ChangeLog-2003
+EXTRA_DIST =				\
+  ChangeLog-2003			\
+  fdl-1.3.texi				\
+  QUESTIONS				\
+  $(templates)				\
+  doc/examples/README			\
+  doc/examples/_unknown.scm		\
+  doc/examples/wolfgangj.scm
 
 # Create the socket directory (aka. 'default-socket-dir'.)  Make it
 # accessible only by its owner since otherwise 'shepherd' suggests using

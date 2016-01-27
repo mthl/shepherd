@@ -75,16 +75,16 @@
  (make <service>
    #:provides '(term)
    #:actions (make-actions
-	      (create "Create a new terminal."
-	       (lambda (running)
-		 (add-new-term)))
-	      (counter-set "Set the terminal creation counter."
-	       (lambda (running num)
-		 (set! term-counter (string->number num))))
-	      (status "Display the terminal creation counter."
-	       (lambda (running)
-		 (local-output "Terminal counter is at ~a."
-			       term-counter)))))
+              (create "Create a new terminal."
+                      (lambda (running)
+                        (add-new-term)))
+              (counter-set "Set the terminal creation counter."
+                           (lambda (running num)
+                             (set! term-counter (string->number num))))
+              (status "Display the terminal creation counter."
+                      (lambda (running)
+                        (local-output "Terminal counter is at ~a."
+                                      term-counter)))))
  (make <service>
    #:provides '(apache insecurity)
    #:requires '(local-net)
@@ -95,14 +95,14 @@
    #:start (make-system-constructor inet " start")
    #:stop (make-system-destructor inet " stop")
    #:actions (make-actions
-	      (dial "Connect to the big, evil internet."
-	       (lambda (running)
-		 (system inet-dial)
-		 #t))
-	      (hangup "Cut the internet connection."
-	       (lambda (running)
-		 (system inet-hangup)
-		 #t))))
+              (dial "Connect to the big, evil internet."
+                    (lambda (running)
+                      (system inet-dial)
+                      #t))
+              (hangup "Cut the internet connection."
+                      (lambda (running)
+                        (system inet-hangup)
+                        #t))))
  (make <service>
    #:provides '(local-net)
    #:start (make-system-constructor ifconfig " " local-interface " " local-ip)
@@ -115,10 +115,10 @@
 
 ;; Create a few terminals.
 (letrec ((loop (lambda (i)
-		 (and (not (zero? i))
-		      (begin
-			(add-new-term)
-			(loop (- i 1)))))))
+                 (and (not (zero? i))
+                      (begin
+                        (add-new-term)
+                        (loop (- i 1)))))))
   (loop default-terms))
 
 ;; Go into background.
@@ -126,7 +126,7 @@
 
 ;; Setup internet, a mailer and a few terms.
 (for-each start
-	  (append '(term inet mailer-daemon)
-		  (map (lambda (x)
-			 (symbol-append 'term- (number->symbol x)))
-		       (iota default-terms 1))))
+          (append '(term inet mailer-daemon)
+                  (map (lambda (x)
+                         (symbol-append 'term- (number->symbol x)))
+                       (iota default-terms 1))))

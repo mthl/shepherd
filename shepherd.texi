@@ -299,7 +299,7 @@ will now take a look at how to configure the Shepherd.  In the configuration
 file, we need mainly the definition of services.  We can also do
 various other things there, like starting a few services already.
 
-FIXME: Finish.  For now, look at the @code{examples/} subdirectory.
+FIXME: Finish.  For now, look at the @code{doc/examples/} subdirectory.
 
 @example
 ...

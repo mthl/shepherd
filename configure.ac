@@ -94,7 +94,6 @@ AM_MISSING_PROG([HELP2MAN], [help2man])
 
 dnl Finish.
 AC_CONFIG_FILES([Makefile
-                 examples/Makefile
-		 modules/shepherd/system.scm])
+                 modules/shepherd/system.scm])
 
 AC_OUTPUT
