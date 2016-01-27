@@ -204,6 +204,7 @@
           (let next-command ()
             (match (accept sock)
               ((command-source . client-address)
+               (setvbuf command-source _IOFBF 1024)
                (process-connection command-source))
               (_ #f))
             (next-command))))))

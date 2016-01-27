@@ -144,7 +144,10 @@ wrong---premature end-of-file, invalid sexp, etc."
                     (result ,(result->sexp result))
                     (error ,error)
                     (messages ,messages))
-            port))))
+            port)
+
+     ;; PORT may be buffered so make sure the command goes out.
+     (force-output port))))
 
 ;; This generic function must be extended to provide sexp representations of
 ;; results that go in <command-reply> objects.
