@@ -77,7 +77,8 @@ return the socket."
           (address (make-socket-address PF_UNIX file)))
       (catch 'system-error
         (lambda ()
-          (connect sock address))
+          (connect sock address)
+          (setvbuf sock _IOFBF 1024))
         (lambda (key proc format-string format-args errno . rest)
           ;; Guile's 'connect' throws an exception that doesn't specify
           ;; FILE.  Augment it with this information.
@@ -116,7 +117,10 @@ wrong---premature end-of-file, invalid sexp, etc."
                                (service ,service)
                                (arguments ,arguments)
                                (directory ,directory))
-            port))))
+            port)
+
+     ;; PORT may be buffered so make sure the command goes out.
+     (force-output port))))
 
 
 ;; Replies to commands.

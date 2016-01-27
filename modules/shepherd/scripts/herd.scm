@@ -96,11 +96,8 @@ the daemon via SOCKET-FILE."
      (write-command (shepherd-command action* service #:arguments args)
                     sock)
 
-     ;; Receive output.
-     (setvbuf sock _IOLBF)
-
-     ;; Interpret the command's output when possible and format it in a
-     ;; human-readable way.
+     ;; Receive output.  Interpret the command's output when possible and
+     ;; format it in a human-readable way.
      (match (read sock)
        (('reply ('version 0 _ ...)                ;no errors
                 ('result result) ('error #f)
