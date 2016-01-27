@@ -71,7 +71,7 @@ root_service_sexp="
       (requires ())
       (respawn? #f)
       (docstring \"The root service is used to operate on shepherd itself.\")
-      (enabled? #t) (running #t) (last-respawns ()))"
+      (enabled? #t) (running #t) (conflicts ()) (last-respawns ()))"
 
 "$GUILE" -c "
 (use-modules (shepherd comm) (srfi srfi-1) (ice-9 match))
@@ -85,12 +85,12 @@ root_service_sexp="
 	     (service (version 0)
 	       (provides (foo)) (requires ())
 	       (respawn? #t) (docstring \"Foo!\")
-	       (enabled? #t) (running 42)
+	       (enabled? #t) (running 42) (conflicts ())
 	       (last-respawns ()))
 	     (service (version 0)
 	       (provides (bar)) (requires (foo))
 	       (respawn? #f) (docstring \"Bar!\")
-	       (enabled? #t) (running #f)
+	       (enabled? #t) (running #f) (conflicts ())
 	       (last-respawns ())))))))
 "
 

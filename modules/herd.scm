@@ -65,7 +65,8 @@ of pairs."
   "Display the status of SERVICE, an sexp."
   (match service
     (('service ('version 0 _ ...) properties ...)
-     (alist-let* properties (provides requires running respawn? enabled?)
+     (alist-let* properties (provides requires running respawn? enabled?
+                             conflicts)
        (format #t (l10n "Status of ~a:~%") (first provides))
        (if running
            (begin
@@ -77,8 +78,7 @@ of pairs."
            (format #t (l10n "  It is disabled.~%")))
        (format #t (l10n "  Provides ~a.~%") provides)
        (format #t (l10n "  Requires ~a.~%") requires)
-       ;; FIXME: We don't have that information.
-       ;; (format #t (l10n "  Conflicts with ~a." (conflicts-with obj)))
+       (format #t (l10n "  Conflicts with ~a.~%") conflicts)
        (if respawn?
            (format #t (l10n "  Will be respawned.~%"))
            (format #t (l10n "  Will not be respawned.~%")))))))
