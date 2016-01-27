@@ -30,7 +30,7 @@ pid="t-pid-$$"
 
 herd="herd -s $socket"
 
-trap "rm -f $socket $conf $stamp $log;
+trap "cat $log || true; rm -f $socket $conf $stamp $log;
       test -f $pid && kill \`cat $pid\` || true; rm -f $pid" EXIT
 
 cat > "$conf"<<EOF
@@ -161,6 +161,18 @@ $herd load root "$confdir/some-conf.scm"
 $herd start test-loaded
 $herd status test-loaded | grep -i "running.*#<unspecified>"
 $herd stop test-loaded
+
+# Deregister 'test-loaded' via 'eval'.
+$herd eval root "(action root-service 'unload \"test-loaded\")"
+if $herd status test-loaded
+then false; else true; fi
+
+# Evaluate silly code, make sure nothing breaks.
+if $herd eval root '(/ 0 0)'
+then false; else true; fi
+
+if $herd eval root '(no closing paren'
+then false; else true; fi
 
 # Unload everything and make sure only 'root' is left.
 $herd unload root all

@@ -42,6 +42,7 @@ ctrl-alt-del is pressed (see ctrlaltdel(8)).
 
 ** ‘halt’ and ‘reboot’ connect to the system socket unconditionally
 ** ‘herd’ uses a non-zero exit code upon errors
+** The ‘root’ service has a new ‘eval’ action
 ** Basic man pages are now provided
 ** ‘make-forkexec-constructor’ has new #:group and #:user parameters
 ** ‘make-forkexec-constructor’ has a new #:pid-file parameter

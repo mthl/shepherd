@@ -117,6 +117,11 @@ the daemon via SOCKET-FILE."
              ((help-text)
               (display (gettext help-text))
               (newline))))
+          (('eval (or 'root 'shepherd))
+           (match result
+             ((value)
+              (write value)
+              (newline))))
           (('status _)
            ;; We get a list of statuses, in case several services have the
            ;; same name.

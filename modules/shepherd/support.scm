@@ -50,6 +50,7 @@
             default-persistency-state-file
 
             load-in-user-module
+            eval-in-user-module
 
             persistency
             persistency-state-file
@@ -332,6 +333,13 @@ which has essential bindings pulled in."
      (lambda ()
        (set-current-module user-module)
        (primitive-load file)))))
+
+(define (eval-in-user-module exp)
+  "Eval EXP in a fresh user module that has essential bindings pulled in."
+  (let ((user-module (make-user-module)))
+    (save-module-excursion
+     (lambda ()
+       (eval exp user-module)))))
 
 (define* (verify-dir dir #:key (secure? #t))
   "Check if the directory DIR exists and create it if it is the default

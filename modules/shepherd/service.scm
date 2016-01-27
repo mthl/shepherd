@@ -29,6 +29,7 @@
   #:use-module (rnrs io ports)
   #:use-module (ice-9 match)
   #:use-module (ice-9 format)
+  #:autoload   (ice-9 pretty-print) (truncated-print)
   #:use-module (shepherd support)
   #:use-module (shepherd comm)
   #:use-module (shepherd config)
@@ -1163,12 +1164,23 @@ Clients such as 'herd' can read it and format it in a human-readable way."
           (lambda (key)
             (local-output "Shutting down...")
             (power-off)))))
-     ;; Load a configuration file.
+     ;; Evaluate arbitrary code.
      (load
       "Load the Scheme code from FILE into shepherd.  This is potentially
 dangerous.  You have been warned."
       (lambda (running file-name)
         (load-config file-name)))
+     (eval
+      "Evaluate the given Scheme expression into the shepherd.  This is
+potentially dangerous, be careful."
+      (lambda (running str)
+        (let ((exp (call-with-input-string str read)))
+          (local-output "Evaluating user expression ~a."
+                        (call-with-output-string
+                          (lambda (port)
+                            (truncated-print exp port #:width 50))))
+          (eval-in-user-module exp))))
+
      ;; Unload a service
      (unload
       "Unload the service identified by SERVICE-NAME or all services

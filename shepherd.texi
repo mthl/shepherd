@@ -946,6 +946,10 @@ Evaluate the Scheme code in @var{file} in a fresh module that uses the
 @code{(oop goops)} and @code{(shepherd services)} modules---as with the
 @code{--config} option of @command{shepherd} (@pxref{Invoking shepherd}).
 
+@item eval @var{exp}
+Likewise, evaluate Scheme expression @var{exp} in a fresh module with
+all the necessary bindings.
+
 @item unload @var{service-name}
 Attempt to remove the service identified by @var{service-name}.
 @command{shepherd} will first stop the service, if necessary, and then
