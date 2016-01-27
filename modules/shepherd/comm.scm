@@ -96,7 +96,7 @@ wrong---premature end-of-file, invalid sexp, etc."
         (('shepherd-command ('version 0 _ ...)
                             ('action action)
                             ('service service)
-                            ('arguments args ...)
+                            ('arguments (args ...))
                             ('directory directory))
          (shepherd-command action service
                            #:arguments args
@@ -114,7 +114,7 @@ wrong---premature end-of-file, invalid sexp, etc."
      (write `(shepherd-command (version 0)        ; protocol version
                                (action ,action)
                                (service ,service)
-                               (arguments ,@arguments)
+                               (arguments ,arguments)
                                (directory ,directory))
             port))))
 
