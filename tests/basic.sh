@@ -54,6 +54,13 @@ cat > "$conf"<<EOF
              #t)
    #:stop  (lambda _
              (delete-file "$stamp-2"))
+   #:respawn? #f)
+ (make <service>
+   #:provides '(broken)
+   #:requires '()
+   #:start (lambda _
+             (mkdir "/this/throws/a/system/error"))
+   #:stop  (const #f)
    #:respawn? #f))
 EOF
 
@@ -100,6 +107,9 @@ done
 if $herd an-action-that-does-not-exist root
 then false; else true; fi
 
+if $herd start broken
+then false; else true; fi
+
 # Wrong number of arguments for an action.
 if $herd status root foo bar baz;
 then false; else true; fi
@@ -113,7 +123,8 @@ then false; else true; fi
 if $herd load root /does/not/exist.scm;
 then false; else true; fi
 
-# Unload one service, make sure the other it still around.
+# Unload two services, make sure the other it still around.
+$herd unload root broken
 $herd unload root test
 $herd status | grep "Stopped: (test-2)"
 
