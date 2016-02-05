@@ -91,6 +91,13 @@
             unknown-action-name
             unknown-action-service
 
+            &action-runtime-error
+            action-runtime-error?
+            action-runtime-error-service
+            action-runtime-error-action
+            action-runtime-error-key
+            action-runtime-error-arguments
+
             condition->sexp))
 
 ;; Type of service actions.
