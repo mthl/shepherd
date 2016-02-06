@@ -172,7 +172,12 @@ output port, and PROC's result is returned."
                  (mkdir path))
              (loop tail path))
            (lambda args
-             (if (= EEXIST (system-error-errno args))
+             ;; On GNU/Hurd we can get EROFS instead of EEXIST here.  Thus, if
+             ;; we get something other than EEXIST, check whether PATH exists.
+             ;; See <https://lists.gnu.org/archive/html/guix-devel/2016-02/msg00049.html>.
+             (if (or (= EEXIST (system-error-errno args))
+                     (let ((st (stat path #f)))
+                       (and st (eq? 'directory (stat:type st)))))
                  (loop tail path)
                  (apply throw args))))))
       (() #t))))
