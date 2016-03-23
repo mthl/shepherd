@@ -74,4 +74,6 @@ $herd status keeps-respawning | grep disabled
 if $herd start keeps-respawning
 then false; else true; fi
 
+$herd status keeps-respawning | grep -i "last respawned"
+
 grep -i "respawning too fast" "$log"

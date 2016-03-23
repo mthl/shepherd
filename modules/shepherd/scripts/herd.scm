@@ -26,6 +26,7 @@
   #:use-module (ice-9 rdelim)
   #:use-module (ice-9 match)
   #:use-module (srfi srfi-1)
+  #:use-module (srfi srfi-19)
   #:export (main))
 
 
@@ -66,7 +67,7 @@ of pairs."
   (match service
     (('service ('version 0 _ ...) properties ...)
      (alist-let* properties (provides requires running respawn? enabled?
-                             conflicts)
+                             conflicts last-respawns)
        (format #t (l10n "Status of ~a:~%") (first provides))
        (if running
            (begin
@@ -81,7 +82,13 @@ of pairs."
        (format #t (l10n "  Conflicts with ~a.~%") conflicts)
        (if respawn?
            (format #t (l10n "  Will be respawned.~%"))
-           (format #t (l10n "  Will not be respawned.~%")))))))
+           (format #t (l10n "  Will not be respawned.~%")))
+       (match last-respawns
+         ((time _ ...)
+          (format #t (l10n "  Last respawned on ~a.~%")
+                  (date->string
+                   (time-utc->date (make-time time-utc 0 time)))))
+         (_ #t))))))
 
 (define (run-command socket-file action service args)
   "Perform ACTION with ARGS on SERVICE, and display the result.  Connect to
