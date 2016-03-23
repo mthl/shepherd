@@ -1116,7 +1116,7 @@ file when persistence is enabled."
     #:docstring "The root service is used to operate on shepherd itself."
     #:provides '(root shepherd)
     #:requires '()
-    #:respawn #f
+    #:respawn? #f
     #:start (lambda args
 	      (when (isatty? (current-output-port))
                 (display-version))
