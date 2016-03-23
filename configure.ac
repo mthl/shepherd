@@ -3,7 +3,7 @@ dnl Process this file with autoconf to procude a configure script.
 AC_PREREQ(2.69)
 
 dnl Initialization
-AC_INIT([GNU Shepherd], [0.3], [bug-guix@gnu.org])
+AC_INIT([GNU Shepherd], [0.3.1], [bug-guix@gnu.org])
 AC_CONFIG_SRCDIR([modules/shepherd.scm])
 AC_CONFIG_AUX_DIR([build-aux])
 
