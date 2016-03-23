@@ -122,7 +122,12 @@
      '())))
 
 ;; Respawning CAR times in CDR seconds will disable the service.
-(define respawn-limit (cons 5 5))
+;;
+;; XXX: The terrible hack in (shepherd) using SIGALRM to work around
+;; unreliable SIGCHLD delivery means that it might take up to 1 second for
+;; SIGCHLD to be delivered.  Thus, arrange for the car to be lower than the
+;; cdr.
+(define respawn-limit '(5 . 7))
 
 (define (respawn-limit-hit? respawns times seconds)
   "Return true of RESPAWNS, the list of times at which a given service was
