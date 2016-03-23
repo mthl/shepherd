@@ -15,6 +15,7 @@ Please send dmd bug reports to bug-guix@gnu.org.
 ** Process respawn limit is honored again (regression introduced in 0.3)
 ** ‘herd status SERVICE’ displays the last respawn time, if any
 ** (shepherd service) exports ‘&action-runtime-error’ and related bindings
+** ‘mkdir-p’ adjusted to cope with GNU/Hurd file system behavior
 
 * Changes in version 0.3
 
