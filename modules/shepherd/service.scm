@@ -311,9 +311,6 @@ wire."
 			     problem)
                (call-with-blocked-asyncs
                 (lambda ()
-                  ;; Reset the list of respawns.
-                  (slot-set! obj 'last-respawns '())
-
                   ;; Start the service itself.  Asyncs are blocked so that if
                   ;; the newly-started process dies immediately, the SIGCHLD
                   ;; handler is invoked later, once we have set the 'running'
@@ -337,7 +334,7 @@ wire."
 ;; latter fails, continue anyway.  Return `#f' if it could be stopped.
 (define-method (stop (obj <service>) . args)
   ;; Block asyncs so the SIGCHLD handler doesn't execute concurrently.
-  ;; Notably, that makes sure the handler process the SIGCHLD for OBJ's
+  ;; Notably, that makes sure the handler processes the SIGCHLD for OBJ's
   ;; process once we're done; otherwise, it could end up respawning OBJ.
   (call-with-blocked-asyncs
    (lambda ()
@@ -373,6 +370,9 @@ wire."
 
                ;; OBJ is no longer running.
                (slot-set! obj 'running #f)
+
+               ;; Reset the list of respawns.
+               (slot-set! obj 'last-respawns '())
 
                ;; Status message.
                (let ((name (canonical-name obj)))
