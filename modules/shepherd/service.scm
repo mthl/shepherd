@@ -929,8 +929,8 @@ child left."
           ;; because this procedure is supposed to be called only upon
           ;; SIGCHLD.
           (let ((errno (system-error-errno args)))
-            (local-output "error: 'waitpid' unexpectedly failed with: ~s"
-                          (strerror errno))
+            (local-output "warning: 'waitpid' ~a failed unexpectedly: ~a"
+                          what (strerror errno))
             '(0 . #f)))))))
 
 (define (respawn-service signum)
