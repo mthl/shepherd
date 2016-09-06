@@ -835,6 +835,7 @@ execution of the @var{command} was successful, @code{#t} if not.
   [#:user #f] @
   [#:group #f] @
   [#:pid-file #f] @
+  [#:log-file #f] @
   [#:directory (default-service-directory)] @
   [#:environment-variables (default-environment-variables)]
 Return a procedure that forks a child process, closes all file
@@ -848,6 +849,10 @@ the procedure will be the PID of the child process.
 When @var{pid-file} is true, it must be the name of a PID file
 associated with the process being launched; the return value is the PID
 read from that file, once that file has been created.
+
+When @var{log-file} is true, it must be the name of a file. The file will
+be removed if it exists and the services stdout and stderr will be
+redirected to it.
 @end deffn
 
 @deffn {procedure} make-kill-destructor [@var{signal}]

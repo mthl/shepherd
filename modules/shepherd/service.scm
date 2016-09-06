@@ -687,6 +687,7 @@ number that was read (a PID)."
                        #:key
                        (user #f)
                        (group #f)
+                       (log-file #f)
                        (directory (default-service-directory))
                        (environment-variables (default-environment-variables)))
   "Run COMMAND as the current process from DIRECTORY, and with
@@ -712,11 +713,26 @@ false."
 
      ;; Close all the file descriptors except stdout and stderr.
      (let ((max-fd (max-file-descriptors)))
-       (catch-system-error (close-fdes 0))
 
+       ;; Redirect stdin to use /dev/null
+       (catch-system-error (close-fdes 0))
        ;; Make sure file descriptor zero is used, so we don't end up reusing
        ;; it for something unrelated, which can confuse some packages.
        (dup2 (open-fdes "/dev/null" O_RDONLY) 0)
+
+       (when log-file
+         (catch #t
+           (lambda ()
+             ;; Redirect stout and stderr to use LOG-FILE.
+             (catch-system-error (close-fdes 1))
+             (catch-system-error (close-fdes 2))
+             (dup2 (open-fdes log-file (logior O_CREAT O_WRONLY)) 1)
+             (dup2 (open-fdes log-file (logior O_CREAT O_WRONLY)) 2))
+           (lambda (key . args)
+             (format (current-error-port)
+                     "failed to open log-file ~s:~%" log-file)
+             (print-exception (current-error-port) #f key args)
+             (primitive-exit 1))))
 
        (let loop ((i 3))
          (when (< i max-fd)
@@ -760,6 +776,7 @@ false."
                             #:key
                             (user #f)
                             (group #f)
+                            (log-file #f)
                             (directory (default-service-directory))
                             (environment-variables
                              (default-environment-variables)))
@@ -770,6 +787,7 @@ its PID."
         (exec-command command
                       #:user user
                       #:group group
+                      #:log-file log-file
                       #:directory directory
                       #:environment-variables environment-variables)
         pid)))
@@ -798,24 +816,31 @@ once that file has been created."
                (group #f)
                (directory (default-service-directory))
                (environment-variables (default-environment-variables))
-               (pid-file #f))
+               (pid-file #f)
+               (log-file #f))
       (let ((command (if (string? command)
                          (begin
                            (warn-deprecated-form)
                            (list command))
                          command)))
         (lambda args
-          (when pid-file
-            (catch 'system-error
-              (lambda ()
-                (delete-file pid-file))
-              (lambda args
-                (unless (= ENOENT (system-error-errno args))
-                  (apply throw args)))))
+          (define (clean-up file)
+            (when file
+              (catch 'system-error
+                (lambda ()
+                  (delete-file file))
+                (lambda args
+                  (unless (= ENOENT (system-error-errno args))
+                    (apply throw args))))))
+
+          (clean-up pid-file)
+          (clean-up log-file)
 
           (let ((pid (fork+exec-command command
+
                                         #:user user
                                         #:group group
+                                        #:log-file log-file
                                         #:directory directory
                                         #:environment-variables
                                         environment-variables)))
