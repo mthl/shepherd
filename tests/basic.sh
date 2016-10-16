@@ -95,9 +95,14 @@ $herd enable test-2
 $herd start test-2
 
 # This used to crash shepherd: <http://bugs.gnu.org/24684>.
-$herd enable test-2 with extra arguments
+if $herd enable test-2 with extra arguments
+then false; else true; fi
 
 $herd status test-2 | grep started
+
+# Make sure extra arguments lead to an error.
+if $herd status test-2 something else that is useless
+then false; else true; fi
 
 for action in status start stop
 do

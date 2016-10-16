@@ -388,31 +388,36 @@ wire."
 
 ;; Call action THE-ACTION with ARGS.
 (define-method (action (obj <service>) the-action . args)
-  (define (default-action running . args)
+  (define default-action
     ;; All actions which are handled here might be called even if the
     ;; service is not running, so they have to take this into account.
     (case the-action
       ;; Restarting is done in the obvious way.
       ((restart)
-       (if running
-	   (stop obj)
-           (local-output "~a was not running." (canonical-name obj)))
-       (start obj))
+       (lambda (running . args)
+         (if running
+             (stop obj)
+             (local-output "~a was not running." (canonical-name obj)))
+         (start obj args)))
       ((status)
        ;; Return the service itself.  It is automatically converted to an sexp
        ;; via 'result->sexp' and sent to the client.
-       obj)
+       (lambda (_) obj))
       ((enable)
-       (enable obj))
+       (lambda (_)
+         (enable obj)))
       ((disable)
-       (disable obj))
+       (lambda (_)
+         (disable obj)))
       ((doc)
-       (apply doc obj args))
+       (lambda (_ . args)
+         (apply doc obj args)))
       (else
-       ;; FIXME: Unknown service.
-       (raise (condition (&unknown-action-error
-                          (service obj)
-                          (action the-action)))))))
+       (lambda _
+         ;; FIXME: Unknown service.
+         (raise (condition (&unknown-action-error
+                            (service obj)
+                            (action the-action))))))))
 
   (let ((proc (or (and=> (lookup-action obj the-action)
                          action-procedure)
@@ -425,7 +430,7 @@ wire."
     (catch #t
       (lambda ()
         (cond ((eq? proc default-action)
-               (apply default-action (slot-ref obj 'running) args))
+               (apply default-action obj args))
               ((not (running? obj))
                (local-output "Service ~a is not running." (canonical-name obj))
                #f)
