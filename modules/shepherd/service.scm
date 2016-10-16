@@ -402,6 +402,12 @@ wire."
        ;; Return the service itself.  It is automatically converted to an sexp
        ;; via 'result->sexp' and sent to the client.
        obj)
+      ((enable)
+       (enable obj))
+      ((disable)
+       (disable obj))
+      ((doc)
+       (apply doc obj args))
       (else
        ;; FIXME: Unknown service.
        (raise (condition (&unknown-action-error
@@ -416,21 +422,23 @@ wire."
     ;; information.
     ;; FIXME: Why should the user-implementations not be allowed to be
     ;; called this way?
-    (cond ((eq? proc default-action)
-           (apply default-action (slot-ref obj 'running) args))
-          ((not (running? obj))
-           (local-output "Service ~a is not running." (canonical-name obj))
-           #f)
-          (else
-           (catch #t
-             (lambda ()
-               (apply proc (slot-ref obj 'running) args))
-             (lambda (key . args)
-               ;; Special case: 'root' may quit.
-               (and (eq? root-service obj)
-                    (eq? key 'quit)
-                    (apply quit args))
-               (report-exception the-action obj key args)))))))
+    (catch #t
+      (lambda ()
+        (cond ((eq? proc default-action)
+               (apply default-action (slot-ref obj 'running) args))
+              ((not (running? obj))
+               (local-output "Service ~a is not running." (canonical-name obj))
+               #f)
+              (else
+               (apply proc (slot-ref obj 'running) args))))
+      (lambda (key . args)
+        ;; Special case: 'root' may quit.
+        (and (eq? root-service obj)
+             (eq? key 'quit)
+             (apply quit args))
+        (if (eq? key 'srfi-34)
+            (apply throw key args)                ;handled by callers
+            (report-exception the-action obj key args))))))
 
 ;; Display documentation about the service.
 (define-method (doc (obj <service>) . args)
@@ -567,16 +575,8 @@ results."
 		   (defines-action? unknown 'action))
 	      (apply action unknown 'action the-action args)
               (raise (condition (&missing-service-error (name obj))))))
-        (map (lambda (s)
-               (apply (case the-action
-                        ((enable) enable)
-                        ((disable) disable)
-                        ((doc) doc)
-                        (else
-                         (lambda (s . further-args)
-                           (apply action s the-action further-args))))
-                      s
-                      args))
+        (map (lambda (service)
+               (apply action service the-action args))
              which-services))))
 
 ;; EINTR-safe versions of 'system' and 'system*'.

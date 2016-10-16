@@ -94,6 +94,9 @@ then false; else true; fi
 $herd enable test-2
 $herd start test-2
 
+# This used to crash shepherd: <http://bugs.gnu.org/24684>.
+$herd enable test-2 with extra arguments
+
 $herd status test-2 | grep started
 
 for action in status start stop
@@ -118,6 +121,10 @@ then false; else true; fi
 $herd doc root action status
 if $herd doc root action an-action-that-does-not-exist
 then false; else true; fi
+
+# Make sure the error message is correct.
+$herd doc root action an-action-that-does-not-exist 2>&1 | \
+    grep "does not have an action 'an-action-that-does-not-exist'"
 
 # Loading nonexistent file.
 if $herd load root /does/not/exist.scm;
