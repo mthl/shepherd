@@ -32,7 +32,7 @@ BUILT_SOURCES = modules/shepherd/config.scm
 # XXX: we can't use 'nobase_' because of the modules/ subdirectory.
 dist_guilemodule_DATA =				\
   modules/shepherd.scm
-nodist_guilemodule_DATA = $(dist_guilemodule_DATA:%.scm=%.go)
+nodist_guileobject_DATA = $(dist_guilemodule_DATA:%.scm=%.go)
 
 shepherdsubdir = $(guilemoduledir)/shepherd
 dist_shepherdsub_DATA =				\
@@ -43,8 +43,11 @@ dist_shepherdsub_DATA =				\
   modules/shepherd/comm.scm
 nodist_shepherdsub_DATA =			\
   modules/shepherd/config.scm			\
+  modules/shepherd/system.scm
+
+shepherdgosubdir = $(guileobjectdir)/shepherd
+nodist_shepherdgosub_DATA =			\
   modules/shepherd/config.go			\
-  modules/shepherd/system.scm			\
   modules/shepherd/system.go			\
   $(dist_shepherdsub_DATA:%.scm=%.go)
 
@@ -53,12 +56,15 @@ dist_scripts_DATA =				\
   modules/shepherd/scripts/halt.scm		\
   modules/shepherd/scripts/herd.scm		\
   modules/shepherd/scripts/reboot.scm
-nodist_scripts_DATA =				\
+
+scriptsgodir = $(shepherdgosubdir)/scripts
+nodist_scriptsgo_DATA =				\
   $(dist_scripts_DATA:%.scm=%.go)
 
 CLEANFILES =						\
   $(nodist_guilemodule_DATA) $(nodist_shepherdsub_DATA)	\
-  $(nodist_scripts_DATA)				\
+  $(nodist_shepherdgosub_DATA)				\
+  $(nodist_scriptsgo_DATA)				\
   $(bin_SCRIPTS) $(sbin_SCRIPTS)
 
 # Documentation.

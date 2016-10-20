@@ -26,7 +26,9 @@ dnl Checks for programs.
 GUILE_PROGS
 
 guilemoduledir="${datarootdir}/guile/site/$GUILE_EFFECTIVE_VERSION"
+guileobjectdir="${libdir}/guile/$GUILE_EFFECTIVE_VERSION/site-ccache"
 AC_SUBST([guilemoduledir])
+AC_SUBST([guileobjectdir])
 
 dnl
 dnl Low-level operating system interface.
