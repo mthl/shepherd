@@ -114,8 +114,8 @@ install-exec-hook: install-executable-symlinks
 	   $(bin_SCRIPTS:%=$(DESTDIR)$(bindir)/%)			\
 	   $(sbin_SCRIPTS:%=$(DESTDIR)$(sbindir)/%) ;			\
 	do								\
-	  $(SED) -e's|$(abs_top_srcdir)/modules|$(guilemoduledir)|g'	\
-	         -e's|$(abs_top_builddir)/modules|$(guilemoduledir)|g'	\
+	  $(SED) -e's|$(abs_top_srcdir)/modules\(.*\)%load-path|$(guilemoduledir)\1%load-path|g' \
+	         -e's|$(abs_top_builddir)/modules\(.*\)%load-compiled-path|$(guileobjectdir)\1%load-compiled-path|g' \
 	         -i $$script ;						\
 	done
 
