@@ -1014,9 +1014,6 @@ otherwise by updating its state."
          ;; loop so we don't miss any terminated child process.
          (loop))))))
 
-;; Install it as the handler.
-(sigaction SIGCHLD respawn-service SA_NOCLDSTOP)
-
 ;; Add NEW-SERVICES to the list of known services.
 (define (register-services . new-services)
   (define (register-single-service new)
