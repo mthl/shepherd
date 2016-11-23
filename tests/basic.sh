@@ -138,7 +138,7 @@ then false; else true; fi
 # Unload two services, make sure the other it still around.
 $herd unload root broken
 $herd unload root test
-$herd status | grep "Stopped: (test-2)"
+$herd status | grep -e "- test-2"
 
 $herd reload root "$conf"
 test "`$herd status`" == "$pristine_status"
@@ -199,8 +199,9 @@ then false; else true; fi
 
 # Unload everything and make sure only 'root' is left.
 $herd unload root all
-$herd status | grep "Stopped: ()"
-$herd status | grep "Started: (root)"
+if $herd status | grep "Stopped:"
+then false; else true; fi
+$herd status | grep -e "+ root"
 
 $herd stop root
 ! kill -0 $shepherd_pid

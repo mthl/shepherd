@@ -46,6 +46,13 @@ of pairs."
 
 (define (display-status-summary services)
   "Display a summary of the status of all of SERVICES."
+  (define (display-services header bullet services)
+    (unless (null? services)
+      (display header)
+      (for-each (lambda (service)
+                  (format #t " ~a ~a~%" bullet
+                          (service-canonical-name service)))
+                services)))
   (call-with-values
       (lambda ()
         (partition (match-lambda
@@ -53,10 +60,10 @@ of pairs."
                       (car (assoc-ref properties 'running))))
                    services))
     (lambda (started stopped)
-      (format #t (l10n "Started: ~a~%")
-              (map service-canonical-name started))
-      (format #t (l10n "Stopped: ~a~%")
-              (map service-canonical-name stopped)))))
+      (display-services (l10n "Started:\n") "+"
+                        started)
+      (display-services (l10n "Stopped:\n") "-"
+                        stopped))))
 
 (define (display-detailed-status services)
   "Display the detailed status of SERVICES."
