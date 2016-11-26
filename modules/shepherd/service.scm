@@ -667,8 +667,8 @@ set when starting a service."
 
 (define* (read-pid-file file #:key (max-delay 5))
   "Wait for MAX-DELAY seconds for FILE to show up, and read its content as a
-number.  Return #f if FILE does not contain a number; otherwise return the
-number that was read (a PID)."
+number.  Return #f if FILE was not created or does not contain a number;
+otherwise return the number that was read (a PID)."
   (define start (current-time))
   (let loop ()
     (catch 'system-error
@@ -678,14 +678,14 @@ number that was read (a PID)."
           (call-with-input-file file get-string-all))))
       (lambda args
         (let ((errno (system-error-errno args)))
-          (if (and (= ENOENT errno)
-                   (< (current-time) (+ start max-delay)))
-              (begin
-                ;; FILE does not exist yet, so wait and try again.
-                ;; XXX: Ideally we would yield to the main event loop
-                ;; and/or use inotify.
-                (sleep 1)
-                (loop))
+          (if (= ENOENT errno)
+              (and (< (current-time) (+ start max-delay))
+                   (begin
+                     ;; FILE does not exist yet, so wait and try again.
+                     ;; XXX: Ideally we would yield to the main event loop
+                     ;; and/or use inotify.
+                     (sleep 1)
+                     (loop)))
               (apply throw args)))))))
 
 (define* (exec-command command
@@ -856,8 +856,13 @@ start."
                                         #:environment-variables
                                         environment-variables)))
             (if pid-file
-                (read-pid-file pid-file
-                               #:max-delay pid-file-timeout)
+                (match (read-pid-file pid-file
+                                      #:max-delay pid-file-timeout)
+                  (#f
+                   (catch-system-error (kill pid SIGTERM))
+                   #f)
+                  ((? integer? pid)
+                   pid))
                 pid)))))
      ((program . program-args)
       ;; The old form, documented until 0.1 included.

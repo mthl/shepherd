@@ -184,6 +184,7 @@ TESTS =						\
   tests/respawn-throttling.sh			\
   tests/misbehaved-client.sh			\
   tests/no-home.sh				\
+  tests/pid-file.sh				\
   tests/status-sexp.sh				\
   tests/sigint.sh
 

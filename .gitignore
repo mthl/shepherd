@@ -56,3 +56,4 @@ Makefile
 Makefile.in
 /tests/respawn-throttling.log
 /tests/respawn-throttling.trs
+/tests/pid-file.log
