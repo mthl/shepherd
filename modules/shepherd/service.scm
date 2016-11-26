@@ -797,6 +797,10 @@ its PID."
                       #:environment-variables environment-variables)
         pid)))
 
+(define %pid-file-timeout
+  ;; Maximum number of seconds we wait for a PID file to show up.
+  5)
+
 (define make-forkexec-constructor
   (let ((warn-deprecated-form
          ;; Until 0.1, this procedure took a rest list.
@@ -815,13 +819,16 @@ the procedure will be the PID of the child process.
 
 When @var{pid-file} is true, it must be the name of a PID file associated with
 the process being launched; the return value is the PID read from that file,
-once that file has been created."
+once that file has been created.  If @var{pid-file} does not show up in less
+than @var{pid-file-timeout} seconds, the service is considered as failing to
+start."
      ((command #:key
                (user #f)
                (group #f)
                (directory (default-service-directory))
                (environment-variables (default-environment-variables))
                (pid-file #f)
+               (pid-file-timeout %pid-file-timeout)
                (log-file #f))
       (let ((command (if (string? command)
                          (begin
@@ -842,7 +849,6 @@ once that file has been created."
           (clean-up log-file)
 
           (let ((pid (fork+exec-command command
-
                                         #:user user
                                         #:group group
                                         #:log-file log-file
@@ -850,7 +856,8 @@ once that file has been created."
                                         #:environment-variables
                                         environment-variables)))
             (if pid-file
-                (read-pid-file pid-file)
+                (read-pid-file pid-file
+                               #:max-delay pid-file-timeout)
                 pid)))))
      ((program . program-args)
       ;; The old form, documented until 0.1 included.
