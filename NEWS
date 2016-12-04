@@ -9,7 +9,16 @@ Copyright © 2013, 2014, 2016 Ludovic Courtès <ludo@gnu.org>
   are permitted in any medium without royalty provided the copyright
   notice and this notice are preserved.
 
-Please send dmd bug reports to bug-guix@gnu.org.
+Please send Shepherd bug reports to bug-guix@gnu.org.
+
+* Changes in version 0.3.2
+** ‘herd status’ displays a bullet list
+** No longer crash when ‘enable’ & co. are passed a wrong argument number
+   (<http://bugs.gnu.org/24684>)
+** ‘make-forkexec-constructor’ has a new #:pid-file-timeout parameter
+** Processes that failed to create their PID file are now killed
+** .go files are now installed in LIBDIR/guile/2.X/site-ccache
+** Build system supports compilation with Guile 2.2
 
 * Changes in version 0.3.1
 ** Process respawn limit is honored again (regression introduced in 0.3)
