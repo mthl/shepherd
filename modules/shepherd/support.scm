@@ -251,6 +251,11 @@ There is NO WARRANTY, to the extent permitted by law.")))
                      (string-append user-homedir "/.config"))
                  "/shepherd"))
 
+(define %user-runtime-dir
+  ;; Default runtime directory if shepherd is run as a normal user.
+  (string-append (or (getenv "XDG_RUNTIME_DIR")
+                     (format #f "/run/user/~s" (getuid)))))
+
 (define (make-bare-init-file target)
   "Return #t if a bare init file was created at TARGET; #f otherwise.
 
@@ -301,7 +306,7 @@ create a template configuration file if non exists."
 (define default-socket-dir
   (if (zero? (getuid))
       %system-socket-dir
-      (string-append %user-config-dir "/run")))
+      (string-append %user-runtime-dir "/shepherd")))
 
 ;; Unix domain socket for receiving commands in shepherd.
 (define default-socket-file

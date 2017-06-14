@@ -419,9 +419,14 @@ to the standard output if @var{file} is omitted.
 @item -s @var{file}
 @itemx --socket=@var{file}
 @cindex socket special file
-Receive further commands on the socket special file @var{file}.  If
-this option is not specified, @file{@var{localstatedir}/run/shepherd/socket} is
-taken.
+@vindex XDG_RUNTIME_DIR
+Receive further commands on the socket special file @var{file}.  If this
+option is not specified, @file{@var{localstatedir}/run/shepherd/socket} is
+taken when running as @code{root}; when running as an unprivileged
+user, @command{shepherd} listens to @file{/run/user/@var{uid}/shepherd},
+where @var{uid} is the user's numerical ID, or to
+@file{$XDG_RUNTIME_DIR/shepherd} when the @code{XDG_RUNTIME_DIR}
+environment variable is defined.
 
 If @code{-} is specified as file name, commands will be read from
 standard input, one per line, as would be passed on a @command{herd}
