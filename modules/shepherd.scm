@@ -41,7 +41,6 @@
   (with-fluids ((%default-port-encoding "UTF-8"))
     (let ((sock    (socket PF_UNIX SOCK_STREAM 0))
           (address (make-socket-address AF_UNIX file-name)))
-      (false-if-exception (delete-file file-name))
       (bind sock address)
       (listen sock 10)
       sock)))
