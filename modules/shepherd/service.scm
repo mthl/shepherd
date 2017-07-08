@@ -398,7 +398,7 @@ wire."
          (if running
              (stop obj)
              (local-output "~a was not running." (canonical-name obj)))
-         (start obj args)))
+         (apply start obj args)))
       ((status)
        ;; Return the service itself.  It is automatically converted to an sexp
        ;; via 'result->sexp' and sent to the client.
