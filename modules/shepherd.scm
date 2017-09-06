@@ -142,9 +142,6 @@
     ;; Start the 'root' service.
     (start root-service)
 
-    ;; Install the SIGCHLD handler.
-    (sigaction SIGCHLD respawn-service SA_NOCLDSTOP)
-
     ;; This _must_ succeed.  (We could also put the `catch' around
     ;; `main', but it is often useful to get the backtrace, and
     ;; `caught-error' does not do this yet.)

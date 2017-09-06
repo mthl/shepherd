@@ -100,6 +100,9 @@
 
             condition->sexp))
 
+;; Keep track of lazy initialization of SIGCHLD handler
+(define %sigchld-handler-installed? #f)
+
 ;; Type of service actions.
 (define-record-type <action>
   (make-action name proc doc)
@@ -787,6 +790,10 @@ false."
                              (default-environment-variables)))
   "Spawn a process that executed COMMAND as per 'exec-command', and return
 its PID."
+  ;; Install the SIGCHLD handler if this is the first fork+exec-command call
+  (unless %sigchld-handler-installed?
+    (sigaction SIGCHLD respawn-service SA_NOCLDSTOP)
+    (set! %sigchld-handler-installed? #t))
   (let ((pid (primitive-fork)))
     (if (zero? pid)
         (exec-command command
