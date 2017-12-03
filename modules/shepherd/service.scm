@@ -1,5 +1,5 @@
 ;; service.scm -- Representation of services.
-;; Copyright (C) 2013, 2014, 2015, 2016 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014, 2015, 2016, 2017 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Järling <wolfgang@pro-linux.de>
 ;; Copyright (C) 2014 Alex Sassmannshausen <alex.sassmannshausen@gmail.com>
 ;; Copyright (C) 2016 Alex Kost <alezost@gmail.com>
@@ -744,6 +744,14 @@ false."
 
        (let loop ((i 3))
          (when (< i max-fd)
+           ;; First try to close any ports associated with file descriptor I.
+           ;; Otherwise the finalization thread might get around to closing
+           ;; those ports eventually, which will raise an EBADF exception (on
+           ;; 2.2), leading to messages like "error in the finalization
+           ;; thread: Bad file descriptor".
+           (for-each (lambda (port)
+                       (catch-system-error (close-port port)))
+                     (fdes->ports i))
            (catch-system-error (close-fdes i))
            (loop (+ i 1)))))
 
