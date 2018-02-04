@@ -1,5 +1,5 @@
 ;; service.scm -- Representation of services.
-;; Copyright (C) 2013, 2014, 2015, 2016, 2017 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Järling <wolfgang@pro-linux.de>
 ;; Copyright (C) 2014 Alex Sassmannshausen <alex.sassmannshausen@gmail.com>
 ;; Copyright (C) 2016 Alex Kost <alezost@gmail.com>
@@ -949,7 +949,8 @@ Return #f if service is not found."
                  %services))
 
 (define (service-list)
-  "Return the list of services currently defined."
+  "Return the list of services currently defined.  Note: The order of the list
+returned in unspecified."
   (hash-fold (lambda (name services result)
                (let ((service (lookup-canonical-service name services)))
                  (if service

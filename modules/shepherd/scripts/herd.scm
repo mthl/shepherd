@@ -1,5 +1,5 @@
 ;; herd.scm -- The program to herd the Shepherd.
-;; Copyright (C) 2013, 2014, 2016 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014, 2016, 2018 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
 ;; This file is part of the GNU Shepherd.
@@ -46,13 +46,17 @@ of pairs."
 
 (define (display-status-summary services)
   "Display a summary of the status of all of SERVICES."
+  (define (service<? service1 service2)
+    (string<? (symbol->string (service-canonical-name service1))
+              (symbol->string (service-canonical-name service2))))
+
   (define (display-services header bullet services)
     (unless (null? services)
       (display header)
       (for-each (lambda (service)
                   (format #t " ~a ~a~%" bullet
                           (service-canonical-name service)))
-                services)))
+                (sort services service<?))))      ;get deterministic output
   (call-with-values
       (lambda ()
         (partition (match-lambda
