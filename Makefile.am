@@ -1,6 +1,6 @@
 # Makefile.am -- How to build and install the Shepherd.
 # Copyright © 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
-# Copyright © 2013, 2014, 2015, 2016 Ludovic Courtès <ludo@gnu.org>
+# Copyright © 2013, 2014, 2015, 2016, 2018 Ludovic Courtès <ludo@gnu.org>
 #
 # This file is part of the GNU Shepherd.
 #
@@ -93,12 +93,13 @@ dist_man1_MANS = doc/shepherd.1 doc/herd.1
 dist_man8_MANS = doc/halt.8 doc/reboot.8
 
 # Things not automatically included in the distribution.
-EXTRA_DIST =				\
-  ChangeLog-2003			\
-  QUESTIONS				\
-  $(templates)				\
-  doc/examples/README			\
-  doc/examples/_unknown.scm		\
+EXTRA_DIST =					\
+  build-aux/config.rpath			\
+  ChangeLog-2003				\
+  QUESTIONS					\
+  $(templates)					\
+  doc/examples/README				\
+  doc/examples/_unknown.scm			\
   doc/examples/wolfgangj.scm
 
 # Create the socket directory (aka. 'default-socket-dir'.)  Make it
@@ -229,3 +230,7 @@ gen-ChangeLog:
 dist-hook: gen-ChangeLog
 
 .PHONY: gen-ChangeLog
+
+SUBDIRS = po
+
+ACLOCAL_AMFLAGS = -I m4

@@ -57,3 +57,16 @@ Makefile.in
 /tests/respawn-throttling.log
 /tests/respawn-throttling.trs
 /tests/pid-file.log
+/po/ChangeLog
+/po/Makefile.in.in
+/po/POTFILES
+/po/Rules-quot
+/po/boldquot.sed
+/po/en@boldquot.header
+/po/en@quot.header
+/po/insert-header.sin
+/po/quot.sed
+/po/remove-potcdate.sed
+/po/remove-potcdate.sin
+/po/shepherd.pot
+/po/stamp-po

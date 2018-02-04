@@ -14,6 +14,8 @@ AM_INIT_AUTOMAKE([1.11 gnu silent-rules -Wall -Wno-portability
 dnl Enable silent rules by default.
 AM_SILENT_RULES([yes])
 
+AM_GNU_GETTEXT([external])
+
 AC_CANONICAL_HOST
 AC_PROG_MKDIR_P
 AC_PROG_SED
@@ -77,7 +79,7 @@ dnl Manual pages.
 AM_MISSING_PROG([HELP2MAN], [help2man])
 
 dnl Finish.
-AC_CONFIG_FILES([Makefile
+AC_CONFIG_FILES([Makefile po/Makefile.in
                  modules/shepherd/system.scm])
 
 AC_OUTPUT

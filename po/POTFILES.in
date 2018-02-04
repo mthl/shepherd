@@ -1,0 +1,8 @@
+# List of source files that contain translatable strings.
+
+modules/shepherd/comm.scm
+modules/shepherd/scripts/herd.scm
+modules/shepherd/support.scm
+modules/shepherd/service.scm
+modules/shepherd/args.scm
+modules/shepherd.scm
