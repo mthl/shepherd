@@ -178,17 +178,17 @@ talking to shepherd"))
     (let ((socket-file default-socket-file)
           (command-args '()))
       (process-args (program-name) args
-                    "ACTION SERVICE [ARG...]"
-                    (string-append
-                     "Apply ACTION (start, stop, status, etc.) on SERVICE"
-                     " with the ARGs.")
+                    (l10n "ACTION SERVICE [ARG...]")
+                    (l10n "Apply ACTION (start, stop, status, etc.) on \\
+SERVICE with the ARGs.")
                     (lambda (arg)
                       ;; Collect unknown args.
                       (set! command-args (cons arg command-args)))
                     (make <option>
                       #:long "socket" #:short #\s
-                      #:takes-arg? #t #:optional-arg? #f #:arg-name "FILE"
-                      #:description "send commands to FILE"
+                      #:takes-arg? #t #:optional-arg? #f
+                      #:arg-name (l10n "FILE")
+                      #:description (l10n "send commands to FILE")
                       #:action (lambda (file)
                                  (set! socket-file file))))
 

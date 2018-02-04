@@ -1,5 +1,5 @@
 ;; args.scm -- Command line argument handling.
-;; Copyright (C) 2013, 2016 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2016, 2018 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
 ;; This file is part of the GNU Shepherd.
@@ -196,14 +196,16 @@
 			    (display args-desc)
 			    (newline)
 			    (for-each display-doc (reverse! options))
-			    (display (string-append "
+			    (format #t (l10n "
 Mandatory or optional arguments to long options are also mandatory or
 optional to the corresponding short options.
 
-Report bugs to: " bug-address ".
-" package-name " general home page: <" package-url ">
-General help using GNU software: <http://www.gnu.org/gethelp/>
-"))
+Report bugs to: ~a .
+~a general home page: <~a>
+General help using GNU software: <http://www.gnu.org/gethelp/>~%")
+                                    bug-address
+                                    package-name
+                                    package-url)
 			    (quit)))
 	       options))
   (let next-arg ((ptr args))

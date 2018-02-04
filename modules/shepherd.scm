@@ -1,5 +1,5 @@
 ;; shepherd.scm -- The daemon shepherd.
-;; Copyright (C) 2013, 2014, 2016 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014, 2016, 2018 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
 ;; This file is part of the GNU Shepherd.
@@ -62,8 +62,9 @@
 		  not ;; Fail on unknown args.
 		  (make <option>
 		    #:long "persistency" #:short #\p
-		    #:takes-arg? #t #:optional-arg? #t #:arg-name "FILE"
-		    #:description "use FILE to load and store state"
+		    #:takes-arg? #t #:optional-arg? #t
+                    #:arg-name (l10n "FILE")
+		    #:description (l10n "use FILE to load and store state")
 		    #:action (lambda (file)
 			       (set! persistency #t)
 			       (and file
@@ -71,14 +72,14 @@
 		  (make <option>
 		    #:long "quiet"
 		    #:takes-arg? #f
-		    #:description "synonym for --silent"
+		    #:description (l10n "synonym for --silent")
 		    #:action (lambda ()
                                ;; XXX: Currently has no effect.
                                #t))
 		  (make <option>
 		    #:long "silent" #:short #\S
 		    #:takes-arg? #f
-		    #:description "don't do output to stdout"
+		    #:description (l10n "don't do output to stdout")
 		    #:action (lambda ()
                                ;; XXX: Currently has no effect.
                                #t))
@@ -88,32 +89,36 @@
 		    ;; we provide it as an option.
 		    #:long "insecure" #:short #\I
 		    #:takes-arg? #f
-		    #:description "don't ensure that the setup is secure"
+		    #:description (l10n "don't ensure that the setup is secure")
 		    #:action (lambda ()
                                (set! secure #f)))
 		  (make <option>
 		    #:long "logfile" #:short #\l
-		    #:takes-arg? #t #:optional-arg? #f #:arg-name "FILE"
-		    #:description "log actions in FILE"
+		    #:takes-arg? #t #:optional-arg? #f
+                    #:arg-name (l10n "FILE")
+		    #:description (l10n  "log actions in FILE")
 		    #:action (lambda (file)
 			       (set! logfile file)))
 		  (make <option>
 		    #:long "pid"
-		    #:takes-arg? #t #:optional-arg? #t #:arg-name "FILE"
-		    #:description "when ready write PID to FILE or stdout"
+		    #:takes-arg? #t #:optional-arg? #t
+                    #:arg-name (l10n "FILE")
+		    #:description (l10n "when ready write PID to FILE or stdout")
 		    #:action (lambda (file)
 			       (set! pid-file (or file #t))))
 		  (make <option>
 		    #:long "config" #:short #\c
-		    #:takes-arg? #t #:optional-arg? #f #:arg-name "FILE"
-		    #:description "read configuration from FILE"
+		    #:takes-arg? #t #:optional-arg? #f
+                    #:arg-name (l10n "FILE")
+		    #:description (l10n "read configuration from FILE")
 		    #:action (lambda (file)
 			       (set! config-file file)))
 		  (make <option>
 		    #:long "socket" #:short #\s
-		    #:takes-arg? #t #:optional-arg? #f #:arg-name "FILE"
+		    #:takes-arg? #t #:optional-arg? #f
+                    #:arg-name (l10n "FILE")
 		    #:description
-		    "get commands from socket FILE or from stdin (-)"
+		    (l10n "get commands from socket FILE or from stdin (-)")
 		    #:action (lambda (file)
 			       (set! socket-file
 				     (if (not (string=? file "-"))
