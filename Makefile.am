@@ -1,6 +1,7 @@
 # Makefile.am -- How to build and install the Shepherd.
 # Copyright © 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 # Copyright © 2013, 2014, 2015, 2016, 2018 Ludovic Courtès <ludo@gnu.org>
+# Copyright © 2018 Carlo Zancanaro <carlo@zancanaro.id.au>
 #
 # This file is part of the GNU Shepherd.
 #
@@ -188,7 +189,7 @@ TESTS =						\
   tests/no-home.sh				\
   tests/pid-file.sh				\
   tests/status-sexp.sh				\
-  tests/sigint.sh
+  tests/signals.sh
 
 TEST_EXTENSIONS = .sh
 EXTRA_DIST += $(TESTS)

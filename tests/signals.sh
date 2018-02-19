@@ -1,5 +1,6 @@
-# GNU Shepherd --- Make sure SIGINT is correctly handled.
+# GNU Shepherd --- Make sure SIGINT, SIGTERM, and SIGHUP are correctly handled.
 # Copyright © 2014, 2016 Ludovic Courtès <ludo@gnu.org>
+# Copyright © 2018 Carlo Zancanaro <carlo@zancanaro.id.au>
 #
 # This file is part of the GNU Shepherd.
 #
@@ -44,14 +45,18 @@ cat > "$conf"<<EOF
  (start 'test)
 EOF
 
-rm -f "$pid" "$stamp"
-shepherd -I -s "$socket" -c "$conf" --pid="$pid" --log="$log" &
+for signal in INT TERM HUP; do
 
-while [ ! -f "$pid" ] ; do sleep 0.5 ; done
+  rm -f "$pid" "$stamp" "$socket"
+  shepherd -I -s "$socket" -c "$conf" --pid="$pid" --log="$log" &
 
-# Send SIGINT to shepherd.
-kill -INT "`cat "$pid"`"
-while kill -0 "`cat "$pid"`" ; do sleep 0.5 ; done
+  while [ ! -f "$pid" ] ; do sleep 0.5 ; done
 
-# Make sure the service's 'stop' method was called.
-test -f "$stamp"
+  # Send signal to shepherd.
+  kill -$signal "`cat "$pid"`"
+  while kill -0 "`cat "$pid"`" ; do sleep 0.5 ; done
+
+  # Make sure the service's 'stop' method was called.
+  test -f "$stamp"
+
+done

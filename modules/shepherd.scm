@@ -1,6 +1,7 @@
 ;; shepherd.scm -- The daemon shepherd.
 ;; Copyright (C) 2013, 2014, 2016, 2018 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
+;; Copyright (C) 2018 Carlo Zancanaro <carlo@zancanaro.id.au>
 ;;
 ;; This file is part of the GNU Shepherd.
 ;;
@@ -179,6 +180,16 @@
     ;; rebooting; this is what happens when pressing ctrl-alt-del, see
     ;; ctrlaltdel(8).
     (sigaction SIGINT
+      (lambda _
+        (stop root-service)))
+
+    ;; Stop everything when we get SIGTERM.
+    (sigaction SIGTERM
+      (lambda _
+        (stop root-service)))
+
+    ;; Stop everything when we get SIGHUP.
+    (sigaction SIGHUP
       (lambda _
         (stop root-service)))
 
