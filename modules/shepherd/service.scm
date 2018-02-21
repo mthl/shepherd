@@ -3,6 +3,7 @@
 ;; Copyright (C) 2002, 2003 Wolfgang Järling <wolfgang@pro-linux.de>
 ;; Copyright (C) 2014 Alex Sassmannshausen <alex.sassmannshausen@gmail.com>
 ;; Copyright (C) 2016 Alex Kost <alezost@gmail.com>
+;; Copyright (C) 2018 Carlo Zancanaro <carlo@zancanaro.id.au>
 ;;
 ;; This file is part of the GNU Shepherd.
 ;;
@@ -64,6 +65,7 @@
             for-each-service
             lookup-services
             respawn-service
+            handle-SIGCHLD
             register-services
             provided-by
             required-by
@@ -77,6 +79,7 @@
             make-system-destructor
             make-init.d-service
 
+            check-for-dead-services
             root-service
             make-actions
 
@@ -800,7 +803,7 @@ false."
 its PID."
   ;; Install the SIGCHLD handler if this is the first fork+exec-command call
   (unless %sigchld-handler-installed?
-    (sigaction SIGCHLD respawn-service SA_NOCLDSTOP)
+    (sigaction SIGCHLD handle-SIGCHLD SA_NOCLDSTOP)
     (set! %sigchld-handler-installed? #t))
   (let ((pid (primitive-fork)))
     (if (zero? pid)
@@ -991,7 +994,7 @@ child left."
                           what (strerror errno))
             '(0 . #f)))))))
 
-(define (respawn-service signum)
+(define (handle-SIGCHLD signum)
   "Handle SIGCHLD, possibly by respawning the service that just died, or
 otherwise by updating its state."
   (let loop ()
@@ -1010,37 +1013,43 @@ otherwise by updating its state."
          ;; SERV can be #f for instance when this code runs just after a
          ;; service's 'stop' method killed its process and completed.
          (when serv
-           (slot-set! serv 'running #f)
-           (if (and (respawn? serv)
-                    (not (respawn-limit-hit? (slot-ref serv 'last-respawns)
-                                             (car respawn-limit)
-                                             (cdr respawn-limit))))
-               (if (not (slot-ref serv 'waiting-for-termination?))
-                   (begin
-                     ;; Everything is okay, start it.
-                     (local-output "Respawning ~a."
-                                   (canonical-name serv))
-                     (slot-set! serv 'last-respawns
-                                (cons (current-time)
-                                      (slot-ref serv 'last-respawns)))
-                     (start serv))
-                   ;; We have just been waiting for the
-                   ;; termination.  The `running' slot has already
-                   ;; been set to `#f' by `stop'.
-                   (begin
-                     (local-output "Service ~a terminated."
-                                   (canonical-name serv))
-                     (slot-set! serv 'waiting-for-termination? #f)))
-               (begin
-                 (local-output "Service ~a has been disabled."
-                               (canonical-name serv))
-                 (when (respawn? serv)
-                   (local-output "  (Respawning too fast.)"))
-                 (slot-set! serv 'enabled? #f))))
+           (respawn-service serv))
 
          ;; As noted in libc's manual (info "(libc) Process Completion"),
          ;; loop so we don't miss any terminated child process.
          (loop))))))
+
+(define (respawn-service serv)
+  "Respawn a service that has stopped running unexpectedly. If we have
+attempted to respawn the service a number of times already and it keeps dying,
+then disable it."
+  (slot-set! serv 'running #f)
+  (if (and (respawn? serv)
+           (not (respawn-limit-hit? (slot-ref serv 'last-respawns)
+                                    (car respawn-limit)
+                                    (cdr respawn-limit))))
+      (if (not (slot-ref serv 'waiting-for-termination?))
+          (begin
+            ;; Everything is okay, start it.
+            (local-output "Respawning ~a."
+                          (canonical-name serv))
+            (slot-set! serv 'last-respawns
+                       (cons (current-time)
+                             (slot-ref serv 'last-respawns)))
+            (start serv))
+          ;; We have just been waiting for the
+          ;; termination.  The `running' slot has already
+          ;; been set to `#f' by `stop'.
+          (begin
+            (local-output "Service ~a terminated."
+                          (canonical-name serv))
+            (slot-set! serv 'waiting-for-termination? #f)))
+      (begin
+        (local-output "Service ~a has been disabled."
+                      (canonical-name serv))
+        (when (respawn? serv)
+          (local-output "  (Respawning too fast.)"))
+        (slot-set! serv 'enabled? #f))))
 
 ;; Add NEW-SERVICES to the list of known services.
 (define (register-services . new-services)
@@ -1170,6 +1179,21 @@ file when persistence is enabled."
       (call-with-output-file persistency-state-file
         (lambda (p)
           (format p "~{~a ~}~%" running-services))))))
+
+(define (check-for-dead-services)
+  "Poll each process that we expect to be running, and respawn any which have
+unexpectedly stopped running. This procedure is used as a fallback on systems
+where prctl/PR_SET_CHILD_SUBREAPER is unsupported."
+  (define (process-exists? pid)
+    (catch #t
+      (lambda () (kill pid 0) #t)
+      (lambda _ #f)))
+  (for-each-service (lambda (service)
+                      (let ((running (slot-ref service 'running)))
+                        (when (and (integer? running)
+                                   (not (process-exists? running)))
+                            (local-output "PID ~a (~a) is dead!" running (canonical-name service))
+                            (respawn-service service))))))
 
 (define root-service
   (make <service>

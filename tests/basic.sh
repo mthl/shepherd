@@ -150,7 +150,7 @@ cat > "$confdir/some-conf.scm" <<EOF
 (register-services
  (make <service>
    #:provides '(test-loaded)
-   #:start (const 42)
+   #:start (const 'abc)
    #:stop (const #f)))
 EOF
 
@@ -166,7 +166,7 @@ $herd status test-loaded
 $herd status test-loaded | grep stopped
 
 $herd start test-loaded
-$herd status test-loaded | grep -i 'running.*42'
+$herd status test-loaded | grep -i 'running.*abc'
 $herd stop test-loaded
 $herd unload root test-loaded
 

@@ -608,7 +608,9 @@ way.  The default value is @code{#f}, which indicates that the service
 is not running. When an attempt is made to start the service, it will
 be set to the return value of the procedure in the @code{start} slot.
 It will also be passed as an argument to the procedure in the
-@code{stop} slot.  This slot can not be initialized with a keyword.
+@code{stop} slot.  If it is set a value that is an integer, it is
+assumed to be a process id, and shepherd will monitor the process for
+unexpected exits.  This slot can not be initialized with a keyword.
 
 @item
 @vindex respawn? (slot of <service>)

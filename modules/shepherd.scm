@@ -42,6 +42,8 @@
   (with-fluids ((%default-port-encoding "UTF-8"))
     (let ((sock    (socket PF_UNIX SOCK_STREAM 0))
           (address (make-socket-address AF_UNIX file-name)))
+      (fcntl sock F_SETFL (logior O_NONBLOCK
+                                  (fcntl sock F_GETFL)))
       (bind sock address)
       (listen sock 10)
       sock)))
@@ -49,14 +51,26 @@
 
 ;; Main program.
 (define (main . args)
-  (initialize-cli)
+  (define poll-services?
+    ;; Do we need polling to find out whether services died?
+    (and (not (= 1 (getpid)))                     ;if we're pid 1, we don't
+         (catch 'system-error
+           (lambda ()
+             ;; Register for orphaned processes to be reparented onto us when
+             ;; their original parent dies. This lets us handle SIGCHLD from
+             ;; daemon processes that would otherwise have been reparented
+             ;; under pid 1. Obviously this is unnecessary when we are pid 1.
+             (prctl PR_SET_CHILD_SUBREAPER 1)
+             #f)                                  ;don't poll
+           (lambda args
+             ;; We fall back to polling for services on systems that don't
+             ;; support prctl/PR_SET_CHILD_SUBREAPER.
+             (let ((errno (system-error-errno args)))
+               (or (= ENOSYS errno)        ;prctl unavailable
+                   (= EINVAL errno)        ;PR_SET_CHILD_SUBREAPER unavailable
+                   (apply throw args)))))))
 
-  (when (not (= 1 (getpid)))
-    ;; Register for orphaned processes to be reparented onto us when their
-    ;; original parent dies. This lets us handle SIGCHLD from daemon processes
-    ;; that would otherwise have been reparented under pid 1. This is
-    ;; unnecessary when we are pid 1.
-    (catch-system-error (prctl PR_SET_CHILD_SUBREAPER 1)))
+  (initialize-cli)
 
   (let ((config-file #f)
 	(socket-file default-socket-file)
@@ -225,11 +239,19 @@
             (_  #t))
 
           (let next-command ()
-            (match (accept sock)
-              ((command-source . client-address)
-               (setvbuf command-source _IOFBF 1024)
-               (process-connection command-source))
-              (_ #f))
+            (define (read-from sock)
+              (match (accept sock)
+                ((command-source . client-address)
+                 (setvbuf command-source _IOFBF 1024)
+                 (process-connection command-source))
+                (_ #f)))
+            (match (select (list sock) (list) (list) (if poll-services? 0.5 #f))
+              (((sock) _ _)
+               (read-from sock))
+              (_
+               #f))
+            (when poll-services?
+              (check-for-dead-services))
             (next-command))))))
 
 (define (process-connection sock)

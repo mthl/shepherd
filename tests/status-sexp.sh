@@ -33,7 +33,7 @@ cat > "$conf"<<EOF
 (register-services
  (make <service>
    #:provides '(foo)
-   #:start (const 42)
+   #:start (const 'abc)
    #:stop  (const #f)
    #:docstring "Foo!"
    #:respawn? #t)
@@ -85,7 +85,7 @@ root_service_sexp="
 	     (service (version 0)
 	       (provides (foo)) (requires ())
 	       (respawn? #t) (docstring \"Foo!\")
-	       (enabled? #t) (running 42) (conflicts ())
+	       (enabled? #t) (running abc) (conflicts ())
 	       (last-respawns ()))
 	     (service (version 0)
 	       (provides (bar)) (requires (foo))
