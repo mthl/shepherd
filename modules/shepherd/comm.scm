@@ -1,5 +1,5 @@
 ;; comm.scm -- Communication between processes and general output.
-;; Copyright (C) 2013, 2014, 2016 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014, 2016, 2018 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
 ;; This file is part of the GNU Shepherd.
@@ -166,6 +166,12 @@ wrong---premature end-of-file, invalid sexp, etc."
 command object."
   (match error
     (('error ('version 0 _ ...) 'service-not-found service)
+     ;; TRANSLATORS: Strings occasionally contain escape sequences starting
+     ;; with '~' (tilde).  For example, '~a' corresponds to '%s' in C printf
+     ;; syntax and '~%' corresponds to '\n'.  These must be preserved as is.
+     ;; See
+     ;; <https://www.gnu.org/software/guile/manual/html_node/Formatted-Output.html>
+     ;; for more info.
      (report-error (l10n "service '~a' could not be found")
                    service))
     (('error ('version 0 _ ...) 'action-not-found action service)

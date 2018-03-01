@@ -104,7 +104,7 @@
 		    #:long "pid"
 		    #:takes-arg? #t #:optional-arg? #t
                     #:arg-name (l10n "FILE")
-		    #:description (l10n "when ready write PID to FILE or stdout")
+		    #:description (l10n "when ready, write PID to FILE or stdout")
 		    #:action (lambda (file)
 			       (set! pid-file (or file #t))))
 		  (make <option>
