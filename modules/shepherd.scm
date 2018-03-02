@@ -49,7 +49,7 @@
 
 ;; Main program.
 (define (main . args)
-  (false-if-exception (setlocale LC_ALL ""))
+  (initialize-cli)
 
   (let ((config-file #f)
 	(socket-file default-socket-file)

@@ -1,5 +1,5 @@
 ;; halt.scm -- Halt or power off the system.
-;; Copyright (C) 2013, 2014, 2015, 2016 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014, 2015, 2016, 2018 Ludovic Courtès <ludo@gnu.org>
 ;;
 ;; This file is part of the GNU Shepherd.
 ;;
@@ -29,7 +29,7 @@
 
 ;; Main program.
 (define (main . args)
-  (false-if-exception (setlocale LC_ALL ""))
+  (initialize-cli)
 
   (parameterize ((program-name "halt"))
     (let ((socket-file %system-socket-file)

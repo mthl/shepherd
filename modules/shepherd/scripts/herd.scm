@@ -172,7 +172,7 @@ talking to shepherd"))
 
 ;; Main program.
 (define (main . args)
-  (false-if-exception (setlocale LC_ALL ""))
+  (initialize-cli)
 
   (parameterize ((program-name "herd"))
     (let ((socket-file default-socket-file)

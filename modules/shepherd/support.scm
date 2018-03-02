@@ -34,6 +34,9 @@
             mkdir-p
             with-directory-excursion
 
+            initialize-cli
+
+            %gettext-domain
             l10n
             local-output
             display-version
@@ -194,6 +197,29 @@ output port, and PROC's result is returned."
        (chdir init)))))
 
 
+
+(define %gettext-domain
+  ;; The gettext message domain.
+  "shepherd")
+
+(define (initialize-cli)
+  "Perform the usual initialization for stand-alone Shepherd commands."
+  ;; By default don't annoy users with deprecation warnings.  In practice,
+  ;; 'define-deprecated' in (ice-9 deprecated) arranges so that those warnings
+  ;; are emitted at expansion-time only, but there are cases where they could
+  ;; slip through, for instance when interpreting code.
+  (unless (getenv "GUILE_WARN_DEPRECATED")
+    (debug-disable 'warn-deprecated))
+
+  ;; In Guile 2.2+, the locale is installed by default.
+  (cond-expand
+    (guile-2.0 (false-if-exception (setlocale LC_ALL "")))
+    (else      #t))
+
+  (bindtextdomain %gettext-domain %localedir)
+  (textdomain %gettext-domain)
+  (setvbuf (current-output-port) _IOLBF)
+  (setvbuf (current-error-port) _IOLBF))
 
 ;; Localized version of STR.
 (define l10n gettext)
