@@ -71,3 +71,16 @@ Makefile.in
 /po/shepherd.pot
 /po/stamp-po
 /po/*.mo
+/doc/shepherd.aux
+/doc/shepherd.cp
+/doc/shepherd.cps
+/doc/shepherd.fn
+/doc/shepherd.fns
+/doc/shepherd.ky
+/doc/shepherd.log
+/doc/shepherd.pg
+/doc/shepherd.toc
+/doc/shepherd.tp
+/doc/shepherd.tps
+/doc/shepherd.vr
+/doc/shepherd.vrs
