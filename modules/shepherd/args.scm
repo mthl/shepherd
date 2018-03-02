@@ -133,13 +133,13 @@
   (set! options
 	(cons* (make <option>
 		 #:long "version"
-		 #:description "display version information and exit"
+		 #:description (l10n "display version information and exit")
 		 #:action (lambda ()
 			    (display-version program-name)
 			    (quit)))
 	       (make <option>
 		 #:long "usage"
-		 #:description "display short usage message and exit"
+		 #:description (l10n "display short usage message and exit")
 		 #:action (lambda ()
 			    (display program-name)
 			    (display " ")
@@ -186,11 +186,11 @@
 			    (quit)))
 	       (make <option>
 		 #:long "help"
-		 #:description "display this help and exit"
+		 #:description (l10n "display this help and exit")
 		 #:action (lambda ()
 			    (for-each display
 				      (list program-name
-					    " [OPTIONS...] "
+					    (l10n " [OPTIONS...] ")
 					    args-syntax))
 			    (newline)
 			    (display args-desc)
@@ -246,7 +246,7 @@ General help using GNU software: <http://www.gnu.org/gethelp/>~%")
 			     (l10n "Option `--~a' is ambigous.")
 			   (l10n "Unknown option: `--~a'."))
 			 name)
-			(local-output "Try `--help'.")
+			(local-output (l10n "Try `--help'."))
 			(quit 1)))
 		 (and (takes-arg? target-option)
 		      (not (optional-arg? target-option))
@@ -270,7 +270,8 @@ General help using GNU software: <http://www.gnu.org/gethelp/>~%")
 		    (param #f))
 	       (if (not target-option)
 		   (begin
-		     (local-output "Unknown option: `-~a'." opt-char)
+		     (local-output (l10n "Unknown option: `-~a'.")
+                                   opt-char)
 		     (quit 1))
 		 (if (takes-arg? target-option)
 		     (begin
@@ -282,7 +283,8 @@ General help using GNU software: <http://www.gnu.org/gethelp/>~%")
 			       (or (optional-arg? target-option)
 				   (begin
 				     (local-output
-				      "Argument required by `-~a'." opt-char)
+				      (l10n "Argument required by `-~a'.")
+                                      opt-char)
 				     (quit 1)))
 			     (begin
 			       (set! ptr (cdr ptr))
