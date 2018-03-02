@@ -196,6 +196,14 @@
 			    (display args-desc)
 			    (newline)
 			    (for-each display-doc (reverse! options))
+
+                            ;; TRANSLATORS: The '~a' placeholders indicate the
+                            ;; bug-reporting address, the name of this
+                            ;; package, and its home page URL.  Please add
+                            ;; another line saying "Report translation bugs to
+                            ;; ...\n" with the address for translation bugs
+                            ;; (typically your translation team's web or email
+                            ;; address).
 			    (format #t (l10n "
 Mandatory or optional arguments to long options are also mandatory or
 optional to the corresponding short options.
