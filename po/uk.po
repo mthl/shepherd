@@ -1,0 +1,237 @@
+# Ukrainian translation to util-linux.
+# Copyright (C) 2018 the authors of Shepherd (msgids)
+# This file is put in the public domain.
+#
+# Yuri Chornoivan <yurchor@ukr.net>, 2018.
+msgid ""
+msgstr ""
+"Project-Id-Version: shepherd 0.3.3-pre1\n"
+"Report-Msgid-Bugs-To: guix-devel@gnu.org\n"
+"POT-Creation-Date: 2018-03-01 14:10+0100\n"
+"PO-Revision-Date: 2018-03-02 08:25+0200\n"
+"Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
+"Language-Team: Ukrainian <translation-team-uk@lists.sourceforge.net>\n"
+"Language: uk\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Lokalize 2.0\n"
+
+#. TRANSLATORS: Strings occasionally contain escape sequences starting
+#. with '~' (tilde).  For example, '~a' corresponds to '%s' in C printf
+#. syntax and '~%' corresponds to '\n'.  These must be preserved as is.
+#. See
+#. <https://www.gnu.org/software/guile/manual/html_node/Formatted-Output.html>
+#. for more info.
+#: modules/shepherd/comm.scm:175
+#, scheme-format
+msgid "service '~a' could not be found"
+msgstr "не вдалося знайти службу «~a»"
+
+#: modules/shepherd/comm.scm:178
+#, scheme-format
+msgid "service '~a' does not have an action '~a'"
+msgstr "для служби «~a» не знайдено дії «~a»"
+
+#: modules/shepherd/comm.scm:182
+#, scheme-format
+msgid "exception caught while executing '~a' on service '~a':"
+msgstr "під час спроби виконати «~a» для служби «~a» сталося виключення:"
+
+#: modules/shepherd/comm.scm:187
+#, scheme-format
+msgid "something went wrong: ~s"
+msgstr "щось пішло не так: ~s"
+
+#: modules/shepherd/scripts/herd.scm:67
+msgid "Started:\n"
+msgstr "Запущено:\n"
+
+#: modules/shepherd/scripts/herd.scm:69
+msgid "Stopped:\n"
+msgstr "Зупинено:\n"
+
+#: modules/shepherd/scripts/herd.scm:82
+#, scheme-format
+msgid "Status of ~a:~%"
+msgstr "Стан ~a:~%"
+
+#: modules/shepherd/scripts/herd.scm:85
+#, scheme-format
+msgid "  It is started.~%"
+msgstr "  Запущено.~%"
+
+#: modules/shepherd/scripts/herd.scm:86
+#, scheme-format
+msgid "  Running value is ~s.~%"
+msgstr "  Значення запуску — ~s.~%"
+
+#: modules/shepherd/scripts/herd.scm:87
+#, scheme-format
+msgid "  It is stopped.~%"
+msgstr "  Зупинено.~%"
+
+#: modules/shepherd/scripts/herd.scm:89
+#, scheme-format
+msgid "  It is enabled.~%"
+msgstr "  Увімкнено.~%"
+
+#: modules/shepherd/scripts/herd.scm:90
+#, scheme-format
+msgid "  It is disabled.~%"
+msgstr "  Вимкнено.~%"
+
+#: modules/shepherd/scripts/herd.scm:91
+#, scheme-format
+msgid "  Provides ~a.~%"
+msgstr "  Забезпечує роботу ~a.~%"
+
+#: modules/shepherd/scripts/herd.scm:92
+#, scheme-format
+msgid "  Requires ~a.~%"
+msgstr "  Потребує ~a.~%"
+
+#: modules/shepherd/scripts/herd.scm:93
+#, scheme-format
+msgid "  Conflicts with ~a.~%"
+msgstr "  Конфліктує з ~a.~%"
+
+#: modules/shepherd/scripts/herd.scm:95
+#, scheme-format
+msgid "  Will be respawned.~%"
+msgstr "  Буде перезапущено.~%"
+
+#: modules/shepherd/scripts/herd.scm:96
+#, scheme-format
+msgid "  Will not be respawned.~%"
+msgstr "  Не буде перезапущено.~%"
+
+#: modules/shepherd/scripts/herd.scm:99
+#, scheme-format
+msgid "  Last respawned on ~a.~%"
+msgstr "  Востаннє перезапущено ~a.~%"
+
+#: modules/shepherd/scripts/herd.scm:149
+#, scheme-format
+msgid "failed to start service ~a"
+msgstr "не вдалося запустити службу ~a"
+
+#: modules/shepherd/scripts/herd.scm:166
+msgid "premature end-of-file while talking to shepherd"
+msgstr "завчасне завершення файла під час обміну даними з shepherd"
+
+#: modules/shepherd/scripts/herd.scm:181
+msgid "ACTION SERVICE [ARG...]"
+msgstr "ДІЯ СЛУЖБА [АРГУМЕНТ...]"
+
+#: modules/shepherd/scripts/herd.scm:182
+msgid ""
+"Apply ACTION (start, stop, status, etc.) on \\\n"
+"SERVICE with the ARGs."
+msgstr ""
+"Застосувати дію ДІЯ (start, stop, status тощо) до \\\n"
+"служби СЛУЖБА з параметрами АРГУМЕНТИ."
+
+#: modules/shepherd/scripts/herd.scm:190 modules/shepherd.scm:67
+#: modules/shepherd.scm:99 modules/shepherd.scm:106 modules/shepherd.scm:113
+#: modules/shepherd.scm:120
+msgid "FILE"
+msgstr "ФАЙЛ"
+
+#: modules/shepherd/scripts/herd.scm:191
+msgid "send commands to FILE"
+msgstr "надіслати команди до файла ФАЙЛ"
+
+#: modules/shepherd/scripts/herd.scm:204
+#, scheme-format
+msgid "Usage: herd ACTION [SERVICE [OPTIONS...]]~%"
+msgstr "Користування: herd ДІЯ [СЛУЖБА [ПАРАМЕТРИ...]]~%"
+
+#: modules/shepherd/support.scm:209
+msgid ""
+"Copyright (C) 2018 the Shepherd authors\n"
+"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
+"This is free software: you are free to change and redistribute it.\n"
+"There is NO WARRANTY, to the extent permitted by law."
+msgstr ""
+"Авторські права належать авторам Shepherd, 2018\n"
+"Умови ліцензування викладено у GPLv3+: GNU GPL версії 3 або новішій, <http://gnuorg/licenses/gplhtml>\n"
+"Це вільне програмне забезпечення: ви можете вільно змінювати і поширювати його.\n"
+"Вам не надається ЖОДНИХ ГАРАНТІЙ, окрім гарантій передбачених законодавством."
+
+#: modules/shepherd/service.scm:336
+#, scheme-format
+msgid "Service ~a has been started."
+msgstr "Службу ~a запущено."
+
+#: modules/shepherd/service.scm:337
+#, scheme-format
+msgid "Service ~a could not be started."
+msgstr "Не вдалося запустити службу ~a."
+
+#: modules/shepherd/args.scm:44
+msgid "undocumented option"
+msgstr "недокументований параметр"
+
+#: modules/shepherd/args.scm:199
+#, scheme-format
+msgid ""
+"\n"
+"Mandatory or optional arguments to long options are also mandatory or\n"
+"optional to the corresponding short options.\n"
+"\n"
+"Report bugs to: ~a .\n"
+"~a general home page: <~a>\n"
+"General help using GNU software: <http://www.gnu.org/gethelp/>~%"
+msgstr ""
+"\n"
+"Обов’язкові і додаткові аргументи до довгих форм запису параметрів є також\n"
+"об’язковими або додатковими для всіх відповідних скорочених форм запису.\n"
+"\n"
+"Про вади слід повідомляти тут: ~a .\n"
+"Загальна домашня сторінка ~a: <~a>\n"
+"Загальна довідкова інформація щодо користування програмним забезпеченням GNU: <http://www.gnu.org/gethelp/>~%"
+
+#: modules/shepherd/args.scm:246
+#, scheme-format
+msgid "Option `--~a' is ambigous."
+msgstr "Параметр «--~a» є неоднозначним."
+
+#: modules/shepherd/args.scm:247
+#, scheme-format
+msgid "Unknown option: `--~a'."
+msgstr "Невідомий параметр: «--~a»."
+
+#: modules/shepherd.scm:68
+msgid "use FILE to load and store state"
+msgstr "скористатися файлом ФАЙЛ для завантаження і зберігання стану"
+
+#: modules/shepherd.scm:76
+msgid "synonym for --silent"
+msgstr "синонім до --silent"
+
+#: modules/shepherd.scm:83
+msgid "don't do output to stdout"
+msgstr "не виводити дані до stdout"
+
+#: modules/shepherd.scm:93
+msgid "don't ensure that the setup is secure"
+msgstr "не перейматися тим, чи є налаштування безпечними"
+
+#: modules/shepherd.scm:100
+msgid "log actions in FILE"
+msgstr "записувати журнал дій до файла ФАЙЛ"
+
+#: modules/shepherd.scm:107
+msgid "when ready, write PID to FILE or stdout"
+msgstr "за готовності записати PID до файла ФАЙЛ або до stdout"
+
+#: modules/shepherd.scm:114
+msgid "read configuration from FILE"
+msgstr "прочитати налаштування з файла ФАЙЛ"
+
+#: modules/shepherd.scm:122
+msgid "get commands from socket FILE or from stdin (-)"
+msgstr "отримати команди з сокета ФАЙЛ або зі stdin (-)"

@@ -70,3 +70,4 @@ Makefile.in
 /po/remove-potcdate.sin
 /po/shepherd.pot
 /po/stamp-po
+/po/*.mo
