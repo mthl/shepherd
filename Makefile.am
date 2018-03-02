@@ -196,7 +196,7 @@ TEST_EXTENSIONS = .sh
 EXTRA_DIST += $(TESTS)
 
 AM_TESTS_ENVIRONMENT =				\
-  unset XDG_CONFIG_HOME; unset LANGUAGE		\
+  unset XDG_CONFIG_HOME; unset LANGUAGE;	\
   LC_ALL=C LC_MESSAGES=C			\
   PATH="$(abs_top_builddir):$$PATH"		\
   SHELL="$(SHELL)" GUILE="$(GUILE)"		\
