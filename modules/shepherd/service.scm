@@ -700,9 +700,9 @@ otherwise return the number that was read (a PID)."
                        (environment-variables (default-environment-variables)))
   "Run COMMAND as the current process from DIRECTORY, and with
 ENVIRONMENT-VARIABLES (a list of strings like \"PATH=/bin\".)  File
-descriptors 1 and 2 are kept as is, whereas file descriptor
-0 (standard input) points to /dev/null; all other file descriptors are
-closed prior to yielding control to COMMAND.
+descriptors 1 and 2 are kept as is or redirected to LOG-FILE if it's true,
+whereas file descriptor 0 (standard input) points to /dev/null; all other file
+descriptors are closed prior to yielding control to COMMAND.
 
 By default, COMMAND is run as the current user.  If the USER keyword
 argument is present and not false, change to USER immediately before
@@ -734,8 +734,8 @@ false."
              ;; Redirect stout and stderr to use LOG-FILE.
              (catch-system-error (close-fdes 1))
              (catch-system-error (close-fdes 2))
-             (dup2 (open-fdes log-file (logior O_CREAT O_WRONLY)) 1)
-             (dup2 (open-fdes log-file (logior O_CREAT O_WRONLY)) 2))
+             (dup2 (open-fdes log-file (logior O_CREAT O_WRONLY O_APPEND)) 1)
+             (dup2 1 2))
            (lambda (key . args)
              (format (current-error-port)
                      "failed to open log-file ~s:~%" log-file)
