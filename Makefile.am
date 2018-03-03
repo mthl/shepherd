@@ -190,6 +190,7 @@ TESTS =						\
   tests/no-home.sh				\
   tests/pid-file.sh				\
   tests/status-sexp.sh				\
+  tests/forking-service.sh			\
   tests/signals.sh
 
 TEST_EXTENSIONS = .sh

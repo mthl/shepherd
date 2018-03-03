@@ -51,6 +51,13 @@
 (define (main . args)
   (initialize-cli)
 
+  (when (not (= 1 (getpid)))
+    ;; Register for orphaned processes to be reparented onto us when their
+    ;; original parent dies. This lets us handle SIGCHLD from daemon processes
+    ;; that would otherwise have been reparented under pid 1. This is
+    ;; unnecessary when we are pid 1.
+    (catch-system-error (prctl PR_SET_CHILD_SUBREAPER 1)))
+
   (let ((config-file #f)
 	(socket-file default-socket-file)
         (pid-file    #f)
