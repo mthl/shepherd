@@ -1,5 +1,6 @@
 ;; system.scm -- Low-level operating system interface.
 ;; Copyright (C) 2013, 2014, 2016 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2018 Carlo Zancanaro <carlo@zancanaro.id.au>
 ;;
 ;; This file is part of the GNU Shepherd.
 ;;
@@ -23,7 +24,9 @@
   #:export (reboot
             halt
             power-off
-            max-file-descriptors))
+            max-file-descriptors
+            prctl
+            PR_SET_CHILD_SUBREAPER))
 
 ;; The <sys/reboot.h> constants.
 (define RB_AUTOBOOT @RB_AUTOBOOT@)
@@ -129,6 +132,24 @@ the returned procedure is called."
                    (list (strerror err) name)
                    (list err))
             result)))))
+
+(define PR_SET_CHILD_SUBREAPER @PR_SET_CHILD_SUBREAPER@)
+
+(define prctl
+  (if (dynamic-func "prctl" (dynamic-link))
+      (let ((proc (syscall->procedure long "prctl" (list int int))))
+        (lambda (process operation)
+          "Perform an operation on the given process"
+          (let-values (((result err) (proc process operation)))
+            (if (= -1 result)
+                (throw 'system-error "prctl" "~A: ~S"
+                       (list (strerror err) name)
+                       (list err))
+                result))))
+      (lambda (process operation)
+        ;; Libc lacks 'prctl', as is the case on GNU/Hurd.
+        (throw 'system-error "prctl" "~A" (list strerror ENOSYS)
+               (list ENOSYS)))))
 
 (define (max-file-descriptors)
   "Return the maximum number of open file descriptors allowed."

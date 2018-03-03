@@ -72,7 +72,11 @@ esac
 AC_SUBST([RB_AUTOBOOT])
 AC_SUBST([RB_HALT_SYSTEM])
 AC_SUBST([RB_POWER_OFF])
+AC_MSG_RESULT([done])
 
+AC_MSG_CHECKING([<sys/prctl.h> constants])
+AC_COMPUTE_INT([PR_SET_CHILD_SUBREAPER], [PR_SET_CHILD_SUBREAPER], [#include <sys/prctl.h>])
+AC_SUBST([PR_SET_CHILD_SUBREAPER])
 AC_MSG_RESULT([done])
 
 dnl Manual pages.
