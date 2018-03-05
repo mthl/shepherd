@@ -3,6 +3,7 @@
 ;; Copyright (C) 2013, 2014, 2016, 2018 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;; Copyright (C) 2016 Mathieu Lirzin <mthl@gnu.org>
+;; Copyright (C) 2018 Danny Milosavljevic <dannym@scratchpost.org>
 ;;
 ;; This file is part of the GNU Shepherd.
 ;;
@@ -22,6 +23,7 @@
 (define-module (shepherd support)
   #:use-module (shepherd config)
   #:use-module (ice-9 match)
+  #:use-module (ice-9 format)
   #:export (call/ec
             caught-error
             assert
@@ -309,12 +311,16 @@ TARGET should be a string representing a filepath + name."
 ;; Logfile.
 (define default-logfile
   (if (zero? (getuid))
-      (string-append %localstatedir "/log/shepherd.log")
+      (if (access? "/dev/kmsg" W_OK)
+          "/dev/kmsg"
+          (string-append %localstatedir "/log/shepherd.log"))
       (string-append %user-config-dir "/shepherd.log")))
 
 (define default-logfile-date-format
   ;; 'strftime' format string to prefix each entry in the log.
-  "%Y-%m-%d %H:%M:%S ")
+  (if (string=? default-logfile "/dev/kmsg")
+      (format #f "shepherd[~d]: " (getpid))
+      "%Y-%m-%d %H:%M:%S "))
 
 ;; Configuration file.
 (define (default-config-file)

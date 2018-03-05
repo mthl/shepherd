@@ -404,9 +404,14 @@ permissions are not as expected.
 @itemx --logfile[=@var{file}]
 @cindex logging
 @cindex log file
-Log output into @var{file}, or if @var{file} is not given,
-@code{/var/log/shepherd.log} when running as superuser,
-@code{$XDG_CONFIG_HOME/shepherd/shepherd.log} otherwise.
+Log output into @var{file}.
+
+The default behavior is to write to @file{/dev/kmsg} when running as
+superuser.  This special device is GNU/Linux-specific; when it does not
+exist, write to @file{/var/log/shepherd.log} instead.
+
+For unprivileged users, the default log file is
+@file{$XDG_CONFIG_HOME/shepherd/shepherd.log}.
 
 @item --pid[=@var{file}]
 When @command{shepherd} is ready to accept connections, write its PID to @var{file} or

@@ -2,6 +2,7 @@
 ;; Copyright (C) 2013, 2014, 2016, 2018 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;; Copyright (C) 2018 Carlo Zancanaro <carlo@zancanaro.id.au>
+;; Copyright (C) 2018 Danny Milosavljevic <dannym@scratchpost.org>
 ;;
 ;; This file is part of the GNU Shepherd.
 ;;
@@ -162,6 +163,11 @@
          (verify-dir (dirname socket-file) #:secure? secure))
     ;; Enable logging as first action.
     (start-logging logfile)
+
+    (when (string=? logfile "/dev/kmsg")
+      ;; By default we'd write both to /dev/kmsg and to stdout.  Redirect
+      ;; stdout to the bitbucket so we don't log twice.
+      (set-current-output-port (%make-void-port "w")))
 
     ;; Send output to log and clients.
     (set-current-output-port (make-shepherd-output-port))
