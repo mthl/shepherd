@@ -164,7 +164,7 @@
     (start-logging logfile)
 
     ;; Send output to log and clients.
-    (set-current-output-port shepherd-output-port)
+    (set-current-output-port (make-shepherd-output-port))
 
     ;; Start the 'root' service.
     (start root-service)

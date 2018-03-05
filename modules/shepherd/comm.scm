@@ -1,6 +1,7 @@
 ;; comm.scm -- Communication between processes and general output.
 ;; Copyright (C) 2013, 2014, 2016, 2018 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
+;; Copyright (C) 2018 Danny Milosavljevic <dannym@scratchpost.org>
 ;;
 ;; This file is part of the GNU Shepherd.
 ;;
@@ -50,7 +51,7 @@
 
             start-logging
             stop-logging
-            shepherd-output-port
+            make-shepherd-output-port
 
             %current-client-socket
             %current-logfile-date-format))
@@ -215,7 +216,8 @@ on service '~a':")
 ;; We provide our own output mechanism, because we have certain
 ;; special needs; most importantly, we want to send output to herd
 ;; sometimes.
-(define (make-shepherd-output-port original-output-port)
+(define* (make-shepherd-output-port
+          #:optional (original-output-port (current-output-port)))
   (make-soft-port
    (vector
 
@@ -272,5 +274,3 @@ on service '~a':")
    ;; It's an output-only port.
    "w"))
 
-(define shepherd-output-port
-  (make-shepherd-output-port (current-output-port)))
