@@ -46,6 +46,7 @@
 
             user-homedir
             default-logfile
+            default-logfile-date-format
             default-config-file
             default-socket-dir
             default-socket-file
@@ -310,6 +311,10 @@ TARGET should be a string representing a filepath + name."
   (if (zero? (getuid))
       (string-append %localstatedir "/log/shepherd.log")
       (string-append %user-config-dir "/shepherd.log")))
+
+(define default-logfile-date-format
+  ;; 'strftime' format string to prefix each entry in the log.
+  "%Y-%m-%d %H:%M:%S ")
 
 ;; Configuration file.
 (define (default-config-file)

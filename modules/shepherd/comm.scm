@@ -50,8 +50,10 @@
 
             start-logging
             stop-logging
+            shepherd-output-port
+
             %current-client-socket
-            shepherd-output-port))
+            %current-logfile-date-format))
 
 
 ;; Command for shepherd.
@@ -206,6 +208,10 @@ on service '~a':")
   ;; Socket of the client currently talking to the daemon.
   (make-parameter #f))
 
+(define %current-logfile-date-format
+  ;; 'strftime' format strings for entries in the log file.
+  (make-parameter default-logfile-date-format))
+
 ;; We provide our own output mechanism, because we have certain
 ;; special needs; most importantly, we want to send output to herd
 ;; sometimes.
@@ -234,7 +240,7 @@ on service '~a':")
             (let* ((log (lambda (x)
                           (display x log-output-port)))
                    (init-line (lambda ()
-                                (log (strftime "%Y-%m-%d %H:%M:%S "
+                                (log (strftime (%current-logfile-date-format)
                                                (localtime (current-time)))))))
               (init-line)
               (for-each log (reverse buffer))
