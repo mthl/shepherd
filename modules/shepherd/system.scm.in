@@ -1,5 +1,5 @@
 ;; system.scm -- Low-level operating system interface.
-;; Copyright (C) 2013, 2014, 2016 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014, 2016, 2018 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2018 Carlo Zancanaro <carlo@zancanaro.id.au>
 ;;
 ;; This file is part of the GNU Shepherd.
@@ -142,8 +142,8 @@ the returned procedure is called."
           "Perform an operation on the given process"
           (let-values (((result err) (proc process operation)))
             (if (= -1 result)
-                (throw 'system-error "prctl" "~A: ~S"
-                       (list (strerror err) name)
+                (throw 'system-error "prctl" "~A"
+                       (list (strerror err))
                        (list err))
                 result))))
       (lambda (process operation)
