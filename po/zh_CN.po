@@ -1,0 +1,234 @@
+# Simplified Chinese translation for shepherd.
+# This file is put in the public domain.
+# Boyuan Yang <073plan@gmail.com>, 2018.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: shepherd 0.3.3-pre1\n"
+"Report-Msgid-Bugs-To: guix-devel@gnu.org\n"
+"POT-Creation-Date: 2018-03-01 14:10+0100\n"
+"PO-Revision-Date: 2018-03-03 17:04+0800\n"
+"Last-Translator: Boyuan Yang <073plan@gmail.com>\n"
+"Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
+"X-Generator: Poedit 2.0.6\n"
+
+#. TRANSLATORS: Strings occasionally contain escape sequences starting
+#. with '~' (tilde).  For example, '~a' corresponds to '%s' in C printf
+#. syntax and '~%' corresponds to '\n'.  These must be preserved as is.
+#. See
+#. <https://www.gnu.org/software/guile/manual/html_node/Formatted-Output.html>
+#. for more info.
+#: modules/shepherd/comm.scm:175
+#, scheme-format
+msgid "service '~a' could not be found"
+msgstr "服务“~a”未找到"
+
+#: modules/shepherd/comm.scm:178
+#, scheme-format
+msgid "service '~a' does not have an action '~a'"
+msgstr "服务“~a”没有“~a”动作"
+
+#: modules/shepherd/comm.scm:182
+#, scheme-format
+msgid "exception caught while executing '~a' on service '~a':"
+msgstr "执行“~a”操作（在服务“~a”中）时捕获到了异常："
+
+#: modules/shepherd/comm.scm:187
+#, scheme-format
+msgid "something went wrong: ~s"
+msgstr "出现了问题：~s"
+
+#: modules/shepherd/scripts/herd.scm:67
+msgid "Started:\n"
+msgstr "启动：\n"
+
+#: modules/shepherd/scripts/herd.scm:69
+msgid "Stopped:\n"
+msgstr "停止：\n"
+
+#: modules/shepherd/scripts/herd.scm:82
+#, scheme-format
+msgid "Status of ~a:~%"
+msgstr "~a 的状态：~%"
+
+#: modules/shepherd/scripts/herd.scm:85
+#, scheme-format
+msgid "  It is started.~%"
+msgstr "  它已被启动。~%"
+
+#: modules/shepherd/scripts/herd.scm:86
+#, scheme-format
+msgid "  Running value is ~s.~%"
+msgstr "  运行值为 ~s。~%"
+
+#: modules/shepherd/scripts/herd.scm:87
+#, scheme-format
+msgid "  It is stopped.~%"
+msgstr "  它已被停止。~%"
+
+#: modules/shepherd/scripts/herd.scm:89
+#, scheme-format
+msgid "  It is enabled.~%"
+msgstr "  它已被启用。~%"
+
+#: modules/shepherd/scripts/herd.scm:90
+#, scheme-format
+msgid "  It is disabled.~%"
+msgstr "  它已被禁用。~%"
+
+#: modules/shepherd/scripts/herd.scm:91
+#, scheme-format
+msgid "  Provides ~a.~%"
+msgstr "  提供 ~a。~%"
+
+#: modules/shepherd/scripts/herd.scm:92
+#, scheme-format
+msgid "  Requires ~a.~%"
+msgstr "  要求 ~a。~%"
+
+#: modules/shepherd/scripts/herd.scm:93
+#, scheme-format
+msgid "  Conflicts with ~a.~%"
+msgstr "  与 ~a 冲突。~%"
+
+#: modules/shepherd/scripts/herd.scm:95
+#, scheme-format
+msgid "  Will be respawned.~%"
+msgstr "  将被重启。~%"
+
+#: modules/shepherd/scripts/herd.scm:96
+#, scheme-format
+msgid "  Will not be respawned.~%"
+msgstr "  将不会被重启。~%"
+
+#: modules/shepherd/scripts/herd.scm:99
+#, scheme-format
+msgid "  Last respawned on ~a.~%"
+msgstr "  上一次重启于 ~a。~%"
+
+#: modules/shepherd/scripts/herd.scm:149
+#, scheme-format
+msgid "failed to start service ~a"
+msgstr "启动服务 ~a 失败"
+
+#: modules/shepherd/scripts/herd.scm:166
+msgid "premature end-of-file while talking to shepherd"
+msgstr "与 shephurd 通信时过早遇到文件终止符"
+
+#: modules/shepherd/scripts/herd.scm:181
+msgid "ACTION SERVICE [ARG...]"
+msgstr "动作 服务名 [参数...]"
+
+#: modules/shepherd/scripts/herd.scm:182
+msgid ""
+"Apply ACTION (start, stop, status, etc.) on \\\n"
+"SERVICE with the ARGs."
+msgstr ""
+"将指定动作（启动、停止、状态等等）及参数应用\\\n"
+"在服务上。"
+
+#: modules/shepherd/scripts/herd.scm:190 modules/shepherd.scm:67
+#: modules/shepherd.scm:99 modules/shepherd.scm:106 modules/shepherd.scm:113
+#: modules/shepherd.scm:120
+msgid "FILE"
+msgstr "文件"
+
+#: modules/shepherd/scripts/herd.scm:191
+msgid "send commands to FILE"
+msgstr "将命令发送到指定文件"
+
+#: modules/shepherd/scripts/herd.scm:204
+#, scheme-format
+msgid "Usage: herd ACTION [SERVICE [OPTIONS...]]~%"
+msgstr "用法：herd 动作 [服务 [选项...]]~%"
+
+#: modules/shepherd/support.scm:209
+msgid ""
+"Copyright (C) 2018 the Shepherd authors\n"
+"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
+"This is free software: you are free to change and redistribute it.\n"
+"There is NO WARRANTY, to the extent permitted by law."
+msgstr ""
+"版权所有 (C) 2018 Shepherd 作者\n"
+"许可证 GPLv3+：GNU GPL 第三版或更新版本 <http://gnu.org/licenses/gpl.html>\n"
+"这是自由软件：您可以自由地对其进行修改和再分发。\n"
+"在法律允许的范围内没有任何质保。"
+
+#: modules/shepherd/service.scm:336
+#, scheme-format
+msgid "Service ~a has been started."
+msgstr "服务 ~a 已启动。"
+
+#: modules/shepherd/service.scm:337
+#, scheme-format
+msgid "Service ~a could not be started."
+msgstr "服务 ~a 无法启动。"
+
+#: modules/shepherd/args.scm:44
+msgid "undocumented option"
+msgstr "未被文档记录的选项"
+
+#: modules/shepherd/args.scm:199
+#, scheme-format
+msgid ""
+"\n"
+"Mandatory or optional arguments to long options are also mandatory or\n"
+"optional to the corresponding short options.\n"
+"\n"
+"Report bugs to: ~a .\n"
+"~a general home page: <~a>\n"
+"General help using GNU software: <http://www.gnu.org/gethelp/>~%"
+msgstr ""
+"\n"
+"长选项的必需参数或可选参数同样对相应的短选项必需或可选。\n"
+"\n"
+"请将软件错误报告至：~a .\n"
+"~a 通用主页：<~a>\n"
+"使用 GNU 软件的通用帮助：<http://www.gnu.org/gethelp/>~%"
+
+#: modules/shepherd/args.scm:246
+#, scheme-format
+msgid "Option `--~a' is ambigous."
+msgstr "选项“--~a”有歧义。"
+
+#: modules/shepherd/args.scm:247
+#, scheme-format
+msgid "Unknown option: `--~a'."
+msgstr "未知的选项：“--~a”。"
+
+#: modules/shepherd.scm:68
+msgid "use FILE to load and store state"
+msgstr "使用文件来加载并存储状态"
+
+#: modules/shepherd.scm:76
+msgid "synonym for --silent"
+msgstr "等效于 --silent"
+
+#: modules/shepherd.scm:83
+msgid "don't do output to stdout"
+msgstr "不要输出至标准输出"
+
+#: modules/shepherd.scm:93
+msgid "don't ensure that the setup is secure"
+msgstr "不保证安装是安全的"
+
+#: modules/shepherd.scm:100
+msgid "log actions in FILE"
+msgstr "在文件中记录动作"
+
+#: modules/shepherd.scm:107
+msgid "when ready, write PID to FILE or stdout"
+msgstr "准备就绪时，将 PID 写入文件或标准输出"
+
+#: modules/shepherd.scm:114
+msgid "read configuration from FILE"
+msgstr "从文件读取配置"
+
+#: modules/shepherd.scm:122
+msgid "get commands from socket FILE or from stdin (-)"
+msgstr "从套接字文件或者标准输入（-）获取命令"
