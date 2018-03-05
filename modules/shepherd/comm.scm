@@ -49,6 +49,7 @@
             result->sexp
             report-command-error
 
+            log-output-port
             start-logging
             stop-logging
             make-shepherd-output-port
@@ -194,16 +195,18 @@ on service '~a':")
 
 
 
-;; Port for logging.  This must always be a valid port, never `#f'.
-(define log-output-port (%make-void-port "w"))
-(define (start-logging file)
+(define log-output-port
+  ;; Port for logging.  This must always be a valid port, never `#f'.
+  (make-parameter (%make-void-port "w")))
+
+(define (start-logging file)                      ;deprecated
   (let ((directory (dirname file)))
     (unless (file-exists? directory)
       (mkdir directory)))
-  (set! log-output-port (open-file file "al")))   ; line-buffered port
-(define (stop-logging)
-  (close-port log-output-port)
-  (set! log-output-port (%make-void-port "w")))
+  (log-output-port (open-file file "al")))
+(define (stop-logging)                            ;deprecated
+  (close-port (log-output-port))
+  (log-output-port (%make-void-port "w")))
 
 (define %current-client-socket
   ;; Socket of the client currently talking to the daemon.
@@ -240,7 +243,7 @@ on service '~a':")
         (if (not (string-index str #\newline))
             (set! buffer (cons str buffer))
             (let* ((log (lambda (x)
-                          (display x log-output-port)))
+                          (display x (log-output-port))))
                    (init-line (lambda ()
                                 (log (strftime (%current-logfile-date-format)
                                                (localtime (current-time)))))))

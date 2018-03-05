@@ -23,7 +23,6 @@
 (define-module (shepherd support)
   #:use-module (shepherd config)
   #:use-module (ice-9 match)
-  #:use-module (ice-9 format)
   #:export (call/ec
             caught-error
             assert
@@ -47,7 +46,7 @@
             display-line
 
             user-homedir
-            default-logfile
+            user-default-log-file
             default-logfile-date-format
             default-config-file
             default-socket-dir
@@ -308,19 +307,15 @@ TARGET should be a string representing a filepath + name."
 ""(for-each start '())
 ")))))
 
-;; Logfile.
-(define default-logfile
-  (if (zero? (getuid))
-      (if (access? "/dev/kmsg" W_OK)
-          "/dev/kmsg"
-          (string-append %localstatedir "/log/shepherd.log"))
-      (string-append %user-config-dir "/shepherd.log")))
+;; Logging.
+(define (user-default-log-file)
+  "Return the file name of the user's default log file."
+  (mkdir-p %user-config-dir #o700)
+  (string-append %user-config-dir "/shepherd.log"))
 
 (define default-logfile-date-format
   ;; 'strftime' format string to prefix each entry in the log.
-  (if (string=? default-logfile "/dev/kmsg")
-      (format #f "shepherd[~d]: " (getpid))
-      "%Y-%m-%d %H:%M:%S "))
+  "%Y-%m-%d %H:%M:%S ")
 
 ;; Configuration file.
 (define (default-config-file)

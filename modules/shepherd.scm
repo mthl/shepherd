@@ -21,6 +21,7 @@
 
 (define-module (shepherd)
   #:use-module (ice-9 match)
+  #:use-module (ice-9 format)
   #:use-module (ice-9 rdelim)   ;; Line-based I/O.
   #:autoload   (ice-9 readline) (activate-readline) ;for interactive use
   #:use-module (oop goops)      ;; Defining classes and methods.
@@ -77,7 +78,7 @@
 	(socket-file default-socket-file)
         (pid-file    #f)
         (secure      #t)
-        (logfile     default-logfile))
+        (logfile     #f))
     ;; Process command line arguments.
     (process-args (program-name) args
 		  ""
@@ -161,104 +162,116 @@
     ;; We do this early so that we can abort early if necessary.
     (and socket-file
          (verify-dir (dirname socket-file) #:secure? secure))
+
     ;; Enable logging as first action.
-    (start-logging logfile)
+    (parameterize ((log-output-port
+                    (cond (logfile
+                           (open-file logfile "al"))
+                          ((zero? (getuid))
+                           (open-file "/dev/kmsg" "wl"))
+                          (else
+                           (open-file (user-default-log-file) "al"))))
+                   (%current-logfile-date-format
+                    (if (and (not logfile) (zero? (getuid)))
+                        (format #f "shepherd[~d]: " (getpid))
+                        default-logfile-date-format))
+                   (current-output-port
+                    ;; Send output to log and clients.
+                    (make-shepherd-output-port
+                     (if (and (zero? (getuid)) (not logfile))
+                         ;; By default we'd write both to /dev/kmsg and to
+                         ;; stdout.  Redirect stdout to the bitbucket so we
+                         ;; don't log twice.
+                         (%make-void-port "w")
+                         (current-output-port)))))
 
-    (when (string=? logfile "/dev/kmsg")
-      ;; By default we'd write both to /dev/kmsg and to stdout.  Redirect
-      ;; stdout to the bitbucket so we don't log twice.
-      (set-current-output-port (%make-void-port "w")))
+      ;; Start the 'root' service.
+      (start root-service)
 
-    ;; Send output to log and clients.
-    (set-current-output-port (make-shepherd-output-port))
+      ;; This _must_ succeed.  (We could also put the `catch' around
+      ;; `main', but it is often useful to get the backtrace, and
+      ;; `caught-error' does not do this yet.)
+      (catch #t
+        (lambda ()
+          (load-in-user-module (or config-file (default-config-file))))
+        (lambda (key . args)
+          (caught-error key args)
+          (quit 1)))
+      ;; Start what was started last time.
+      (and persistency
+           (catch 'system-error
+             (lambda ()
+               (start-in-order (read (open-input-file
+                                      persistency-state-file))))
+             (lambda (key . args)
+               (apply format #f (gettext (cadr args)) (caddr args))
+               (quit 1))))
 
-    ;; Start the 'root' service.
-    (start root-service)
+      (when (provided? 'threads)
+        ;; XXX: This terrible hack allows us to make sure that signal handlers
+        ;; get a chance to run in a timely fashion.  Without it, after an EINTR,
+        ;; we could restart the accept(2) call below before the corresponding
+        ;; async has been queued.  See the thread at
+        ;; <https://lists.gnu.org/archive/html/guile-devel/2013-07/msg00004.html>.
+        (sigaction SIGALRM (lambda _ (alarm 1)))
+        (alarm 1))
 
-    ;; This _must_ succeed.  (We could also put the `catch' around
-    ;; `main', but it is often useful to get the backtrace, and
-    ;; `caught-error' does not do this yet.)
-    (catch #t
-      (lambda ()
-        (load-in-user-module (or config-file (default-config-file))))
-      (lambda (key . args)
-	(caught-error key args)
-	(quit 1)))
-    ;; Start what was started last time.
-    (and persistency
-	 (catch 'system-error
-	   (lambda ()
-	     (start-in-order (read (open-input-file
-				    persistency-state-file))))
-	   (lambda (key . args)
-	     (apply format #f (gettext (cadr args)) (caddr args))
-	     (quit 1))))
+      ;; Stop everything when we get SIGINT.  When running as PID 1, that means
+      ;; rebooting; this is what happens when pressing ctrl-alt-del, see
+      ;; ctrlaltdel(8).
+      (sigaction SIGINT
+        (lambda _
+          (stop root-service)))
 
-    (when (provided? 'threads)
-      ;; XXX: This terrible hack allows us to make sure that signal handlers
-      ;; get a chance to run in a timely fashion.  Without it, after an EINTR,
-      ;; we could restart the accept(2) call below before the corresponding
-      ;; async has been queued.  See the thread at
-      ;; <https://lists.gnu.org/archive/html/guile-devel/2013-07/msg00004.html>.
-      (sigaction SIGALRM (lambda _ (alarm 1)))
-      (alarm 1))
+      ;; Stop everything when we get SIGTERM.
+      (sigaction SIGTERM
+        (lambda _
+          (stop root-service)))
 
-    ;; Stop everything when we get SIGINT.  When running as PID 1, that means
-    ;; rebooting; this is what happens when pressing ctrl-alt-del, see
-    ;; ctrlaltdel(8).
-    (sigaction SIGINT
-      (lambda _
-        (stop root-service)))
+      ;; Stop everything when we get SIGHUP.
+      (sigaction SIGHUP
+        (lambda _
+          (stop root-service)))
 
-    ;; Stop everything when we get SIGTERM.
-    (sigaction SIGTERM
-      (lambda _
-        (stop root-service)))
+      ;; Ignore SIGPIPE so that we don't die if a client closes the connection
+      ;; prematurely.
+      (sigaction SIGPIPE SIG_IGN)
 
-    ;; Stop everything when we get SIGHUP.
-    (sigaction SIGHUP
-      (lambda _
-        (stop root-service)))
+      (if (not socket-file)
+          ;; Get commands from the standard input port.
+          (process-textual-commands (current-input-port))
+          ;; Process the data arriving at a socket.
+          (let ((sock   (open-server-socket socket-file))
 
-    ;; Ignore SIGPIPE so that we don't die if a client closes the connection
-    ;; prematurely.
-    (sigaction SIGPIPE SIG_IGN)
+                ;; With Guile <= 2.0.9, we can get a system-error exception for
+                ;; EINTR, which happens anytime we receive a signal, such as
+                ;; SIGCHLD.  Thus, wrap the 'accept' call.
+                (accept (EINTR-safe accept)))
 
-    (if (not socket-file)
-	;; Get commands from the standard input port.
-        (process-textual-commands (current-input-port))
-        ;; Process the data arriving at a socket.
-        (let ((sock   (open-server-socket socket-file))
+            ;; Possibly write out our PID, which means we're ready to accept
+            ;; connections.  XXX: What if we daemonized already?
+            (match pid-file
+              ((? string? file)
+               (with-atomic-file-output pid-file
+                 (cute display (getpid) <>)))
+              (#t (display (getpid)))
+              (_  #t))
 
-              ;; With Guile <= 2.0.9, we can get a system-error exception for
-              ;; EINTR, which happens anytime we receive a signal, such as
-              ;; SIGCHLD.  Thus, wrap the 'accept' call.
-              (accept (EINTR-safe accept)))
-
-          ;; Possibly write out our PID, which means we're ready to accept
-          ;; connections.  XXX: What if we daemonized already?
-          (match pid-file
-            ((? string? file)
-             (with-atomic-file-output pid-file
-               (cute display (getpid) <>)))
-            (#t (display (getpid)))
-            (_  #t))
-
-          (let next-command ()
-            (define (read-from sock)
-              (match (accept sock)
-                ((command-source . client-address)
-                 (setvbuf command-source _IOFBF 1024)
-                 (process-connection command-source))
-                (_ #f)))
-            (match (select (list sock) (list) (list) (if poll-services? 0.5 #f))
-              (((sock) _ _)
-               (read-from sock))
-              (_
-               #f))
-            (when poll-services?
-              (check-for-dead-services))
-            (next-command))))))
+            (let next-command ()
+              (define (read-from sock)
+                (match (accept sock)
+                  ((command-source . client-address)
+                   (setvbuf command-source _IOFBF 1024)
+                   (process-connection command-source))
+                  (_ #f)))
+              (match (select (list sock) (list) (list) (if poll-services? 0.5 #f))
+                (((sock) _ _)
+                 (read-from sock))
+                (_
+                 #f))
+              (when poll-services?
+                (check-for-dead-services))
+              (next-command)))))))
 
 (define (process-connection sock)
   "Process client connection SOCK, reading and processing commands."
