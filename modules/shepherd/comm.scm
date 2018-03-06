@@ -216,6 +216,9 @@ on service '~a':")
   ;; 'strftime' format strings for entries in the log file.
   (make-parameter default-logfile-date-format))
 
+(define %not-newline
+  (char-set-complement (char-set #\newline)))
+
 ;; We provide our own output mechanism, because we have certain
 ;; special needs; most importantly, we want to send output to herd
 ;; sometimes.
@@ -242,26 +245,19 @@ on service '~a':")
         ;; completed line.
         (if (not (string-index str #\newline))
             (set! buffer (cons str buffer))
-            (let* ((log (lambda (x)
-                          (display x (log-output-port))))
-                   (init-line (lambda ()
-                                (log (strftime (%current-logfile-date-format)
-                                               (localtime (current-time)))))))
-              (init-line)
-              (for-each log (reverse buffer))
-              (let* ((lines (string-split str #\newline))
-                     (last-line (car (take-right lines 1)))
-                     (is-first #t))
-                (for-each (lambda (line)
-                            (if is-first
-                                (set! is-first #f)
-                                (init-line))
-                            (log line)
-                            (log #\newline))
-                          (drop-right lines 1))
-                (set! buffer (if (string-null? last-line)
-                                 '()
-                                 (list last-line))))))))
+            (let* ((str   (string-concatenate-reverse (cons str buffer)))
+                   (lines (string-tokenize str %not-newline)))
+              (define prefix
+                (strftime (%current-logfile-date-format)
+                          (localtime (current-time))))
+
+              ;; Make exactly one 'display' call per line to make sure we
+              ;; don't create several entries for each line.
+              (for-each (lambda (line)
+                          (display (string-append prefix line "\n")
+                                   (log-output-port)))
+                        lines)
+              (set! buffer '())))))
 
     ;; Flush output.
     (lambda ()
