@@ -50,6 +50,7 @@
             report-command-error
 
             log-output-port
+            syslog-output-port
             start-logging
             stop-logging
             make-shepherd-output-port
@@ -215,6 +216,71 @@ on service '~a':")
 (define %current-logfile-date-format
   ;; 'strftime' format strings for entries in the log file.
   (make-parameter default-logfile-date-format))
+
+(define call-with-syslog-port
+  (let ((port #f))                                ;connection to /dev/log
+    (lambda (proc)
+      "Call PROC with an open output port.  The output port corresponds to
+/dev/log (aka. syslog) or, if that is unavailable, a degraded logging
+mechanism."
+      (define (call/syslog)
+        (catch 'system-error
+          (lambda ()
+            (proc port))
+          (lambda args
+            (if (memv (system-error-errno args)
+                      (list ENOTCONN ECONNREFUSED EPIPE))
+                (begin
+                  (set! port #f)
+                  (call-with-syslog-port proc))
+                (apply throw args)))))
+
+      (or (and port (not (port-closed? port)) (call/syslog))
+          (let ((sock (socket AF_UNIX SOCK_DGRAM 0)))
+            (catch 'system-error
+              (lambda ()
+                (connect sock AF_UNIX "/dev/log")
+                (setvbuf sock _IOLBF)
+                (set! port sock)
+                (call/syslog))
+              (lambda args
+                (close-port sock)
+                (if (memv (system-error-errno args)
+                          (list ENOENT ECONNREFUSED))
+                    (catch 'system-error
+                      (lambda ()
+                        (call-with-output-file "/dev/kmsg"
+                          (lambda (port)
+                            (setvbuf port _IOFBF)
+                            (proc port))))
+                      (lambda args
+                        (if (memv (system-error-errno args)
+                                  (list ENOENT EACCES EPERM))
+                            (call-with-output-file "/dev/console"
+                              (lambda (port)
+                                (setvbuf port _IONBF)
+                                (proc port)))
+                            (apply throw args))))
+                    (apply throw args)))))))))
+
+(define (syslog-output-port)
+  "Return the output port to write to syslog or /dev/kmsg, whichever is
+available."
+  (make-soft-port
+   (vector
+    (lambda (char)                                ;write char
+      (call-with-syslog-port
+       (lambda (port)
+         (write-char char port))))
+    (lambda (str)                                 ;write string
+      (call-with-syslog-port
+       (lambda (port)
+         (display str port))))
+    (const #t)                                    ;flush
+    #f                                            ;get char
+    (lambda ()                                    ;close
+      (call-with-syslog-port close-port)))
+   "w"))                                          ;output port
 
 (define %not-newline
   (char-set-complement (char-set #\newline)))

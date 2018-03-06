@@ -406,12 +406,22 @@ permissions are not as expected.
 @cindex log file
 Log output into @var{file}.
 
-The default behavior is to write to @file{/dev/kmsg} when running as
-superuser.  This special device is GNU/Linux-specific; when it does not
-exist, write to @file{/var/log/shepherd.log} instead.
-
 For unprivileged users, the default log file is
 @file{$XDG_CONFIG_HOME/shepherd/shepherd.log}.
+
+@cindex syslog
+When running as root, the default behavior is to connect to
+@file{/dev/log}, the @dfn{syslog} socket (@pxref{Overview of Syslog,,,
+libc, The GNU C Library Reference Manual}).  A syslog daemon,
+@command{syslogd}, is expected to read messages from there
+(@pxref{syslogd invocation, syslogd,, libc, GNU Inetutils}).
+
+When @file{/dev/log} is unavailable, for instance because
+@command{syslogd} is not running, as is the case during system startup
+and shutdown, @command{shepherd} falls back to the Linux kernel
+@dfn{ring buffer}, @file{/dev/kmsg}.  If @file{/dev/kmsg} is missing, as
+is the case on other operating systems, it falls back to
+@file{/dev/console}.
 
 @item --pid[=@var{file}]
 When @command{shepherd} is ready to accept connections, write its PID to @var{file} or

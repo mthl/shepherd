@@ -168,7 +168,7 @@
                     (cond (logfile
                            (open-file logfile "al"))
                           ((zero? (getuid))
-                           (open-file "/dev/kmsg" "wl"))
+                           (syslog-output-port))
                           (else
                            (open-file (user-default-log-file) "al"))))
                    (%current-logfile-date-format
