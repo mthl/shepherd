@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: shepherd 0.3.3-pre1\n"
 "Report-Msgid-Bugs-To: guix-devel@gnu.org\n"
 "POT-Creation-Date: 2018-03-01 14:10+0100\n"
-"PO-Revision-Date: 2018-03-05 10:45+0100\n"
+"PO-Revision-Date: 2018-03-05 15:41+0100\n"
 "Last-Translator: Julien Lepiller <julien@lepiller.eu>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "Language: fr\n"
@@ -28,35 +28,35 @@ msgstr ""
 #: modules/shepherd/comm.scm:175
 #, scheme-format
 msgid "service '~a' could not be found"
-msgstr "service « ~a » introuvable"
+msgstr "service « ~a » introuvable"
 
 #: modules/shepherd/comm.scm:178
 #, scheme-format
 msgid "service '~a' does not have an action '~a'"
-msgstr "le service « ~a » n’a pas d’action « ~a »"
+msgstr "le service « ~a » n’a pas d’action « ~a »"
 
 #: modules/shepherd/comm.scm:182
 #, scheme-format
 msgid "exception caught while executing '~a' on service '~a':"
-msgstr "exception rattrapée pendant l’exécution de « ~a » sur le service « ~a » :"
+msgstr "exception rattrapée pendant l’exécution de « ~a » sur le service « ~a » :"
 
 #: modules/shepherd/comm.scm:187
 #, scheme-format
 msgid "something went wrong: ~s"
-msgstr "quelque chose s’est mal passé : ~s"
+msgstr "quelque chose s’est mal passé : ~s"
 
 #: modules/shepherd/scripts/herd.scm:67
 msgid "Started:\n"
-msgstr "Démarrés :\n"
+msgstr "Démarrés :\n"
 
 #: modules/shepherd/scripts/herd.scm:69
 msgid "Stopped:\n"
-msgstr "Arrêtés :\n"
+msgstr "Arrêtés :\n"
 
 #: modules/shepherd/scripts/herd.scm:82
 #, scheme-format
 msgid "Status of ~a:~%"
-msgstr "Statut de ~a :~%"
+msgstr "Statut de ~a :~%"
 
 #: modules/shepherd/scripts/herd.scm:85
 #, scheme-format
@@ -147,7 +147,7 @@ msgstr "envoie des commandes au FICHIER"
 #: modules/shepherd/scripts/herd.scm:204
 #, scheme-format
 msgid "Usage: herd ACTION [SERVICE [OPTIONS...]]~%"
-msgstr "Utilisation : herd ACTION [SERVICE [OPTION…]]~%"
+msgstr "Utilisation : herd ACTION [SERVICE [OPTION…]]~%"
 
 #: modules/shepherd/support.scm:209
 msgid ""
@@ -156,9 +156,9 @@ msgid ""
 "This is free software: you are free to change and redistribute it.\n"
 "There is NO WARRANTY, to the extent permitted by law."
 msgstr ""
-"Copyright (C) 2018 les auteurs de Shepherd\n"
-"Licence GPLv3+: GNU GPL version 3 ou ultérieure <http://gnu.org/licenses/gpl.html>\n"
-"Ce logiciel est libre : vous êtes libre de le changer et de le redistribuer.\n"
+"Copyright (C) 2018 les auteurs du Shepherd\n"
+"Licence GPLv3+ : GNU GPL version 3 ou ultérieure <http://gnu.org/licenses/gpl.html>\n"
+"Ce logiciel est libre : vous êtes libre de le changer et de le redistribuer.\n"
 "AUCUNE GARANTIE n’est donnée dans la limite autorisée par la loi."
 
 #: modules/shepherd/service.scm:336
@@ -190,20 +190,20 @@ msgstr ""
 "Les arguments requis ou facultatifs pour les options longues sont aussi requis\n"
 "ou facultatifs pour les options courtes correspondantes.\n"
 "\n"
-"Rapportez les bugs à : ~a.\n"
-"Rapportez les problèmes de traduction à : traduc@traduc.org.\n"
-"Page d’accueil de ~a : <~a>\n"
-"Aide générale pour les logiciels GNU : <http://www.gnu.org/gethelp/>~%"
+"Rapportez les bugs à : ~a.\n"
+"Rapportez les problèmes de traduction à : traduc@traduc.org.\n"
+"Page d’accueil de ~a : <~a>\n"
+"Aide générale pour les logiciels GNU : <http://www.gnu.org/gethelp/>~%"
 
 #: modules/shepherd/args.scm:246
 #, scheme-format
 msgid "Option `--~a' is ambigous."
-msgstr "L’option « --~a » est ambiguë."
+msgstr "L’option « --~a » est ambiguë."
 
 #: modules/shepherd/args.scm:247
 #, scheme-format
 msgid "Unknown option: `--~a'."
-msgstr "Option inconnue : « --~a »."
+msgstr "Option inconnue : « --~a »."
 
 #: modules/shepherd.scm:68
 msgid "use FILE to load and store state"
