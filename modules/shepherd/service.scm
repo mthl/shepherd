@@ -745,19 +745,6 @@ false."
              (print-exception (current-error-port) #f key args)
              (primitive-exit 1))))
 
-       (let loop ((i 3))
-         (when (< i max-fd)
-           ;; First try to close any ports associated with file descriptor I.
-           ;; Otherwise the finalization thread might get around to closing
-           ;; those ports eventually, which will raise an EBADF exception (on
-           ;; 2.2), leading to messages like "error in the finalization
-           ;; thread: Bad file descriptor".
-           (for-each (lambda (port)
-                       (catch-system-error (close-port port)))
-                     (fdes->ports i))
-           (catch-system-error (close-fdes i))
-           (loop (+ i 1)))))
-
      ;; setgid must be done *before* setuid, otherwise the user will
      ;; likely no longer have permissions to setgid.
      (when group
@@ -781,6 +768,22 @@ false."
                    "failed to change to user ~s:~%" user)
            (print-exception (current-error-port) #f key args)
            (primitive-exit 1))))
+
+     ;; As the last action, close file descriptors.  Doing it last makes
+     ;; "error in the finalization thread: Bad file descriptor" issues
+     ;; unlikely on 2.2.
+     (let loop ((i 3))
+       (when (< i max-fd)
+         ;; First try to close any ports associated with file descriptor I.
+         ;; Otherwise the finalization thread might get around to closing
+         ;; those ports eventually, which will raise an EBADF exception (on
+         ;; 2.2), leading to messages like "error in the finalization
+         ;; thread: Bad file descriptor".
+         (for-each (lambda (port)
+                     (catch-system-error (close-port port)))
+                   (fdes->ports i))
+         (catch-system-error (close-fdes i))
+         (loop (+ i 1)))))
 
      (catch 'system-error
        (lambda ()
