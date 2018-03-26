@@ -27,6 +27,10 @@ GUILE_PKG([2.2 2.0])
 dnl Checks for programs.
 GUILE_PROGS
 
+if test "x$GUILE_EFFECTIVE_VERSION" = "x2.0"; then
+  PKG_CHECK_MODULES([GUILE], [guile-2.0 >= 2.0.13])
+fi
+
 guilemoduledir="${datarootdir}/guile/site/$GUILE_EFFECTIVE_VERSION"
 guileobjectdir="${libdir}/guile/$GUILE_EFFECTIVE_VERSION/site-ccache"
 AC_SUBST([guilemoduledir])
