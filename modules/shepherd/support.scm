@@ -30,7 +30,6 @@
 
             catch-system-error
             with-system-error-handling
-            EINTR-safe
             with-atomic-file-output
             mkdir-p
             with-directory-excursion
@@ -126,19 +125,6 @@ turned into user error messages."
   (call-with-system-error-handling
    (lambda ()
      body ...)))
-
-(define (EINTR-safe proc)
-  "Wrap PROC so that if a 'system-error' exception with EINTR is raised (that
-was possible up to Guile 2.0.9 included) the call to PROC is restarted."
-  (lambda args
-    (let loop ()
-      (catch 'system-error
-        (lambda ()
-          (apply proc args))
-        (lambda args
-          (if (= EINTR (system-error-errno args))
-              (loop)
-              (apply throw args)))))))
 
 (define (with-atomic-file-output file proc)       ;copied from Guix
   "Call PROC with an output port for the file that is going to replace FILE.

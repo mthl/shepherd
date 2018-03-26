@@ -241,12 +241,7 @@
           ;; Get commands from the standard input port.
           (process-textual-commands (current-input-port))
           ;; Process the data arriving at a socket.
-          (let ((sock   (open-server-socket socket-file))
-
-                ;; With Guile <= 2.0.9, we can get a system-error exception for
-                ;; EINTR, which happens anytime we receive a signal, such as
-                ;; SIGCHLD.  Thus, wrap the 'accept' call.
-                (accept (EINTR-safe accept)))
+          (let ((sock   (open-server-socket socket-file)))
 
             ;; Possibly write out our PID, which means we're ready to accept
             ;; connections.  XXX: What if we daemonized already?
