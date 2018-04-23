@@ -1,4 +1,4 @@
-# Portuguese translations for shepherd package
+# Brazilian Portuguese translations for shepherd package
 # Traduções em português brasileiro para o pacote shepherd.
 # This file is put in the public domain.
 # Rafael Fontenelle <rafaelff@gnome.org>, 2018.
@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: shepherd 0.3.3-pre1\n"
 "Report-Msgid-Bugs-To: guix-devel@gnu.org\n"
 "POT-Creation-Date: 2018-03-01 14:10+0100\n"
-"PO-Revision-Date: 2018-03-02 10:49-0200\n"
+"PO-Revision-Date: 2018-04-22 07:01-0300\n"
 "Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
 "Language-Team: Brazilian Portuguese <ldpbr-translation@lists.sourceforge.net>\n"
 "Language: pt_BR\n"
