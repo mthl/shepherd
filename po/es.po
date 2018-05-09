@@ -1,0 +1,239 @@
+# Spanish translation for shepherd 0.3.3-pre1
+# Copyright (C) 2018 the authors of Shepherd (msgids)
+# This file is distributed under the same license as the shepherd package.
+# Francisco Javier Serrador <fserrador@gmail.com>, 2018.
+# Santiago Vila Doncel <sanvila@unex.es>, 2018.
+msgid ""
+msgstr ""
+"Project-Id-Version: shepherd 0.3.3-pre1\n"
+"Report-Msgid-Bugs-To: guix-devel@gnu.org\n"
+"POT-Creation-Date: 2018-03-01 14:10+0100\n"
+"PO-Revision-Date: 2018-05-02 19:24+0200\n"
+"Last-Translator: Santiago Vila Doncel <sanvila@unex.es>\n"
+"Language-Team: Spanish <es@tp.org.es>\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
+"X-Generator: Poedit 2.0.4\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+
+#. TRANSLATORS: Strings occasionally contain escape sequences starting
+#. with '~' (tilde).  For example, '~a' corresponds to '%s' in C printf
+#. syntax and '~%' corresponds to '\n'.  These must be preserved as is.
+#. See
+#. <https://www.gnu.org/software/guile/manual/html_node/Formatted-Output.html>
+#. for more info.
+#: modules/shepherd/comm.scm:175
+#, scheme-format
+msgid "service '~a' could not be found"
+msgstr "no se pudo encontrar el servicio '~a'"
+
+#: modules/shepherd/comm.scm:178
+#, scheme-format
+msgid "service '~a' does not have an action '~a'"
+msgstr "el servicio '~a' no tiene una operación '~a'"
+
+#: modules/shepherd/comm.scm:182
+#, scheme-format
+msgid "exception caught while executing '~a' on service '~a':"
+msgstr "excepción atrapada mientras se ejecutaba '~a' en el servicio '~a':"
+
+#: modules/shepherd/comm.scm:187
+#, scheme-format
+msgid "something went wrong: ~s"
+msgstr "algo salió mal: ~s"
+
+#: modules/shepherd/scripts/herd.scm:67
+msgid "Started:\n"
+msgstr "Iniciado:\n"
+
+#: modules/shepherd/scripts/herd.scm:69
+msgid "Stopped:\n"
+msgstr "Detenido:\n"
+
+#: modules/shepherd/scripts/herd.scm:82
+#, scheme-format
+msgid "Status of ~a:~%"
+msgstr "Estado de ~a:~%"
+
+#: modules/shepherd/scripts/herd.scm:85
+#, scheme-format
+msgid "  It is started.~%"
+msgstr "  Está iniciado.~%"
+
+#: modules/shepherd/scripts/herd.scm:86
+#, scheme-format
+msgid "  Running value is ~s.~%"
+msgstr "  El valor que está funcionando es ~s.~%"
+
+#: modules/shepherd/scripts/herd.scm:87
+#, scheme-format
+msgid "  It is stopped.~%"
+msgstr "  Está detenido:.~%"
+
+#: modules/shepherd/scripts/herd.scm:89
+#, scheme-format
+msgid "  It is enabled.~%"
+msgstr "  Está activado.~%"
+
+#: modules/shepherd/scripts/herd.scm:90
+#, scheme-format
+msgid "  It is disabled.~%"
+msgstr "  Está desactivado.~%"
+
+#: modules/shepherd/scripts/herd.scm:91
+#, scheme-format
+msgid "  Provides ~a.~%"
+msgstr "  Proporciona ~a.~%"
+
+#: modules/shepherd/scripts/herd.scm:92
+#, scheme-format
+msgid "  Requires ~a.~%"
+msgstr "  Requiere ~a.~%"
+
+#: modules/shepherd/scripts/herd.scm:93
+#, scheme-format
+msgid "  Conflicts with ~a.~%"
+msgstr "  Tiene un conflicto con ~a.~%"
+
+#: modules/shepherd/scripts/herd.scm:95
+#, scheme-format
+msgid "  Will be respawned.~%"
+msgstr "  Será reiniciado.~%"
+
+#: modules/shepherd/scripts/herd.scm:96
+#, scheme-format
+msgid "  Will not be respawned.~%"
+msgstr "  No será reiniciado.~%"
+
+#: modules/shepherd/scripts/herd.scm:99
+#, scheme-format
+msgid "  Last respawned on ~a.~%"
+msgstr "  Último reinicio en ~a.~%"
+
+#: modules/shepherd/scripts/herd.scm:149
+#, scheme-format
+msgid "failed to start service ~a"
+msgstr "fallo al iniciar el servicio ~a"
+
+# Nota: shepherd es el nombre del "daemon" y por ese motivo no se traduce.
+#: modules/shepherd/scripts/herd.scm:166
+msgid "premature end-of-file while talking to shepherd"
+msgstr "fin de fichero prematuro mientras se hablaba con shepherd"
+
+#: modules/shepherd/scripts/herd.scm:181
+msgid "ACTION SERVICE [ARG...]"
+msgstr "OPERACIÓN SERVICIO [ARG...]"
+
+#: modules/shepherd/scripts/herd.scm:182
+msgid ""
+"Apply ACTION (start, stop, status, etc.) on \\\n"
+"SERVICE with the ARGs."
+msgstr ""
+"Aplica OPERACIÓN (start, stop, status, etc.) en \\\n"
+"SERVICIO con los ARGumentos."
+
+#: modules/shepherd/scripts/herd.scm:190 modules/shepherd.scm:67
+#: modules/shepherd.scm:99 modules/shepherd.scm:106 modules/shepherd.scm:113
+#: modules/shepherd.scm:120
+msgid "FILE"
+msgstr "FICHERO"
+
+#: modules/shepherd/scripts/herd.scm:191
+msgid "send commands to FILE"
+msgstr "envía órdenes a FICHERO"
+
+#: modules/shepherd/scripts/herd.scm:204
+#, scheme-format
+msgid "Usage: herd ACTION [SERVICE [OPTIONS...]]~%"
+msgstr "Modo de empleo: herd OPERACIÓN [SERVICIO [OPCIONES...]]~%"
+
+#: modules/shepherd/support.scm:209
+msgid ""
+"Copyright (C) 2018 the Shepherd authors\n"
+"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
+"This is free software: you are free to change and redistribute it.\n"
+"There is NO WARRANTY, to the extent permitted by law."
+msgstr ""
+"Copyright © 2018 los autores de Shepherd\n"
+"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
+"This is free software: you are free to change and redistribute it.\n"
+"There is NO WARRANTY, to the extent permitted by law."
+
+#: modules/shepherd/service.scm:336
+#, scheme-format
+msgid "Service ~a has been started."
+msgstr "El servicio ~a ha sido iniciado."
+
+#: modules/shepherd/service.scm:337
+#, scheme-format
+msgid "Service ~a could not be started."
+msgstr "No se pudo iniciar el servicio ~a."
+
+#: modules/shepherd/args.scm:44
+msgid "undocumented option"
+msgstr "opción indocumentada"
+
+#: modules/shepherd/args.scm:199
+#, scheme-format
+msgid ""
+"\n"
+"Mandatory or optional arguments to long options are also mandatory or\n"
+"optional to the corresponding short options.\n"
+"\n"
+"Report bugs to: ~a .\n"
+"~a general home page: <~a>\n"
+"General help using GNU software: <http://www.gnu.org/gethelp/>~%"
+msgstr ""
+"\n"
+"Los argumentos obligatorios u opcionales para las opciones largas también son\n"
+"obligatorios u opcionales para las opciones cortas correspondientes.\n"
+"\n"
+"Comunique defectos a: ~a.\n"
+"página inicial general de ~a:  <~a>\n"
+"Ayuda general sobre el uso de software GNU: <http://www.gnu.org/gethelp/>~%"
+
+#: modules/shepherd/args.scm:246
+#, scheme-format
+msgid "Option `--~a' is ambigous."
+msgstr "La opción `--~a' es ambigua."
+
+#: modules/shepherd/args.scm:247
+#, scheme-format
+msgid "Unknown option: `--~a'."
+msgstr "Opción desconocida: `--~a'."
+
+#: modules/shepherd.scm:68
+msgid "use FILE to load and store state"
+msgstr "utiliza FICHERO para cargar y almacenar estado del almacenaje"
+
+#: modules/shepherd.scm:76
+msgid "synonym for --silent"
+msgstr "sinónimo para --silent"
+
+#: modules/shepherd.scm:83
+msgid "don't do output to stdout"
+msgstr "no da resultados en la salida estándar"
+
+#: modules/shepherd.scm:93
+msgid "don't ensure that the setup is secure"
+msgstr "no se asegura de que la configuración es segura"
+
+#: modules/shepherd.scm:100
+msgid "log actions in FILE"
+msgstr "registra operaciones en FICHERO"
+
+#: modules/shepherd.scm:107
+msgid "when ready, write PID to FILE or stdout"
+msgstr "cuando está preparado, escribe el PID en FICHERO o en la salida estándar"
+
+#: modules/shepherd.scm:114
+msgid "read configuration from FILE"
+msgstr "lee la configuración de FICHERO"
+
+#: modules/shepherd.scm:122
+msgid "get commands from socket FILE or from stdin (-)"
+msgstr "obtiene órdenes del «socket» FICHERO o de la entrada estándar (-)"
