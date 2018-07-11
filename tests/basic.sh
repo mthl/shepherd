@@ -1,5 +1,5 @@
 # GNU Shepherd --- Test basic communication capabilities.
-# Copyright © 2013, 2014, 2016, 2017 Ludovic Courtès <ludo@gnu.org>
+# Copyright © 2013, 2014, 2016, 2017, 2018 Ludovic Courtès <ludo@gnu.org>
 # Copyright © 2016 Mathieu Lirzin <mthl@gnu.org>
 # Copyright © 2014 Alex Sassmannshausen <alex.sassmannshausen@gmail.com>
 #
@@ -54,6 +54,10 @@ cat > "$conf"<<EOF
              #t)
    #:stop  (lambda _
              (delete-file "$stamp-2"))
+   #:actions (make-actions (hi "Say hi."
+                               (lambda _
+                                 (display "start\n\nend\n")
+                                 #t)))
    #:respawn? #f)
  (make <service>
    #:provides '(broken)
@@ -93,6 +97,14 @@ then false; else true; fi
 
 $herd enable test-2
 $herd start test-2
+
+# Try a custom action; make sure we get all the lines, including the empty
+# lines (this was not the case in 0.4.0.)
+$herd doc test-2 action hi | grep "Say hi\."
+$herd hi test-2
+$herd hi test-2 | grep '^start$'
+$herd hi test-2 | grep '^end$'
+test `$herd hi test-2 | wc -l` -eq 3
 
 # This used to crash shepherd: <http://bugs.gnu.org/24684>.
 if $herd enable test-2 with extra arguments

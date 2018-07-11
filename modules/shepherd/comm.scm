@@ -282,9 +282,6 @@ available."
       (call-with-syslog-port close-port)))
    "w"))                                          ;output port
 
-(define %not-newline
-  (char-set-complement (char-set #\newline)))
-
 ;; We provide our own output mechanism, because we have certain
 ;; special needs; most importantly, we want to send output to herd
 ;; sometimes.
@@ -312,7 +309,7 @@ available."
         (if (not (string-index str #\newline))
             (set! buffer (cons str buffer))
             (let* ((str   (string-concatenate-reverse (cons str buffer)))
-                   (lines (string-tokenize str %not-newline)))
+                   (lines (string-split str #\newline)))
               (define prefix
                 (strftime (%current-logfile-date-format)
                           (localtime (current-time))))

@@ -284,9 +284,6 @@
       ;; Maybe we got EPIPE while writing to SOCK, or something like that.
       (false-if-exception (close sock)))))
 
-(define %not-newline
-  (char-set-complement (char-set #\newline)))
-
 (define (process-command command port)
   "Interpret COMMAND, a command sent by the user, represented as a
 <shepherd-command> object.  Send the reply to PORT."
@@ -302,8 +299,19 @@
              (open-output-string)))
 
          (define (get-messages)
-           (string-tokenize (get-output-string message-port)
-                            %not-newline))
+           (let* ((str (get-output-string message-port))
+                  (lst (string-split str #\newline)))
+             ;; 'string-tokenize' swallows empty lines, which is not great,
+             ;; and 'string-split' doesn't distinguish between an empty line
+             ;; and this empty string, which is not great either.  So we hack
+             ;; our way the best we can.
+             (cond ((string-null? str)
+                    '())
+                   ;; If STR ends in \n, drop the trailing empty string since
+                   ;; that would lead the client to print an extra newline.
+                   ((string-suffix? "\n" str)
+                    (drop-right lst 1))
+                   (else lst))))
 
          (parameterize ((%current-client-socket message-port))
            (guard (c ((service-error? c)
