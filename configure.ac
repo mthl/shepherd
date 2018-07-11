@@ -21,7 +21,7 @@ AC_PROG_MKDIR_P
 AC_PROG_SED
 
 dnl Check for Guile 2.x.
-m4_pattern_forbid([^GUILE_PKG])
+m4_pattern_forbid([^GUILE_PKG$])
 GUILE_PKG([2.2 2.0])
 
 dnl Checks for programs.
