@@ -428,20 +428,11 @@ wire."
   (let ((proc (or (and=> (lookup-action obj the-action)
                          action-procedure)
 		  default-action)))
-    ;; Calling default-action will be allowed even when the service is
-    ;; not running, as it provides generally useful functionality and
-    ;; information.
-    ;; FIXME: Why should the user-implementations not be allowed to be
-    ;; called this way?
+    ;; Invoking THE-ACTION is allowed even when the service is not running, as
+    ;; it provides generally useful functionality and information.
     (catch #t
       (lambda ()
-        (cond ((eq? proc default-action)
-               (apply default-action obj args))
-              ((not (running? obj))
-               (local-output "Service ~a is not running." (canonical-name obj))
-               #f)
-              (else
-               (apply proc (slot-ref obj 'running) args))))
+        (apply proc (slot-ref obj 'running) args))
       (lambda (key . args)
         ;; Special case: 'root' may quit.
         (and (eq? root-service obj)
