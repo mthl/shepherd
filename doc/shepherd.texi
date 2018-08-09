@@ -708,6 +708,15 @@ handler will not start it again.
 
 otherwise @code{#f}.
 
+@item
+@vindex replacement (slot of <service>)
+@code{replacement} specifies a service to be used to replace this one
+when it is stopped.  This service will continue to function normally
+until the @code{stop} action is invoked.  After the service has been
+successfully stopped, its definition will be replaced by the value of
+this slot, which must itself be a service.  This slot is ignored if
+its value is @code{#f}.
+
 @end itemize
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

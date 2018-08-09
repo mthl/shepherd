@@ -205,7 +205,10 @@ respawned, shows that it has been respawned more than TIMES in SECONDS."
   (stop-delay? #:init-keyword #:stop-delay?
 	       #:init-value #f)
   ;; The times of the last respawns, most recent first.
-  (last-respawns #:init-form '()))
+  (last-respawns #:init-form '())
+  ;; A replacement for when this service is stopped.
+  (replacement #:init-keyword #:replacement
+               #:init-value #f))
 
 (define (service? obj)
   "Return true if OBJ is a service."
@@ -341,6 +344,20 @@ wire."
 			 (canonical-name obj)))))
   (slot-ref obj 'running))
 
+(define (replace-service old-service new-service)
+  "Replace OLD-SERVICE with NEW-SERVICE in the services registry.  This
+completely removes all references to OLD-SERVICE before registering
+NEW-SERVICE."
+  (define (remove-service name)
+    (let* ((old (hashq-ref %services name))
+           (new (delete old-service old)))
+      (if (null? new)
+          (hashq-remove! %services name)
+          (hashq-set! %services name new))))
+  (when new-service
+    (for-each remove-service (provided-by old-service))
+    (register-services new-service)))
+
 ;; Stop the service, including services that depend on it.  If the
 ;; latter fails, continue anyway.  Return `#f' if it could be stopped.
 (define-method (stop (obj <service>) . args)
@@ -384,6 +401,11 @@ wire."
 
                ;; Reset the list of respawns.
                (slot-set! obj 'last-respawns '())
+
+               ;; Replace the service with its replacement, if it has one
+               (let ((replacement (slot-ref obj 'replacement)))
+                 (when replacement
+                   (replace-service obj replacement)))
 
                ;; Status message.
                (let ((name (canonical-name obj)))
@@ -1038,25 +1060,41 @@ then disable it."
 
 ;; Add NEW-SERVICES to the list of known services.
 (define (register-services . new-services)
+  "Add NEW-SERVICES to the list of known services.  If a service has already
+been registered, arrange to have it replaced when it is next stopped.  If it
+is currently stopped, replace it immediately."
   (define (register-single-service new)
     ;; Sanity-checks first.
     (assert (list-of-symbols? (provided-by new)))
     (assert (list-of-symbols? (required-by new)))
     (assert (boolean? (respawn? new)))
-    ;; Canonical name actually must be canonical.  (FIXME: This test
-    ;; is incomplete, since we may add a service later that makes it
-    ;; non-cannonical.)
-    (assert (null? (lookup-services (canonical-name new))))
-    ;; FIXME: Verify consistency: Check that there are no circular
-    ;; dependencies, check for bogus conflicts/dependencies, whatever
-    ;; else makes sense.
 
-    ;; Insert into the hash table.
-    (for-each (lambda (name)
-		(let ((old (lookup-services name)))
-		  ;; Actually add the new service now.
-		  (hashq-set! %services name (cons new old))))
-	      (provided-by new)))
+    ;; FIXME: Just because we have a unique canonical name now doesn't mean it
+    ;; will remain unique as other services are added. Whenever a service is
+    ;; added it should check that it's not conflicting with any already
+    ;; registered canonical names.
+    (match (lookup-services (canonical-name new))
+      (() ;; empty, so we can safely add ourselves
+       (for-each (lambda (name)
+		   (let ((old (lookup-services name)))
+		     (hashq-set! %services name (cons new old))))
+	         (provided-by new)))
+      ((old) ;; one service registered, so it may be an old version of us
+       (cond
+        ((not (eq? (canonical-name new) (canonical-name old)))
+         (local-output
+          "Cannot register service ~a: canonical name is not unique."
+          (canonical-name new))
+         (throw 'non-canonical-name))
+        ((running? old)
+         (slot-set! old 'replacement new))
+        (#:else
+         (replace-service old new))))
+      (_ ;; in any other case, there are too many services to register
+       (local-output
+        "Cannot register service ~a: canonical name is not unique."
+        (canonical-name new))
+       (throw 'non-canonical-name))))
 
   (for-each register-single-service new-services))
 

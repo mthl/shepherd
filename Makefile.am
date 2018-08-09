@@ -184,6 +184,7 @@ SUFFIXES = .go
 
 TESTS =						\
   tests/basic.sh				\
+  tests/replacement.sh				\
   tests/respawn.sh				\
   tests/respawn-throttling.sh			\
   tests/misbehaved-client.sh			\
