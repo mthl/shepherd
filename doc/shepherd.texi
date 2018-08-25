@@ -267,12 +267,12 @@ this inconsistency is just to make it more intuitive to get
 information about the status of a service, see below).
 
 These actions are @code{restart} and @code{status}.  The default
-implementation of @code{restart} calls @code{stop} and @code{start} on
-the affected service in order, the @code{status} action displays some
-general information about the service, like what it provides, what it
-depends on and with which other services it conflicts (because they
-provide a virtual service that is also provided by that particular
-service).
+implementation of @code{restart} calls @code{stop} and @code{start} on the
+affected service, taking care to also restart any dependent services. The
+default implementation of @code{status} displays some general information
+about the service, like what it provides, what it depends on and with which
+other services it conflicts (because they provide a virtual service that is
+also provided by that particular service).
 
 Another special action is @code{list-actions}, which displays a list
 of the additional actions a service provides; obviously, it can also

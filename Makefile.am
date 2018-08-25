@@ -187,6 +187,7 @@ TESTS =						\
   tests/replacement.sh				\
   tests/respawn.sh				\
   tests/respawn-throttling.sh			\
+  tests/restart.sh				\
   tests/misbehaved-client.sh			\
   tests/no-home.sh				\
   tests/pid-file.sh				\

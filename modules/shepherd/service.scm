@@ -358,61 +358,72 @@ NEW-SERVICE."
     (for-each remove-service (provided-by old-service))
     (register-services new-service)))
 
+(define (required-by? service dependent)
+  "Returns #t if DEPENDENT directly requires SERVICE in order to run.  Returns
+#f otherwise."
+  (and (find (lambda (dependency)
+               (memq dependency (provided-by service)))
+             (required-by dependent))
+       #t))
+
 ;; Stop the service, including services that depend on it.  If the
 ;; latter fails, continue anyway.  Return `#f' if it could be stopped.
-(define-method (stop (obj <service>) . args)
+(define-method (stop (service <service>) . args)
+  "Stop SERVICE, and any services which depend on it.  Returns a list of
+canonical names for all of the services which have been stopped (including
+transitive dependent services).  This method will print a warning if SERVICE
+is not already running, and will return SERVICE's canonical name in a list."
   ;; Block asyncs so the SIGCHLD handler doesn't execute concurrently.
-  ;; Notably, that makes sure the handler processes the SIGCHLD for OBJ's
-  ;; process once we're done; otherwise, it could end up respawning OBJ.
+  ;; Notably, that makes sure the handler processes the SIGCHLD for SERVICE's
+  ;; process once we're done; otherwise, it could end up respawning SERVICE.
   (call-with-blocked-asyncs
    (lambda ()
-     (if (not (running? obj))
-         (local-output "Service ~a is not running." (canonical-name obj))
-         (if (slot-ref obj 'stop-delay?)
+     (if (not (running? service))
+         (begin
+           (local-output "Service ~a is not running." (canonical-name service))
+           (list (canonical-name service)))
+         (if (slot-ref service 'stop-delay?)
              (begin
-               (slot-set! obj 'waiting-for-termination? #t)
+               (slot-set! service 'waiting-for-termination? #t)
                (local-output "Service ~a pending to be stopped."
-                             (canonical-name obj)))
-             (begin
-               ;; Stop services that depend on it.
-               (for-each-service
-                (lambda (serv)
-                  (and (running? serv)
-                       (for-each (lambda (sym)
-                                   (and (memq sym (provided-by obj))
-                                        (stop serv)))
-                                 (required-by serv)))))
-
+                             (canonical-name service))
+               (list (canonical-name service)))
+             (let ((name (canonical-name service))
+                   (stopped-dependents (fold-services (lambda (other acc)
+                                                        (if (and (running? other)
+                                                                 (required-by? service other))
+                                                            (append (stop other) acc)
+                                                            acc))
+                                                      '())))
                ;; Stop the service itself.
                (catch #t
                  (lambda ()
-                   (apply (slot-ref obj 'stop)
-                          (slot-ref obj 'running)
+                   (apply (slot-ref service 'stop)
+                          (slot-ref service 'running)
                           args))
                  (lambda (key . args)
                    ;; Special case: 'root' may quit.
-                   (and (eq? root-service obj)
+                   (and (eq? root-service service)
                         (eq? key 'quit)
                         (apply quit args))
                    (caught-error key args)))
 
-               ;; OBJ is no longer running.
-               (slot-set! obj 'running #f)
+               ;; SERVICE is no longer running.
+               (slot-set! service 'running #f)
 
                ;; Reset the list of respawns.
-               (slot-set! obj 'last-respawns '())
+               (slot-set! service 'last-respawns '())
 
                ;; Replace the service with its replacement, if it has one
-               (let ((replacement (slot-ref obj 'replacement)))
+               (let ((replacement (slot-ref service 'replacement)))
                  (when replacement
-                   (replace-service obj replacement)))
+                   (replace-service service replacement)))
 
                ;; Status message.
-               (let ((name (canonical-name obj)))
-                 (if (running? obj)
-                     (local-output "Service ~a could not be stopped." name)
-                     (local-output "Service ~a has been stopped." name))))))
-     (slot-ref obj 'running))))
+               (if (running? service)
+                   (local-output "Service ~a could not be stopped." name)
+                   (local-output "Service ~a has been stopped." name))
+               (cons name stopped-dependents)))))))
 
 ;; Call action THE-ACTION with ARGS.
 (define-method (action (obj <service>) the-action . args)
@@ -423,10 +434,9 @@ NEW-SERVICE."
       ;; Restarting is done in the obvious way.
       ((restart)
        (lambda (running . args)
-         (if running
-             (stop obj)
-             (local-output "~a was not running." (canonical-name obj)))
-         (apply start obj args)))
+         (let ((stopped-services (stop obj)))
+           (for-each start stopped-services)
+           #t)))
       ((status)
        ;; Return the service itself.  It is automatically converted to an sexp
        ;; via 'result->sexp' and sent to the client.
@@ -959,6 +969,16 @@ Return #f if service is not found."
   (find (lambda (service)
           (eq? name (canonical-name service)))
         services))
+
+(define (fold-services proc init)
+  "Apply PROC to the registered services to build a result, and return that
+result.  Works in a manner akin to `fold' from SRFI-1."
+  (hash-fold (lambda (name services acc)
+               (let ((service (lookup-canonical-service name services)))
+                 (if service
+                     (proc service acc)
+                     acc)))
+             init %services))
 
 (define (for-each-service proc)
   "Call PROC for each registered service."
