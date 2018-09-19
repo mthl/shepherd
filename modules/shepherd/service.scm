@@ -625,22 +625,23 @@ results."
 (define (handle-unknown . args)
   (let ((unknown (lookup-running 'unknown)))
     ;; FIXME: Display message if no unknown service.
-    (if unknown
-	(apply-to-args args
-	    (case-lambda
-	     ;; Start or stop.
-	     ((service-symbol start/stop args)
-	      (if (defines-action? unknown start/stop)
-		  (apply action unknown start/stop service-symbol args)
-		;; FIXME: Bad message.
-		(local-output "Cannot ~a ~a." start/stop service-symbol)))
-	     ;; Action.
-	     ((service-symbol action-sym the-action args)
-	      (assert (eq? action-sym 'action))
-	      (if (defines-action? unknown 'action)
-		  (apply action unknown 'action service-symbol the-action args)
-		  (local-output (l10n "No service provides ~a.")
-                                service-symbol))))))))
+    (when unknown
+      (apply (case-lambda
+	       ;; Start or stop.
+	       ((service-symbol start/stop args)
+	        (if (defines-action? unknown start/stop)
+		    (apply action unknown start/stop service-symbol args)
+		    ;; FIXME: Bad message.
+		    (local-output "Cannot ~a ~a." start/stop service-symbol)))
+	       ;; Action.
+	       ((service-symbol action-sym the-action args)
+	        (assert (eq? action-sym 'action))
+	        (if (defines-action? unknown 'action)
+		    (apply action unknown 'action service-symbol
+                           the-action args)
+		    (local-output (l10n "No service provides ~a.")
+                                  service-symbol))))
+             args))))
 
 ;; Check if any of SERVICES is running.  If this is the case, return
 ;; it.  If none, return `#f'.  Only the first one found will be
