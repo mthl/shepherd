@@ -297,7 +297,7 @@
   ;; ROOT-SERVICE.  So, if we're running as 'root', just reboot.
   (if (zero? (getuid))
       (begin
-        (local-output "Rebooting...")
+        (local-output (l10n "Rebooting..."))
         (reboot))
       (quit)))
 
@@ -352,7 +352,7 @@
                           port))))
        quit-exception-handler))
     (_
-     (local-output "Invalid command."))))
+     (local-output (l10n "Invalid command.")))))
 
 (define (process-textual-commands port)
   "Process textual commands from PORT.  'Textual' means that they're as you
@@ -371,5 +371,5 @@ would write them on the 'herd' command line."
                                                 #:arguments arguments)
                               port))
             (_
-             (local-output "invalid command line" line)))
+             (local-output (l10n "invalid command line") line)))
           (loop (read-line port))))))

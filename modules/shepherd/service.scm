@@ -289,24 +289,24 @@ wire."
 ;; Enable the service, allow it to get started.
 (define-method (enable (obj <service>))
   (slot-set! obj 'enabled? #t)
-  (local-output "Enabled service ~a." (canonical-name obj)))
+  (local-output (l10n "Enabled service ~a.") (canonical-name obj)))
 
 ;; Disable the service, make it unstartable.
 (define-method (disable (obj <service>))
   (slot-set! obj 'enabled? #f)
-  (local-output "Disabled service ~a." (canonical-name obj)))
+  (local-output (l10n "Disabled service ~a.") (canonical-name obj)))
 
 ;; Start the service, including dependencies.
 (define-method (start (obj <service>) . args)
   (cond ((running? obj)
-	 (local-output "Service ~a is already running."
+	 (local-output (l10n "Service ~a is already running.")
 		       (canonical-name obj)))
 	((not (enabled? obj))
-	 (local-output "Service ~a is currently disabled."
+	 (local-output (l10n "Service ~a is currently disabled.")
 		       (canonical-name obj)))
 	((let ((conflicts (conflicts-with-running obj)))
 	   (or (null? conflicts)
-	       (local-output "Service ~a conflicts with running services ~a."
+	       (local-output (l10n "Service ~a conflicts with running services ~a.")
 			     (canonical-name obj)
 			     (map canonical-name conflicts)))
 	   (not (null? conflicts)))
@@ -318,7 +318,7 @@ wire."
 		;; Resolve all dependencies.
 		(find (negate start) (required-by obj))))
 	   (if problem
-	       (local-output "Service ~a depends on ~a."
+	       (local-output (l10n "Service ~a depends on ~a.")
 			     (canonical-name obj)
 			     problem)
                (call-with-blocked-asyncs
@@ -378,12 +378,13 @@ is not already running, and will return SERVICE's canonical name in a list."
    (lambda ()
      (if (not (running? service))
          (begin
-           (local-output "Service ~a is not running." (canonical-name service))
+           (local-output (l10n "Service ~a is not running.")
+                         (canonical-name service))
            (list (canonical-name service)))
          (if (slot-ref service 'stop-delay?)
              (begin
                (slot-set! service 'waiting-for-termination? #t)
-               (local-output "Service ~a pending to be stopped."
+               (local-output (l10n "Service ~a pending to be stopped.")
                              (canonical-name service))
                (list (canonical-name service)))
              (let ((name (canonical-name service))
@@ -419,8 +420,10 @@ is not already running, and will return SERVICE's canonical name in a list."
 
                ;; Status message.
                (if (running? service)
-                   (local-output "Service ~a could not be stopped." name)
-                   (local-output "Service ~a has been stopped." name))
+                   (local-output (l10n "Service ~a could not be stopped.")
+                                 name)
+                   (local-output (l10n "Service ~a has been stopped.")
+                                 name))
                (cons name stopped-dependents)))))))
 
 ;; Call action THE-ACTION with ARGS.
@@ -503,7 +506,7 @@ is not already running, and will return SERVICE's canonical name in a list."
 		     (action-list obj)))
       (else
        ;; FIXME: Implement doc-help.
-       (local-output "Unknown keyword.  Try 'doc root help'.")))))
+       (local-output (l10n "Unknown keyword.  Try 'doc root help'."))))))
 
 ;; Return a list of services that conflict with OBJ.
 (define-method (conflicts-with (obj <service>))
@@ -636,7 +639,8 @@ results."
 	      (assert (eq? action-sym 'action))
 	      (if (defines-action? unknown 'action)
 		  (apply action unknown 'action service-symbol the-action args)
-		(local-output "No service provides ~a." service-symbol))))))))
+		  (local-output (l10n "No service provides ~a.")
+                                service-symbol))))))))
 
 ;; Check if any of SERVICES is running.  If this is the case, return
 ;; it.  If none, return `#f'.  Only the first one found will be
@@ -1015,7 +1019,7 @@ returned in unspecified."
         ;; because this procedure is supposed to be called only upon
         ;; SIGCHLD.
         (let ((errno (system-error-errno args)))
-          (local-output "warning: 'waitpid' ~a failed unexpectedly: ~a"
+          (local-output (l10n "warning: 'waitpid' ~a failed unexpectedly: ~a")
                         what (strerror errno))
           '(0 . #f))))))
 
@@ -1056,7 +1060,7 @@ then disable it."
       (if (not (slot-ref serv 'waiting-for-termination?))
           (begin
             ;; Everything is okay, start it.
-            (local-output "Respawning ~a."
+            (local-output (l10n "Respawning ~a.")
                           (canonical-name serv))
             (slot-set! serv 'last-respawns
                        (cons (current-time)
@@ -1066,14 +1070,14 @@ then disable it."
           ;; termination.  The `running' slot has already
           ;; been set to `#f' by `stop'.
           (begin
-            (local-output "Service ~a terminated."
+            (local-output (l10n "Service ~a terminated.")
                           (canonical-name serv))
             (slot-set! serv 'waiting-for-termination? #f)))
       (begin
-        (local-output "Service ~a has been disabled."
+        (local-output (l10n "Service ~a has been disabled.")
                       (canonical-name serv))
         (when (respawn? serv)
-          (local-output "  (Respawning too fast.)"))
+          (local-output (l10n "  (Respawning too fast.)")))
         (slot-set! serv 'enabled? #f))))
 
 ;; Add NEW-SERVICES to the list of known services.
@@ -1159,10 +1163,10 @@ requested to be removed."
     (cond ((eq? name 'all)
            ;; Special 'remove all' case.
            (let ((pairs (service-pairs)))
-             (local-output "Unloading all optional services: '~a'..."
+             (local-output (l10n "Unloading all optional services: '~a'...")
                            (map car pairs))
              (for-each deregister (map cdr pairs))
-             (local-output "Done.")))
+             (local-output (l10n "Done."))))
           (else
            ;; Removing only one service.
            (match (lookup-services name)
@@ -1171,20 +1175,20 @@ requested to be removed."
              ((service)             ; only SERVICE provides NAME
               ;; Are we removing a user service…
               (if (eq? (canonical-name service) name)
-                  (local-output "Removing service '~a'..." name)
+                  (local-output (l10n "Removing service '~a'...") name)
                   ;; or a virtual service?
                   (local-output
                    "Removing service '~a' providing '~a'..."
                    (canonical-name service) name))
               (deregister service)
-              (local-output "Done."))
+              (local-output (l10n "Done.")))
              ((services ...)            ; ambiguous NAME
               (local-output
                "Not unloading: '~a' names several services: '~a'."
                name (map canonical-name services))))))))
 
 (define (load-config file-name)
-  (local-output "Loading ~a." file-name)
+  (local-output (l10n "Loading ~a.") file-name)
   ;; Every action is protected anyway, so no need for a `catch'
   ;; here.  FIXME: What about `quit'?
   (load-in-user-module file-name))
@@ -1233,7 +1237,8 @@ where prctl/PR_SET_CHILD_SUBREAPER is unsupported."
                       (let ((running (slot-ref service 'running)))
                         (when (and (integer? running)
                                    (not (process-exists? running)))
-                            (local-output "PID ~a (~a) is dead!" running (canonical-name service))
+                          (local-output (l10n "PID ~a (~a) is dead!")
+                                        running (canonical-name service))
                             (respawn-service service))))))
 
 (define root-service
@@ -1247,7 +1252,7 @@ where prctl/PR_SET_CHILD_SUBREAPER is unsupported."
                 (display-version))
 	      #t)
     #:stop (lambda (unused . args)
-	     (local-output "Exiting shepherd...")
+	     (local-output (l10n "Exiting shepherd..."))
 	     ;; Prevent that we try to stop ourself again.
 	     (slot-set! root-service 'running #f)
              (shutdown-services)
@@ -1285,7 +1290,7 @@ Clients such as 'herd' can read it and format it in a human-readable way."
         (catch 'quit
           (cut stop root-service)
           (lambda (key)
-            (local-output "Halting...")
+            (local-output (l10n "Halting..."))
             (halt)))))
      ;; Power off.
      (power-off
@@ -1294,7 +1299,7 @@ Clients such as 'herd' can read it and format it in a human-readable way."
         (catch 'quit
           (cut stop root-service)
           (lambda (key)
-            (local-output "Shutting down...")
+            (local-output (l10n "Shutting down..."))
             (power-off)))))
      ;; Evaluate arbitrary code.
      (load
@@ -1307,7 +1312,7 @@ dangerous.  You have been warned."
 potentially dangerous, be careful."
       (lambda (running str)
         (let ((exp (call-with-input-string str read)))
-          (local-output "Evaluating user expression ~a."
+          (local-output (l10n "Evaluating user expression ~a.")
                         (call-with-output-string
                           (lambda (port)
                             (truncated-print exp port #:width 50))))
@@ -1336,7 +1341,7 @@ we want to receive these signals."
       (lambda (running)
         (case (getpid)
           ((1)
-           (local-output "Running as PID 1, so not daemonizing."))
+           (local-output (l10n "Running as PID 1, so not daemonizing.")))
           (else
            (if (zero? (primitive-fork))
                (begin
@@ -1367,6 +1372,6 @@ when in interactive mode, i.e. with `--socket=none'."
      (restart
       "This does not work for the 'root' service."
       (lambda (running)
-	(local-output "You must be kidding."))))))
+	(local-output (l10n "You must be kidding.")))))))
 
 (register-services root-service)

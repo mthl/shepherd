@@ -92,7 +92,7 @@
 (define-syntax-rule (assert EXPR)
   (and (not EXPR)
        (begin
-	 (local-output "Assertion ~a failed." 'EXPR)
+	 (local-output (l10n "Assertion ~a failed.") 'EXPR)
 	 (throw 'assertion-failed))))
 
 ;; Recursive procedures.
@@ -215,7 +215,7 @@ output port, and PROC's result is returned."
 ;; Display some text and a newline.
 (define-syntax-rule (local-output format-string args ...)
   (begin
-    (format #t (gettext format-string) args ...)
+    (format #t format-string args ...)
     (newline)))
 
 (define* (display-version #:optional (program-name (program-name)))
@@ -382,5 +382,5 @@ directory are not checked."
     (let ((dir-stat (stat dir)))
       (unless (and (= (stat:uid dir-stat) (getuid))
                    (= (stat:perms dir-stat) #o700))
-        (local-output "Socket directory setup is insecure.")
+        (local-output (l10n "Socket directory setup is insecure."))
         (exit 1)))))
