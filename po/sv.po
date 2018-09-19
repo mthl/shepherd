@@ -1,0 +1,236 @@
+# Swedish translation for shepherd
+# This file is put in the public domain.
+# Sebastian Rasmussen <sebras@gmail.com>, 2018.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: shepherd 0.3.3-pre1\n"
+"Report-Msgid-Bugs-To: guix-devel@gnu.org\n"
+"POT-Creation-Date: 2018-03-01 14:10+0100\n"
+"PO-Revision-Date: 2018-09-10 13:35+0800\n"
+"Last-Translator: Sebastian Rasmussen <sebras@gmail.com>\n"
+"Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
+"Language: sv\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 2.1.1\n"
+
+#. TRANSLATORS: Strings occasionally contain escape sequences starting
+#. with '~' (tilde).  For example, '~a' corresponds to '%s' in C printf
+#. syntax and '~%' corresponds to '\n'.  These must be preserved as is.
+#. See
+#. <https://www.gnu.org/software/guile/manual/html_node/Formatted-Output.html>
+#. for more info.
+#: modules/shepherd/comm.scm:175
+#, scheme-format
+msgid "service '~a' could not be found"
+msgstr "tjänst ”~a” kunde inte hittas"
+
+#: modules/shepherd/comm.scm:178
+#, scheme-format
+msgid "service '~a' does not have an action '~a'"
+msgstr "tjänst ”~a” saknar åtgärd ”~a”"
+
+#: modules/shepherd/comm.scm:182
+#, scheme-format
+msgid "exception caught while executing '~a' on service '~a':"
+msgstr "undantag fångat vid körning av ”~a” i tjänst ”~a”:"
+
+#: modules/shepherd/comm.scm:187
+#, scheme-format
+msgid "something went wrong: ~s"
+msgstr "något gick fel: ~s"
+
+#: modules/shepherd/scripts/herd.scm:67
+msgid "Started:\n"
+msgstr "Startad:\n"
+
+#: modules/shepherd/scripts/herd.scm:69
+msgid "Stopped:\n"
+msgstr "Stoppad:\n"
+
+#: modules/shepherd/scripts/herd.scm:82
+#, scheme-format
+msgid "Status of ~a:~%"
+msgstr "Status för ~a:~%"
+
+#: modules/shepherd/scripts/herd.scm:85
+#, scheme-format
+msgid "  It is started.~%"
+msgstr "  Den är startad.~%"
+
+#: modules/shepherd/scripts/herd.scm:86
+#, scheme-format
+msgid "  Running value is ~s.~%"
+msgstr "  Körvärde är ~s.~%"
+
+#: modules/shepherd/scripts/herd.scm:87
+#, scheme-format
+msgid "  It is stopped.~%"
+msgstr "  Den är stoppad.~%"
+
+#: modules/shepherd/scripts/herd.scm:89
+#, scheme-format
+msgid "  It is enabled.~%"
+msgstr "  Den är aktiverad.~%"
+
+#: modules/shepherd/scripts/herd.scm:90
+#, scheme-format
+msgid "  It is disabled.~%"
+msgstr "  Den är inaktiverad.~%"
+
+#: modules/shepherd/scripts/herd.scm:91
+#, scheme-format
+msgid "  Provides ~a.~%"
+msgstr "  Tillhandahåller ~a.~%"
+
+#: modules/shepherd/scripts/herd.scm:92
+#, scheme-format
+msgid "  Requires ~a.~%"
+msgstr "  Kräver ~a.~%"
+
+#: modules/shepherd/scripts/herd.scm:93
+#, scheme-format
+msgid "  Conflicts with ~a.~%"
+msgstr "  Står i konflikt med ~a.~%"
+
+#: modules/shepherd/scripts/herd.scm:95
+#, scheme-format
+msgid "  Will be respawned.~%"
+msgstr "  Kommer att startas om.~%"
+
+#: modules/shepherd/scripts/herd.scm:96
+#, scheme-format
+msgid "  Will not be respawned.~%"
+msgstr "  Kommer inte att startas om.~%"
+
+#: modules/shepherd/scripts/herd.scm:99
+#, scheme-format
+msgid "  Last respawned on ~a.~%"
+msgstr "  Senast omstartad ~a.~%"
+
+#: modules/shepherd/scripts/herd.scm:149
+#, scheme-format
+msgid "failed to start service ~a"
+msgstr "misslyckades med att starta tjänst ~a"
+
+#: modules/shepherd/scripts/herd.scm:166
+msgid "premature end-of-file while talking to shepherd"
+msgstr "för tidigt filslut vid samtal med shepherd"
+
+#: modules/shepherd/scripts/herd.scm:181
+msgid "ACTION SERVICE [ARG...]"
+msgstr "ÅTGÄRD TJÄNST [ARG…]"
+
+#: modules/shepherd/scripts/herd.scm:182
+msgid ""
+"Apply ACTION (start, stop, status, etc.) on \\\n"
+"SERVICE with the ARGs."
+msgstr ""
+"Tillämpa ÅTGÄRD (start, stop, status, etc.) för\\\n"
+"TJÄNST med ARGument."
+
+#: modules/shepherd/scripts/herd.scm:190 modules/shepherd.scm:67
+#: modules/shepherd.scm:99 modules/shepherd.scm:106 modules/shepherd.scm:113
+#: modules/shepherd.scm:120
+msgid "FILE"
+msgstr "FIL"
+
+#: modules/shepherd/scripts/herd.scm:191
+msgid "send commands to FILE"
+msgstr "skicka kommandon till FIL"
+
+#: modules/shepherd/scripts/herd.scm:204
+#, scheme-format
+msgid "Usage: herd ACTION [SERVICE [OPTIONS...]]~%"
+msgstr "Användning: herd ÅTGÄRD [TJÄNST [FLAGGOR…]]~%"
+
+#: modules/shepherd/support.scm:209
+msgid ""
+"Copyright (C) 2018 the Shepherd authors\n"
+"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
+"This is free software: you are free to change and redistribute it.\n"
+"There is NO WARRANTY, to the extent permitted by law."
+msgstr ""
+"Copyright (C) 2018 the Shepherd authors\n"
+"Licens GPLv3+: GNU GPL version 3 eller senare <http://gnu.org/licenses/gpl.html>\n"
+"Detta är fri programvara: du har rätt att ändra och vidaredistribuera den.\n"
+"Det finns INGEN GARANTI, så långt som lagen tillåter."
+
+#: modules/shepherd/service.scm:336
+#, scheme-format
+msgid "Service ~a has been started."
+msgstr "Tjänst ~a har startats."
+
+#: modules/shepherd/service.scm:337
+#, scheme-format
+msgid "Service ~a could not be started."
+msgstr "Tjänst ~a kunde inte startas."
+
+#: modules/shepherd/args.scm:44
+msgid "undocumented option"
+msgstr "odokumenterad flagga"
+
+#: modules/shepherd/args.scm:199
+#, scheme-format
+msgid ""
+"\n"
+"Mandatory or optional arguments to long options are also mandatory or\n"
+"optional to the corresponding short options.\n"
+"\n"
+"Report bugs to: ~a .\n"
+"~a general home page: <~a>\n"
+"General help using GNU software: <http://www.gnu.org/gethelp/>~%"
+msgstr ""
+"\n"
+"Obligatoriska eller valfria argument till långa flaggor är också obligatoriska eller\n"
+"valfria för motsvarande korta flaggor.\n"
+"\n"
+"Rapportera fel till: ~a .\n"
+"~a allmän hemsida: <~a>\n"
+"Allmän hjälp med att använda GNU-programvar a<http://www.gnu.org/gethelp/>~%"
+
+#: modules/shepherd/args.scm:246
+#, scheme-format
+msgid "Option `--~a' is ambigous."
+msgstr "Flagga ”--~a” är tvetydig."
+
+#: modules/shepherd/args.scm:247
+#, scheme-format
+msgid "Unknown option: `--~a'."
+msgstr "Okänd flagga: ”--~a”."
+
+#: modules/shepherd.scm:68
+msgid "use FILE to load and store state"
+msgstr "använd FIL för att läsa in och spara tillstånd"
+
+#: modules/shepherd.scm:76
+msgid "synonym for --silent"
+msgstr "synonym för --silent"
+
+#: modules/shepherd.scm:83
+msgid "don't do output to stdout"
+msgstr "mata inte ut till standard ut"
+
+#: modules/shepherd.scm:93
+msgid "don't ensure that the setup is secure"
+msgstr "säkerställ inte att installationen är säker"
+
+#: modules/shepherd.scm:100
+msgid "log actions in FILE"
+msgstr "logga åtgärder i FIL"
+
+#: modules/shepherd.scm:107
+msgid "when ready, write PID to FILE or stdout"
+msgstr "när redo, skriv PID till FIL eller standard ut"
+
+#: modules/shepherd.scm:114
+msgid "read configuration from FILE"
+msgstr "läs konfiguration från FIL"
+
+#: modules/shepherd.scm:122
+msgid "get commands from socket FILE or from stdin (-)"
+msgstr "hämta kommandon från uttags-FIL eller från standard in (-)"
