@@ -59,7 +59,6 @@ service manager for the GNU system.
 * Jump Start::        How to do simple things with the Shepherd.
 * herd and shepherd:: User interface to service management.
 * Services::          Details on services.
-* Runlevels::         Details on runlevels.
 * Misc Facilities::   Generally useful things provided by the Shepherd.
 * Internals::         Hacking shepherd.
 
@@ -1036,25 +1035,6 @@ This is useful only in few cases, but enables you to do various sorts
 of unusual things.
 
 @c FIXME-CRITICAL: finish
-
-@c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-@node Runlevels
-@chapter Runlevels
-
-RUNLEVELS DO NOT WORK YET! Do not use them! Ignore this section!
-
-@cindex runlevel
-@tindex <runlevel>
-A @dfn{runlevel} makes it easier to start and stop groups of services,
-to bring the system into a certain state.  An object of class
-@code{<runlevel>} is an abstract runlevel, and has the following
-methods:
-
-@deffn {method} enter (rl <runlevel>) services
-This will be called when the runlevel should be entered.
-@var{services} is the list of the currently running services.
-@end deffn
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 

@@ -40,7 +40,6 @@ dist_shepherdsub_DATA =				\
   modules/shepherd/args.scm			\
   modules/shepherd/service.scm			\
   modules/shepherd/support.scm			\
-  modules/shepherd/runlevel.scm			\
   modules/shepherd/comm.scm
 nodist_shepherdsub_DATA =			\
   modules/shepherd/config.scm			\
