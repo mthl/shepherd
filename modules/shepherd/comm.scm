@@ -308,18 +308,23 @@ available."
         ;; completed line.
         (if (not (string-index str #\newline))
             (set! buffer (cons str buffer))
-            (let* ((str   (string-concatenate-reverse (cons str buffer)))
-                   (lines (string-split str #\newline)))
+            (let ((str (string-concatenate-reverse (cons str buffer))))
               (define prefix
                 (strftime (%current-logfile-date-format)
                           (localtime (current-time))))
 
-              ;; Make exactly one 'display' call per line to make sure we
-              ;; don't create several entries for each line.
-              (for-each (lambda (line)
-                          (display (string-append prefix line "\n")
-                                   (log-output-port)))
-                        lines)
+              ;; Note: We want to render as many newlinew as present in STR,
+              ;; so neither 'string-split' nor 'string-tokenize' helps.
+              (let loop ((str str))
+                (let* ((index (string-index str #\newline))
+                       (line  (if index (string-take str (+ 1 index)) str)))
+                  (unless (string-null? str)
+                    ;; Make exactly one 'display' call per line to make sure we
+                    ;; don't create several entries for each line.
+                    (display (string-append prefix line) (log-output-port))
+                    (when index
+                      (loop (string-drop str (+ index 1)))))))
+
               (set! buffer '())))))
 
     ;; Flush output.

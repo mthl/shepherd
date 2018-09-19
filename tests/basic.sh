@@ -98,6 +98,11 @@ then false; else true; fi
 $herd enable test-2
 $herd start test-2
 
+# Make sure we didn't emit empty lines in the log (strip the timestamp that
+# prefixes each line.)
+test `wc -l < "$log"` -gt 0
+test `cut -c 21- < "$log" | grep "^$" | wc -l` -eq 0
+
 # Try a custom action; make sure we get all the lines, including the empty
 # lines (this was not the case in 0.4.0.)
 $herd doc test-2 action hi | grep "Say hi\."
