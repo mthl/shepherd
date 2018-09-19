@@ -216,12 +216,19 @@
         (sigaction SIGALRM (lambda _ (alarm 1)))
         (alarm 1))
 
-      ;; Stop everything when we get SIGINT.  When running as PID 1, that means
-      ;; rebooting; this is what happens when pressing ctrl-alt-del, see
-      ;; ctrlaltdel(8).
+      (when (= 1 (getpid))
+        ;; When running as PID 1, disable hard reboots upon ctrl-alt-del.
+        ;; Instead, the kernel will send us SIGINT so that we can gracefully
+        ;; shut down.  See ctrlaltdel(8) and kernel/reboot.c.
+        (disable-reboot-on-ctrl-alt-del))
+
+      ;; Stop everything when we get SIGINT.
       (sigaction SIGINT
         (lambda _
-          (stop root-service)))
+          (catch 'quit
+            (lambda ()
+              (stop root-service))
+            quit-exception-handler)))
 
       ;; Stop everything when we get SIGTERM.
       (sigaction SIGTERM
@@ -284,6 +291,16 @@
       ;; Maybe we got EPIPE while writing to SOCK, or something like that.
       (false-if-exception (close sock)))))
 
+(define (quit-exception-handler key)
+  "Handle the 'quit' exception, rebooting if we're running as root."
+  ;; Most likely we're receiving 'quit' from the 'stop' method of
+  ;; ROOT-SERVICE.  So, if we're running as 'root', just reboot.
+  (if (zero? (getuid))
+      (begin
+        (local-output "Rebooting...")
+        (reboot))
+      (quit)))
+
 (define (process-command command port)
   "Interpret COMMAND, a command sent by the user, represented as a
 <shepherd-command> object.  Send the reply to PORT."
@@ -333,14 +350,7 @@
 
              (write-reply (command-reply command result #f (get-messages))
                           port))))
-       (lambda (key)
-         ;; Most likely we're receiving 'quit' from the 'stop' method of
-         ;; ROOT-SERVICE.  So, if we're running as 'root', just reboot.
-         (if (zero? (getuid))
-             (begin
-               (local-output "Rebooting...")
-               (reboot))
-             (quit)))))
+       quit-exception-handler))
     (_
      (local-output "Invalid command."))))
 

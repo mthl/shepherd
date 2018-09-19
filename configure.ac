@@ -64,15 +64,18 @@ case "$host_os" in
     # has a different set of features and flags.
     AC_COMPUTE_INT([RB_HALT_SYSTEM], [RB_HALT], [#include <sys/reboot.h>])
     AC_COMPUTE_INT([RB_POWER_OFF], [RB_HALT], [#include <sys/reboot.h>])
+    RB_DISABLE_CAD="#f"
     ;;
   *)
     # What is this?  GNU/kFreeBSD?
     AC_MSG_WARN([not sure how to halt the system on '$host_os'])
     AC_COMPUTE_INT([RB_HALT_SYSTEM], [RB_HALT_SYSTEM], [#include <sys/reboot.h>])
     AC_COMPUTE_INT([RB_POWER_OFF], [RB_HALT_SYSTEM], [#include <sys/reboot.h>])
+    RB_DISABLE_CAD="#f"
     ;;
 esac
 
+AC_SUBST([RB_DISABLE_CAD])
 AC_SUBST([RB_AUTOBOOT])
 AC_SUBST([RB_HALT_SYSTEM])
 AC_SUBST([RB_POWER_OFF])

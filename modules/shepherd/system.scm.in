@@ -21,7 +21,8 @@
   #:use-module (system foreign)
   #:use-module (rnrs bytevectors)
   #:use-module (srfi srfi-11)
-  #:export (reboot
+  #:export (disable-reboot-on-ctrl-alt-del
+            reboot
             halt
             power-off
             max-file-descriptors
@@ -32,6 +33,7 @@
 (define RB_AUTOBOOT @RB_AUTOBOOT@)
 (define RB_HALT_SYSTEM @RB_HALT_SYSTEM@)
 (define RB_POWER_OFF @RB_POWER_OFF@)
+(define RB_DISABLE_CAD @RB_DISABLE_CAD@)          ; integer | #f
 
 (define (syscall->procedure return-type name argument-types)
   "Return a procedure that wraps the C function NAME using the dynamic FFI,
@@ -106,6 +108,13 @@ the returned procedure is called."
                                            (sizeof int)))))))))
             (ref bv))))
       (lambda () 0)))
+
+(define (disable-reboot-on-ctrl-alt-del)
+  "Disable hard reboot upon ctrl-alt-del.  Instead, the kernel Linux will send
+SIGINT to PID 1, which is responsible for cleaning things up gracefully.  See
+ctrlaltdel(8) and see kernel/reboot.c in Linux."
+  (when RB_DISABLE_CAD
+    (%libc-reboot RB_DISABLE_CAD)))
 
 (define (reboot)
   "Perform a hard reset of the system now.  Return #f on failure."
