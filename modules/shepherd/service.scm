@@ -35,8 +35,6 @@
   #:use-module (shepherd comm)
   #:use-module (shepherd config)
   #:use-module (shepherd system)
-  #:replace (system
-             system*)
   #:export (<service>
             service?
             canonical-name
@@ -613,13 +611,6 @@ results."
                (apply action service the-action args))
              which-services))))
 
-;; EINTR-safe versions of 'system' and 'system*'.
-
-(define system*
-  (EINTR-safe (@ (guile) system*)))
-
-(define system
-  (EINTR-safe (@ (guile) system)))
 
 
 
@@ -1014,21 +1005,19 @@ returned in unspecified."
   (hashq-ref %services name '()))
 
 (define waitpid*
-  (let ((waitpid (EINTR-safe waitpid)))
-    (lambda (what flags)
-      "Like 'waitpid', but EINTR-safe, and return (0 . _) when there's no
-child left."
-      (catch 'system-error
-        (lambda ()
-          (waitpid what flags))
-        (lambda args
-          ;; Did we get ECHILD or something?  If we did, that's a problem,
-          ;; because this procedure is supposed to be called only upon
-          ;; SIGCHLD.
-          (let ((errno (system-error-errno args)))
-            (local-output "warning: 'waitpid' ~a failed unexpectedly: ~a"
-                          what (strerror errno))
-            '(0 . #f)))))))
+  (lambda (what flags)
+    "Like 'waitpid', and return (0 . _) when there's no child left."
+    (catch 'system-error
+      (lambda ()
+        (waitpid what flags))
+      (lambda args
+        ;; Did we get ECHILD or something?  If we did, that's a problem,
+        ;; because this procedure is supposed to be called only upon
+        ;; SIGCHLD.
+        (let ((errno (system-error-errno args)))
+          (local-output "warning: 'waitpid' ~a failed unexpectedly: ~a"
+                        what (strerror errno))
+          '(0 . #f))))))
 
 (define (handle-SIGCHLD signum)
   "Handle SIGCHLD, possibly by respawning the service that just died, or
