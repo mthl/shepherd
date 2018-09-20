@@ -27,7 +27,7 @@
 
 ;; This does mostly the same as getopt-long, except for that it is
 ;; able to recognize abbreviations for long options, as long as they
-;; are not ambigous.  Additionally, output is done in a way that makes
+;; are not ambiguous.  Additionally, output is done in a way that makes
 ;; localization possible.
 
 (define-class <option> ()
@@ -102,7 +102,7 @@
   ;; If this returns `#f', it means no option that can be abbreviated
   ;; as NAME (or has exactly this name) was found.  If the return
   ;; value is an option, it is exactly that or an abbreviation for it.
-  ;; `#t' means that it is ambigous.
+  ;; `#t' means that it is ambiguous.
   (define (find-long-option name)
     (call/ec (lambda (return)
 	       (let ((abbrev-for #f))
@@ -251,7 +251,7 @@ General help using GNU software: <http://www.gnu.org/gethelp/>~%")
 		      (begin
 			(local-output
 			 (if target-option
-			     (l10n "Option `--~a' is ambigous.")
+			     (l10n "Option `--~a' is ambiguous.")
 			   (l10n "Unknown option: `--~a'."))
 			 name)
 			(local-output (l10n "Try `--help'."))

@@ -651,7 +651,7 @@ therefore it is desirable to specify a different one usually.
 
 @item
 @vindex stop (slot of <service>)
-@cindex Stoping a service
+@cindex Stopping a service
 @cindex Service destructor
 @code{stop} is, similar to @code{start}, a slot containing a
 procedure.  But in this case, it gets the current value of the
@@ -729,7 +729,7 @@ It tries quite hard to do this: When a service that provides a
 required symbol can not be started, it will look for another service
 that also provides this symbol, until starting one such service
 succeeds.  There is some room for theoretical improvement here, of
-course, but in pratice the current strategy already works very well.
+course, but in practice the current strategy already works very well.
 This method returns the new value of the @code{running} slot
 @ref{Slots of services}, which is @code{#f} if the service could not
 be started.
@@ -1063,8 +1063,8 @@ message and throw an @code{assertion-failed} exception.
 @end deffn
 
 @deffn {procedure} caught-error key args
-Tell the Shepherd that a @var{key} error with @var{args} has occured.  This is
-the simplest way to cause caught error result in uniformly formated
+Tell the Shepherd that a @var{key} error with @var{args} has occurred.  This is
+the simplest way to cause caught error result in uniformly formatted
 warning messages.  The current implementation is not very good,
 though.
 @end deffn
@@ -1245,11 +1245,11 @@ sometimes useful, but often one also wants to operate on single
 services.  System V Init makes this hard: While you can start and stop
 a service, @code{init} will not know about it, and use the runlevel
 configuration as its source of information, opening the door for
-inconsistencies (which fortunatly are not a practical problem
+inconsistencies (which fortunately are not a practical problem
 usually).  In the Shepherd, this was avoided by having a central entity that is
 responsible for starting and stopping the services, which therefore
 knows which services are actually started (if not completely
-inproperly used, but that is a requirement which is impossible to
+improperly used, but that is a requirement which is impossible to
 avoid anyway).  While runlevels are not implemented yet, it is clear
 that they will sit on top of the service concept, i.e. runlevels will
 merely be an optional extension that the service concept does not rely
@@ -1258,7 +1258,7 @@ become necessary.
 
 The consequence of having a daemon running that controls the services
 is that we need another program as user interface which communicates
-with the daemon.  Fortunatly, this makes the commands necessary for
+with the daemon.  Fortunately, this makes the commands necessary for
 controlling services pretty short and intuitive, and gives the
 additional bonus of adding some more flexibility.  For example, it is
 easiely possible to grant password-protected control over certain
@@ -1269,7 +1269,7 @@ above) is that it should always know exactly what is happening,
 i.e. which services are started and stopped.  The alternative would
 have been to not use a daemon, but to save the state on the file
 system, again opening the door for inconsistencies of all sorts.
-Also, we would have to use a seperate program for respawning a service
+Also, we would have to use a separate program for respawning a service
 (which just starts the services, waits until it terminates and then
 starts it again).  Killing the program that does the respawning (but
 not the service that is supposed to be respawned) would cause horrible
@@ -1544,7 +1544,7 @@ we find which combination works?  I found only one way yet: Kind of a
 brute force attack: Try combinations until we find one that works.
 
 This alone would be too slow.  With 20 services we would have 2^20
-possible combinations, that is a bit more than a million.  Fortunatly,
+possible combinations, that is a bit more than a million.  Fortunately,
 we can optimize this.  First I thought we could remove all services
 from the list that do not provide any symbol we need, but that is
 obviously a stupid idea, as we might need them for dependencies, in

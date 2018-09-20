@@ -1328,7 +1328,7 @@ removing them if needed."
         (deregister-service service-name)))
      (reload
       "Unload all services, then load from FILE-NAME into shepherd.  This
-is potentialy dangerous.  You have been warned."
+is potentially dangerous.  You have been warned."
       (lambda (running file-name)
         (and (deregister-service "all") ; unload all services
              (load-config file-name)))) ; reload from FILE-NAME
@@ -1336,8 +1336,8 @@ is potentialy dangerous.  You have been warned."
      (daemonize
       "Go into the background.  Be careful, this means that a new
 process will be created, so shepherd will not get SIGCHLD signals anymore
-if previously spawned childs terminate.  Therefore, this action should
-usually only be used (if at all) *before* childs get spawned for which
+if previously spawned children terminate.  Therefore, this action should
+usually only be used (if at all) *before* children get spawned for which
 we want to receive these signals."
       (lambda (running)
         (case (getpid)
