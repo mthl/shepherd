@@ -20,9 +20,9 @@ AC_CANONICAL_HOST
 AC_PROG_MKDIR_P
 AC_PROG_SED
 
-dnl Check for Guile 2.x.
+dnl Check for Guile 2.x+.
 m4_pattern_forbid([^GUILE_PKG$])
-GUILE_PKG([2.2 2.0])
+GUILE_PKG([3.0 2.2 2.0])
 
 dnl Checks for programs.
 GUILE_PROGS
