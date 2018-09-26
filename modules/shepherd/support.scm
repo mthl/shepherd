@@ -219,9 +219,8 @@ output port, and PROC's result is returned."
     (debug-disable 'warn-deprecated))
 
   ;; In Guile 2.2+, the locale is installed by default.
-  (cond-expand
-    (guile-2.0 (false-if-exception (setlocale LC_ALL "")))
-    (else      #t))
+  (if-2.0 (false-if-exception (setlocale LC_ALL ""))
+          #t)
 
   (bindtextdomain %gettext-domain %localedir)
   (textdomain %gettext-domain)
