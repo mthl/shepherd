@@ -219,7 +219,16 @@
         ;; When running as PID 1, disable hard reboots upon ctrl-alt-del.
         ;; Instead, the kernel will send us SIGINT so that we can gracefully
         ;; shut down.  See ctrlaltdel(8) and kernel/reboot.c.
-        (disable-reboot-on-ctrl-alt-del))
+        (catch 'system-error
+          (lambda ()
+            (disable-reboot-on-ctrl-alt-del))
+          (lambda args
+            (let ((err (system-error-errno args)))
+              ;; When in a separate PID namespace, we get EINVAL (see
+              ;; 'reboot_pid_ns' in kernel/pid_namespace.c.)  We get EPERM in
+              ;; a user namespace that lacks CAP_SYS_BOOT.
+              (unless (member err (list EINVAL EPERM))
+                (apply throw args))))))
 
       ;; Stop everything when we get SIGINT.
       (sigaction SIGINT
