@@ -23,7 +23,9 @@
 (define-module (shepherd support)
   #:use-module (shepherd config)
   #:use-module (ice-9 match)
-  #:export (call/ec
+  #:export (buffering-mode
+
+            call/ec
             caught-error
             assert
             label
@@ -60,6 +62,23 @@
             persistency-state-file
 
             verify-dir))
+
+(define-syntax-rule (if-2.0 subsequent alternate)
+  "Expand to SUBSEQUENT when using Guile 2.0, and to ALTERNATE otherwise."
+  (cond-expand
+    ((and guile-2 (not guile-2.2)) subsequent)
+    (else alternate)))
+
+(define-syntax buffering-mode
+  (syntax-rules (line block none)
+    "Return the appropriate buffering mode depending on whether we're on Guile
+2.0 or later."
+    ((_ line)
+     (if-2.0 _IOLBF 'line))
+    ((_ block)
+     (if-2.0 _IOFBF 'block))
+    ((_ none)
+     (if-2.0 _IONBF 'none))))
 
 ;; Implement `call-with-escape-continuation' with `catch' and `throw'.
 ;; FIXME: Multiple return values.
@@ -206,8 +225,8 @@ output port, and PROC's result is returned."
 
   (bindtextdomain %gettext-domain %localedir)
   (textdomain %gettext-domain)
-  (setvbuf (current-output-port) _IOLBF)
-  (setvbuf (current-error-port) _IOLBF))
+  (setvbuf (current-output-port) (buffering-mode line))
+  (setvbuf (current-error-port) (buffering-mode line)))
 
 ;; Localized version of STR.
 (define l10n gettext)

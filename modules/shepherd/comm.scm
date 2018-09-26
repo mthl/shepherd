@@ -83,7 +83,7 @@ return the socket."
       (catch 'system-error
         (lambda ()
           (connect sock address)
-          (setvbuf sock _IOFBF 1024))
+          (setvbuf sock (buffering-mode block) 1024))
         (lambda (key proc format-string format-args errno . rest)
           ;; Guile's 'connect' throws an exception that doesn't specify
           ;; FILE.  Augment it with this information.
@@ -240,7 +240,7 @@ mechanism."
             (catch 'system-error
               (lambda ()
                 (connect sock AF_UNIX "/dev/log")
-                (setvbuf sock _IOLBF)
+                (setvbuf sock (buffering-mode line))
                 (set! port sock)
                 (call/syslog))
               (lambda args
@@ -251,14 +251,14 @@ mechanism."
                       (lambda ()
                         (call-with-output-file "/dev/kmsg"
                           (lambda (port)
-                            (setvbuf port _IOFBF)
+                            (setvbuf port (buffering-mode block))
                             (proc port))))
                       (lambda args
                         (if (memv (system-error-errno args)
                                   (list ENOENT EACCES EPERM))
                             (call-with-output-file "/dev/console"
                               (lambda (port)
-                                (setvbuf port _IONBF)
+                                (setvbuf port (buffering-mode none))
                                 (proc port)))
                             (apply throw args))))
                     (apply throw args)))))))))

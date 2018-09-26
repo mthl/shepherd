@@ -262,7 +262,7 @@
               (define (read-from sock)
                 (match (accept sock)
                   ((command-source . client-address)
-                   (setvbuf command-source _IOFBF 1024)
+                   (setvbuf command-source (buffering-mode block) 1024)
                    (process-connection command-source))
                   (_ #f)))
               (match (select (list sock) (list) (list) (if poll-services? 0.5 #f))
