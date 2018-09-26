@@ -5,19 +5,19 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: shepherd 0.3.3-pre1\n"
+"Project-Id-Version: shepherd 0.5.0-pre1\n"
 "Report-Msgid-Bugs-To: guix-devel@gnu.org\n"
-"POT-Creation-Date: 2018-03-01 14:10+0100\n"
-"PO-Revision-Date: 2018-03-05 15:41+0100\n"
+"POT-Creation-Date: 2018-09-19 22:45+0200\n"
+"PO-Revision-Date: 2018-09-23 18:14+0200\n"
 "Last-Translator: Julien Lepiller <julien@lepiller.eu>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Bugs: Report translation errors to the Language-Team address.\n"
-"X-Generator: Poedit 2.0.6\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
+"X-Generator: Offlate 0.1\n"
 
 #. TRANSLATORS: Strings occasionally contain escape sequences starting
 #. with '~' (tilde).  For example, '~a' corresponds to '%s' in C printf
@@ -25,22 +25,22 @@ msgstr ""
 #. See
 #. <https://www.gnu.org/software/guile/manual/html_node/Formatted-Output.html>
 #. for more info.
-#: modules/shepherd/comm.scm:175
+#: modules/shepherd/comm.scm:180
 #, scheme-format
 msgid "service '~a' could not be found"
 msgstr "service « ~a » introuvable"
 
-#: modules/shepherd/comm.scm:178
+#: modules/shepherd/comm.scm:183
 #, scheme-format
 msgid "service '~a' does not have an action '~a'"
 msgstr "le service « ~a » n’a pas d’action « ~a »"
 
-#: modules/shepherd/comm.scm:182
+#: modules/shepherd/comm.scm:187
 #, scheme-format
 msgid "exception caught while executing '~a' on service '~a':"
 msgstr "exception rattrapée pendant l’exécution de « ~a » sur le service « ~a » :"
 
-#: modules/shepherd/comm.scm:187
+#: modules/shepherd/comm.scm:192
 #, scheme-format
 msgid "something went wrong: ~s"
 msgstr "quelque chose s’est mal passé : ~s"
@@ -134,9 +134,9 @@ msgstr ""
 "Applique l’ACTION (start, stop, status, etc…) sur le\\\n"
 "SERVICE avec des ARGuments."
 
-#: modules/shepherd/scripts/herd.scm:190 modules/shepherd.scm:67
-#: modules/shepherd.scm:99 modules/shepherd.scm:106 modules/shepherd.scm:113
-#: modules/shepherd.scm:120
+#: modules/shepherd/scripts/herd.scm:190 modules/shepherd.scm:89
+#: modules/shepherd.scm:121 modules/shepherd.scm:128 modules/shepherd.scm:135
+#: modules/shepherd.scm:142
 msgid "FILE"
 msgstr "FICHIER"
 
@@ -149,7 +149,12 @@ msgstr "envoie des commandes au FICHIER"
 msgid "Usage: herd ACTION [SERVICE [OPTIONS...]]~%"
 msgstr "Utilisation : herd ACTION [SERVICE [OPTION…]]~%"
 
-#: modules/shepherd/support.scm:209
+#: modules/shepherd/support.scm:95
+#, scheme-format
+msgid "Assertion ~a failed."
+msgstr "L'assertion ~a a échouée."
+
+#: modules/shepherd/support.scm:223
 msgid ""
 "Copyright (C) 2018 the Shepherd authors\n"
 "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
@@ -161,21 +166,180 @@ msgstr ""
 "Ce logiciel est libre : vous êtes libre de le changer et de le redistribuer.\n"
 "AUCUNE GARANTIE n’est donnée dans la limite autorisée par la loi."
 
-#: modules/shepherd/service.scm:336
+#: modules/shepherd/support.scm:385
+msgid "Socket directory setup is insecure."
+msgstr "Le paramétrage du répertoire du socket n'est pas sécurisé."
+
+#: modules/shepherd/service.scm:292
+#, scheme-format
+msgid "Enabled service ~a."
+msgstr "Service ~a activé."
+
+#: modules/shepherd/service.scm:297
+#, scheme-format
+msgid "Disabled service ~a."
+msgstr "Service ~a désactivé."
+
+#: modules/shepherd/service.scm:302
+#, scheme-format
+msgid "Service ~a is already running."
+msgstr "Service ~a déjà lancé."
+
+#: modules/shepherd/service.scm:305
+#, scheme-format
+msgid "Service ~a is currently disabled."
+msgstr "Service ~a actuellement désactivé."
+
+#: modules/shepherd/service.scm:309
+#, scheme-format
+msgid "Service ~a conflicts with running services ~a."
+msgstr "Le service ~a est en conflit avec le service lancé ~a."
+
+#: modules/shepherd/service.scm:321
+#, scheme-format
+msgid "Service ~a depends on ~a."
+msgstr "Le service ~a dépend de ~a."
+
+#: modules/shepherd/service.scm:340
 #, scheme-format
 msgid "Service ~a has been started."
 msgstr "Service ~a démarré."
 
-#: modules/shepherd/service.scm:337
+#: modules/shepherd/service.scm:341
 #, scheme-format
 msgid "Service ~a could not be started."
 msgstr "Impossible de démarrer le service ~a."
+
+#: modules/shepherd/service.scm:381
+#, scheme-format
+msgid "Service ~a is not running."
+msgstr "Le service ~a n'est pas lancé."
+
+#: modules/shepherd/service.scm:387
+#, scheme-format
+msgid "Service ~a pending to be stopped."
+msgstr "Le service ~a attend d'être arrêté."
+
+#: modules/shepherd/service.scm:423
+#, scheme-format
+msgid "Service ~a could not be stopped."
+msgstr "Impossible d'arrêter le service ~a."
+
+#: modules/shepherd/service.scm:425
+#, scheme-format
+msgid "Service ~a has been stopped."
+msgstr "Service ~a arrêté."
+
+#: modules/shepherd/service.scm:509
+msgid "Unknown keyword.  Try 'doc root help'."
+msgstr "Mot-clef inconnu.  Essayez « doc root help »."
+
+#: modules/shepherd/service.scm:642
+#, scheme-format
+msgid "No service provides ~a."
+msgstr "Aucun service ne fournit ~a."
+
+#: modules/shepherd/service.scm:1023
+#, scheme-format
+msgid "warning: 'waitpid' ~a failed unexpectedly: ~a"
+msgstr "avertissement : « waitpid » ~a a échoué de manière inattendue : ~a"
+
+#: modules/shepherd/service.scm:1064
+#, scheme-format
+msgid "Respawning ~a."
+msgstr "Redémarrage de ~a."
+
+#: modules/shepherd/service.scm:1074
+#, scheme-format
+msgid "Service ~a terminated."
+msgstr "Service ~a tué."
+
+#: modules/shepherd/service.scm:1078
+#, scheme-format
+msgid "Service ~a has been disabled."
+msgstr "Le service ~a a été désactivé."
+
+#: modules/shepherd/service.scm:1081
+msgid "  (Respawning too fast.)"
+msgstr "  (Redémarrage trop rapide.)"
+
+#: modules/shepherd/service.scm:1167
+#, scheme-format
+msgid "Unloading all optional services: '~a'..."
+msgstr "Déchargement de tous les services facultatif : « ~a »…"
+
+#: modules/shepherd/service.scm:1170 modules/shepherd/service.scm:1185
+msgid "Done."
+msgstr "Terminé."
+
+#: modules/shepherd/service.scm:1179
+#, scheme-format
+msgid "Removing service '~a'..."
+msgstr "Suppression du service « ~a »…"
+
+#: modules/shepherd/service.scm:1192
+#, scheme-format
+msgid "Loading ~a."
+msgstr "Chargement de ~a."
+
+#: modules/shepherd/service.scm:1241
+#, scheme-format
+msgid "PID ~a (~a) is dead!"
+msgstr "Le PID ~a (~a) est mort !"
+
+#: modules/shepherd/service.scm:1256
+msgid "Exiting shepherd..."
+msgstr "Shepherd s'arrête…"
+
+#: modules/shepherd/service.scm:1294
+msgid "Halting..."
+msgstr "Arrêt…"
+
+#: modules/shepherd/service.scm:1303
+msgid "Shutting down..."
+msgstr "Extinction…"
+
+#: modules/shepherd/service.scm:1316
+#, scheme-format
+msgid "Evaluating user expression ~a."
+msgstr "Évaluation de l'expression utilisateur ~a."
+
+#: modules/shepherd/service.scm:1345
+msgid "Running as PID 1, so not daemonizing."
+msgstr "Lancé en PID 1, donc pas de lancement en tant que démon."
+
+#: modules/shepherd/service.scm:1376
+msgid "You must be kidding."
+msgstr "Vous voulez rire ?"
 
 #: modules/shepherd/args.scm:44
 msgid "undocumented option"
 msgstr "option non documentée"
 
-#: modules/shepherd/args.scm:199
+#: modules/shepherd/args.scm:136
+msgid "display version information and exit"
+msgstr "affiche l'information de version avant de quitter."
+
+#: modules/shepherd/args.scm:142
+msgid "display short usage message and exit"
+msgstr "affiche un message d'utilisation court avant de quitter."
+
+#: modules/shepherd/args.scm:189
+msgid "display this help and exit"
+msgstr "affiche cet aide avant de quitter."
+
+#: modules/shepherd/args.scm:193
+msgid " [OPTIONS...] "
+msgstr " [OPTIONS...] "
+
+#. TRANSLATORS: The '~a' placeholders indicate the
+#. bug-reporting address, the name of this
+#. package, and its home page URL.  Please add
+#. another line saying "Report translation bugs to
+#. ...\n" with the address for translation bugs
+#. (typically your translation team's web or email
+#. address).
+#: modules/shepherd/args.scm:207
 #, scheme-format
 msgid ""
 "\n"
@@ -195,44 +359,70 @@ msgstr ""
 "Page d’accueil de ~a : <~a>\n"
 "Aide générale pour les logiciels GNU : <http://www.gnu.org/gethelp/>~%"
 
-#: modules/shepherd/args.scm:246
+#: modules/shepherd/args.scm:254
 #, scheme-format
 msgid "Option `--~a' is ambigous."
 msgstr "L’option « --~a » est ambiguë."
 
-#: modules/shepherd/args.scm:247
+#: modules/shepherd/args.scm:255
 #, scheme-format
 msgid "Unknown option: `--~a'."
 msgstr "Option inconnue : « --~a »."
 
-#: modules/shepherd.scm:68
+#: modules/shepherd/args.scm:257
+msgid "Try `--help'."
+msgstr "Essayez « --help »."
+
+#: modules/shepherd/args.scm:281
+#, scheme-format
+msgid "Unknown option: `-~a'."
+msgstr "Option inconnue : « -~a »."
+
+#: modules/shepherd/args.scm:294
+#, scheme-format
+msgid "Argument required by `-~a'."
+msgstr "Un argument est requis par « -~a »."
+
+#: modules/shepherd.scm:90
 msgid "use FILE to load and store state"
 msgstr "utiliser le FICHIER pour charger et stocker l’état"
 
-#: modules/shepherd.scm:76
+#: modules/shepherd.scm:98
 msgid "synonym for --silent"
 msgstr "synonyme de --silent"
 
-#: modules/shepherd.scm:83
+#: modules/shepherd.scm:105
 msgid "don't do output to stdout"
 msgstr "ne pas afficher la sortie sur stdout"
 
-#: modules/shepherd.scm:93
+#: modules/shepherd.scm:115
 msgid "don't ensure that the setup is secure"
 msgstr "ne pas s'assurer que le paramétrage est sécurisé"
 
-#: modules/shepherd.scm:100
+#: modules/shepherd.scm:122
 msgid "log actions in FILE"
 msgstr "enregistrer les actions dans FICHIER"
 
-#: modules/shepherd.scm:107
+#: modules/shepherd.scm:129
 msgid "when ready, write PID to FILE or stdout"
 msgstr "lorsqu'il est disponible, écrire le PID dans le FICHIER ou stdout"
 
-#: modules/shepherd.scm:114
+#: modules/shepherd.scm:136
 msgid "read configuration from FILE"
 msgstr "lire la configuration depuis le FICHIER"
 
-#: modules/shepherd.scm:122
+#: modules/shepherd.scm:144
 msgid "get commands from socket FILE or from stdin (-)"
 msgstr "récupérer les commandes du FICHIER de socket ou depuis stdin (-)"
+
+#: modules/shepherd.scm:319
+msgid "Rebooting..."
+msgstr "Redémarrage…"
+
+#: modules/shepherd.scm:374
+msgid "Invalid command."
+msgstr "Commande invalide."
+
+#: modules/shepherd.scm:393
+msgid "invalid command line"
+msgstr "Ligne de commande invalide."
