@@ -1111,7 +1111,7 @@ is currently stopped, replace it immediately."
          (throw 'non-canonical-name))
         ((running? old)
          (slot-set! old 'replacement new))
-        (#:else
+        (else
          (replace-service old new))))
       (_ ;; in any other case, there are too many services to register
        (local-output
