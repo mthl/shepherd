@@ -454,7 +454,7 @@ Synonym for @code{--silent}.
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 @node Invoking herd
-@section Invoking herd
+@section Invoking @command{herd}
 
 @cindex herd
 The @command{herd} command is a generic client program to control a
@@ -502,7 +502,7 @@ failed.
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 @node Invoking reboot
-@section Invoking reboot
+@section Invoking @command{reboot}
 
 @cindex herd
 The @command{reboot} command is a convenience client program to instruct
@@ -528,7 +528,7 @@ not specified, @file{@var{localstatedir}/run/shepherd/socket} is taken.
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 @node Invoking halt
-@section Invoking halt
+@section Invoking @command{halt}
 
 @cindex herd
 The @command{halt} command is a convenience client program to instruct
