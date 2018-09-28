@@ -1102,22 +1102,12 @@ is currently stopped, replace it immediately."
 		   (let ((old (lookup-services name)))
 		     (hashq-set! %services name (cons new old))))
 	         (provided-by new)))
-      ((old) ;; one service registered, so it may be an old version of us
-       (cond
-        ((not (eq? (canonical-name new) (canonical-name old)))
-         (local-output
-          "Cannot register service ~a: canonical name is not unique."
-          (canonical-name new))
-         (throw 'non-canonical-name))
-        ((running? old)
-         (slot-set! old 'replacement new))
-        (else
-         (replace-service old new))))
-      (_ ;; in any other case, there are too many services to register
-       (local-output
-        "Cannot register service ~a: canonical name is not unique."
-        (canonical-name new))
-       (throw 'non-canonical-name))))
+      ((old . rest) ;; one service registered, it may be an old version of us
+       (assert (null? rest))
+       (assert (eq? (canonical-name new) (canonical-name old)))
+       (if (running? old)
+           (slot-set! old 'replacement new)
+           (replace-service old new)))))
 
   (for-each register-single-service new-services))
 
