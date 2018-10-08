@@ -1018,11 +1018,11 @@ respawnable services are started, as otherwise we would not get the
 @code{SIGCHLD} signals when they terminate.
 
 @item enable-persistency
-When terminating, safe the list of running services in a file.
+When terminating, save the list of running services in a file.
 @c FIXME-CRITICAL: How can we specify which one?
 
 @item disable-persistency
-Don't safe the list of running services when terminating.
+Don't save the list of running services when terminating.
 
 @end table
 
