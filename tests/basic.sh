@@ -57,7 +57,8 @@ cat > "$conf"<<EOF
    #:actions (make-actions (hi "Say hi."
                                (lambda _
                                  (display "start\n\nend\n")
-                                 #t)))
+                                 #t))
+			   (fail "Fail." (const #f)))
    #:respawn? #f)
  (make <service>
    #:provides '(broken)
@@ -110,6 +111,9 @@ $herd hi test-2
 $herd hi test-2 | grep '^start$'
 $herd hi test-2 | grep '^end$'
 test `$herd hi test-2 | wc -l` -eq 3
+
+# An action that returns false must lead to a non-zero exit code.
+if $herd fail test-2; then false; else true; fi
 
 # This used to crash shepherd: <http://bugs.gnu.org/24684>.
 if $herd enable test-2 with extra arguments

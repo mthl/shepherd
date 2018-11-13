@@ -150,8 +150,10 @@ the daemon via SOCKET-FILE."
                            service)
              (exit 1)))
           (_
-           ;; For other commands, we don't do any interpretation.
-           #t)))
+           ;; For other commands, exit successfully if and only if all the
+           ;; values of RESULT are true.
+           (unless (every ->bool result)
+             (exit 1)))))
        (('reply ('version 0 _ ...)                ;an error
                 ('result _) ('error error)
                 ('messages messages))
