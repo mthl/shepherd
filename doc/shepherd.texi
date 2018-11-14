@@ -438,7 +438,9 @@ Receive further commands on the socket special file @var{file}.  If this
 option is not specified, @file{@var{localstatedir}/run/shepherd/socket} is
 taken when running as @code{root}; when running as an unprivileged
 user, @command{shepherd} listens to @file{/run/user/@var{uid}/shepherd},
-where @var{uid} is the user's numerical ID, or to
+where @var{uid} is the user's numerical ID@footnote{On GNU/Linux, the
+@file{/run/user/@var{uid}} directory is typically created by elogind or by
+systemd, which are available in most distributions.}, or to
 @file{$XDG_RUNTIME_DIR/shepherd} when the @code{XDG_RUNTIME_DIR}
 environment variable is defined.
 
