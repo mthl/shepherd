@@ -437,7 +437,7 @@ to the standard output if @var{file} is omitted.
 Receive further commands on the socket special file @var{file}.  If this
 option is not specified, @file{@var{localstatedir}/run/shepherd/socket} is
 taken when running as @code{root}; when running as an unprivileged
-user, @command{shepherd} listens to @file{/run/user/@var{uid}/shepherd},
+user, @command{shepherd} listens to @file{/run/user/@var{uid}/shepherd/socket},
 where @var{uid} is the user's numerical ID@footnote{On GNU/Linux, the
 @file{/run/user/@var{uid}} directory is typically created by elogind or by
 systemd, which are available in most distributions.}, or to
