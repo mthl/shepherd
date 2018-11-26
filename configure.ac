@@ -15,6 +15,7 @@ dnl Enable silent rules by default.
 AM_SILENT_RULES([yes])
 
 AM_GNU_GETTEXT([external])
+AM_GNU_GETTEXT_VERSION([0.19])
 
 AC_CANONICAL_HOST
 AC_PROG_MKDIR_P
