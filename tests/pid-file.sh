@@ -1,5 +1,5 @@
 # GNU Shepherd --- Test the #:pid-file option of 'make-forkexec-constructor'.
-# Copyright © 2016 Ludovic Courtès <ludo@gnu.org>
+# Copyright © 2016, 2019 Ludovic Courtès <ludo@gnu.org>
 #
 # This file is part of the GNU Shepherd.
 #
@@ -43,7 +43,12 @@ cat > "$conf"<<EOF
    #:provides '(test)
    #:start (make-forkexec-constructor %command
                                       #:pid-file "/does-not-exist"
-                                      #:pid-file-timeout 2)
+
+                                      ;; Low-end ARMv7 machines are
+                                      ;; slow enough that creating
+                                      ;; $service_pid could take
+                                      ;; up to 4 seconds or so.
+                                      #:pid-file-timeout 6)
    #:stop  (make-kill-destructor)
    #:respawn? #f))
 EOF
