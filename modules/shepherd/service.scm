@@ -4,6 +4,7 @@
 ;; Copyright (C) 2014 Alex Sassmannshausen <alex.sassmannshausen@gmail.com>
 ;; Copyright (C) 2016 Alex Kost <alezost@gmail.com>
 ;; Copyright (C) 2018 Carlo Zancanaro <carlo@zancanaro.id.au>
+;; Copyright (C) 2019 Ricardo Wurmus <rekado@elephly.net>
 ;;
 ;; This file is part of the GNU Shepherd.
 ;;
@@ -592,13 +593,18 @@ Used by `start' and `enforce'."
 ;; Stopping by name.
 (define-method (stop (obj <symbol>) . args)
   (let ((which (lookup-running obj)))
-    (if (not which)
-	(let ((unknown (lookup-running 'unknown)))
+    (if which
+	(apply stop which args)
+        (let ((unknown (lookup-running 'unknown)))
 	  (if (and unknown
 		   (defines-action? unknown 'stop))
 	      (apply action unknown 'stop obj args)
-              (raise (condition (&missing-service-error (name obj))))))
-        (apply stop which args))))
+              ;; Only print an error if the service does not exist.
+              (match (lookup-services obj)
+                (()
+                 (raise (condition (&missing-service-error (name obj)))))
+                ((stopped . _)
+                 (list))))))))
 
 (define-method (action (obj <symbol>) the-action . args)
   "Perform THE-ACTION on all the services named OBJ.  Return the list of

@@ -91,6 +91,11 @@ $herd stop test
 
 $herd status test | grep stopped
 
+# Stopping a stopped service should be a no-op.
+out=$($herd stop test)
+test $?
+test -z "$out"
+
 # Disable a service and make sure it cannot be started.
 $herd disable test-2
 if $herd start test-2
