@@ -49,6 +49,17 @@
       (listen sock 10)
       sock)))
 
+(define (call-with-server-socket file-name proc)
+  "Call PROC, passing it a listening socket at FILE-NAME and deleting the
+socket file at FILE-NAME upon exit of PROC.  Return the values of PROC."
+  (let ((sock (open-server-socket file-name)))
+    (dynamic-wind
+      noop
+      (lambda () (proc sock))
+      (lambda ()
+        (close sock)
+        (delete-file file-name)))))
+
 
 ;; Main program.
 (define (main . args)
@@ -256,32 +267,34 @@
           ;; Get commands from the standard input port.
           (process-textual-commands (current-input-port))
           ;; Process the data arriving at a socket.
-          (let ((sock   (open-server-socket socket-file)))
+          (call-with-server-socket
+           socket-file
+           (lambda (sock)
 
-            ;; Possibly write out our PID, which means we're ready to accept
-            ;; connections.  XXX: What if we daemonized already?
-            (match pid-file
-              ((? string? file)
-               (with-atomic-file-output pid-file
-                 (cute display (getpid) <>)))
-              (#t (display (getpid)))
-              (_  #t))
+             ;; Possibly write out our PID, which means we're ready to accept
+             ;; connections.  XXX: What if we daemonized already?
+             (match pid-file
+               ((? string? file)
+                (with-atomic-file-output pid-file
+                  (cute display (getpid) <>)))
+               (#t (display (getpid)))
+               (_  #t))
 
-            (let next-command ()
-              (define (read-from sock)
-                (match (accept sock)
-                  ((command-source . client-address)
-                   (setvbuf command-source (buffering-mode block) 1024)
-                   (process-connection command-source))
-                  (_ #f)))
-              (match (select (list sock) (list) (list) (if poll-services? 0.5 #f))
-                (((sock) _ _)
-                 (read-from sock))
-                (_
-                 #f))
-              (when poll-services?
-                (check-for-dead-services))
-              (next-command)))))))
+             (let next-command ()
+               (define (read-from sock)
+                 (match (accept sock)
+                   ((command-source . client-address)
+                    (setvbuf command-source (buffering-mode block) 1024)
+                    (process-connection command-source))
+                   (_ #f)))
+               (match (select (list sock) (list) (list) (if poll-services? 0.5 #f))
+                 (((sock) _ _)
+                  (read-from sock))
+                 (_
+                  #f))
+               (when poll-services?
+                 (check-for-dead-services))
+               (next-command))))))))
 
 ;; Start all of SERVICES, which is a list of canonical names (FIXME?),
 ;; but in a order where all dependencies are fulfilled before we
