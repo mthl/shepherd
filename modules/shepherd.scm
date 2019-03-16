@@ -1,5 +1,5 @@
 ;; shepherd.scm -- The daemon shepherd.
-;; Copyright (C) 2013, 2014, 2016, 2018 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014, 2016, 2018, 2019 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;; Copyright (C) 2018 Carlo Zancanaro <carlo@zancanaro.id.au>
 ;; Copyright (C) 2018 Danny Milosavljevic <dannym@scratchpost.org>
@@ -319,8 +319,11 @@
       ;; Maybe we got EPIPE while writing to SOCK, or something like that.
       (false-if-exception (close sock)))))
 
-(define (quit-exception-handler key)
+(define* (quit-exception-handler key #:optional value)
   "Handle the 'quit' exception, rebooting if we're running as root."
+  ;; Note: The 'quit' exception does not necessarily have an associated value:
+  ;; compare (exit 1) with (exit).
+
   ;; Most likely we're receiving 'quit' from the 'stop' method of
   ;; ROOT-SERVICE.  So, if we're running as 'root', just reboot.
   (if (zero? (getuid))
