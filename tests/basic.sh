@@ -1,5 +1,5 @@
 # GNU Shepherd --- Test basic communication capabilities.
-# Copyright © 2013, 2014, 2016, 2017, 2018 Ludovic Courtès <ludo@gnu.org>
+# Copyright © 2013, 2014, 2016, 2017, 2018, 2019 Ludovic Courtès <ludo@gnu.org>
 # Copyright © 2016 Mathieu Lirzin <mthl@gnu.org>
 # Copyright © 2014 Alex Sassmannshausen <alex.sassmannshausen@gmail.com>
 #
@@ -92,9 +92,8 @@ $herd stop test
 $herd status test | grep stopped
 
 # Stopping a stopped service should be a no-op.
-out=$($herd stop test)
-test $?
-test -z "$out"
+$herd stop test
+test -z "`$herd stop test 2>&1`"
 
 # Disable a service and make sure it cannot be started.
 $herd disable test-2
