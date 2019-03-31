@@ -1,0 +1,418 @@
+# Tamil messages for shepherd
+# Copyright (C) 2019 the authors of Shepherd (msgids)
+# This file is distributed under the same license as the shepherd package.
+# List of contributors follow:
+# Arun Isaac <arunisaac@systemreboot.net>, 2019
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: shepherd 0.5.0-pre1\n"
+"Report-Msgid-Bugs-To: guix-devel@gnu.org\n"
+"POT-Creation-Date: 2018-09-19 22:45+0200\n"
+"PO-Revision-Date: 2019-03-19 17:38+0530\n"
+"Last-Translator: Arun Isaac <arunisaac@systemreboot.net>\n"
+"Language-Team: Tamil <tamil@systemreboot.net>\n"
+"Language: ta\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. TRANSLATORS: Strings occasionally contain escape sequences starting
+#. with '~' (tilde).  For example, '~a' corresponds to '%s' in C printf
+#. syntax and '~%' corresponds to '\n'.  These must be preserved as is.
+#. See
+#. <https://www.gnu.org/software/guile/manual/html_node/Formatted-Output.html>
+#. for more info.
+#: modules/shepherd/comm.scm:180
+#, scheme-format
+msgid "service '~a' could not be found"
+msgstr "'~a' ஊழியம் கிடைக்கவில்லை"
+
+#: modules/shepherd/comm.scm:183
+#, scheme-format
+msgid "service '~a' does not have an action '~a'"
+msgstr "'~a' ஊழியத்தில் '~a' என்னும் செயல் இல்லை"
+
+#: modules/shepherd/comm.scm:187
+#, scheme-format
+msgid "exception caught while executing '~a' on service '~a':"
+msgstr ""
+
+#: modules/shepherd/comm.scm:192
+#, scheme-format
+msgid "something went wrong: ~s"
+msgstr "ஏதோத் தவறாக நடந்தது: ~s"
+
+#: modules/shepherd/scripts/herd.scm:67
+msgid "Started:\n"
+msgstr "தொடங்கப்பட்டது:\n"
+
+#: modules/shepherd/scripts/herd.scm:69
+msgid "Stopped:\n"
+msgstr "நிறுத்தப்பட்டது:\n"
+
+#: modules/shepherd/scripts/herd.scm:82
+#, scheme-format
+msgid "Status of ~a:~%"
+msgstr "~a வின் நிலை:~%"
+
+#: modules/shepherd/scripts/herd.scm:85
+#, scheme-format
+msgid "  It is started.~%"
+msgstr "  இதுத் தொடங்கப்பட்டது.~%"
+
+#: modules/shepherd/scripts/herd.scm:86
+#, scheme-format
+msgid "  Running value is ~s.~%"
+msgstr ""
+
+#: modules/shepherd/scripts/herd.scm:87
+#, scheme-format
+msgid "  It is stopped.~%"
+msgstr "  இது நிறுத்தப்பட்டது.~%"
+
+#: modules/shepherd/scripts/herd.scm:89
+#, scheme-format
+msgid "  It is enabled.~%"
+msgstr "  இதுக் கணினித் தொடங்கும்பொழுது தொடங்கப்படும்.~%"
+
+#: modules/shepherd/scripts/herd.scm:90
+#, scheme-format
+msgid "  It is disabled.~%"
+msgstr "  இதுக் கணினித் தொடங்கும்பொழுது தொடங்கப்படாது.~%"
+
+#: modules/shepherd/scripts/herd.scm:91
+#, scheme-format
+msgid "  Provides ~a.~%"
+msgstr "  இது ~a யை வழங்குகிறது.~%"
+
+#: modules/shepherd/scripts/herd.scm:92
+#, scheme-format
+msgid "  Requires ~a.~%"
+msgstr "  இதற்கு ~a தேவை.~%"
+
+#: modules/shepherd/scripts/herd.scm:93
+#, scheme-format
+msgid "  Conflicts with ~a.~%"
+msgstr "  இது ~a வுடன் முரண்படுகிறது.~%"
+
+#: modules/shepherd/scripts/herd.scm:95
+#, scheme-format
+msgid "  Will be respawned.~%"
+msgstr ""
+
+#: modules/shepherd/scripts/herd.scm:96
+#, scheme-format
+msgid "  Will not be respawned.~%"
+msgstr ""
+
+#: modules/shepherd/scripts/herd.scm:99
+#, scheme-format
+msgid "  Last respawned on ~a.~%"
+msgstr ""
+
+#: modules/shepherd/scripts/herd.scm:149
+#, scheme-format
+msgid "failed to start service ~a"
+msgstr "~a ஊழியத்தைத் தொடங்க இயலவில்லை"
+
+#: modules/shepherd/scripts/herd.scm:166
+msgid "premature end-of-file while talking to shepherd"
+msgstr ""
+
+#: modules/shepherd/scripts/herd.scm:181
+msgid "ACTION SERVICE [ARG...]"
+msgstr "<செயல்> <ஊழியம்> [<செயலுருபு>...]"
+
+#: modules/shepherd/scripts/herd.scm:182
+msgid ""
+"Apply ACTION (start, stop, status, etc.) on \\\n"
+"SERVICE with the ARGs."
+msgstr ""
+
+#: modules/shepherd/scripts/herd.scm:190 modules/shepherd.scm:89
+#: modules/shepherd.scm:121 modules/shepherd.scm:128 modules/shepherd.scm:135
+#: modules/shepherd.scm:142
+msgid "FILE"
+msgstr "<கோப்பு>"
+
+#: modules/shepherd/scripts/herd.scm:191
+msgid "send commands to FILE"
+msgstr "கட்டளைகளைக் <கோப்பிற்கு> அனுப்பு"
+
+#: modules/shepherd/scripts/herd.scm:204
+#, scheme-format
+msgid "Usage: herd ACTION [SERVICE [OPTIONS...]]~%"
+msgstr "பயன்பாடு: herd <செயல்> [<ஊழியம்> [<செயல்மாற்றிகள்>...]]~%"
+
+#: modules/shepherd/support.scm:95
+#, scheme-format
+msgid "Assertion ~a failed."
+msgstr "உறுதிப்படுத்தல் ~a தோல்வியுற்றது."
+
+#: modules/shepherd/support.scm:223
+msgid ""
+"Copyright (C) 2018 the Shepherd authors\n"
+"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
+"This is free software: you are free to change and redistribute it.\n"
+"There is NO WARRANTY, to the extent permitted by law."
+msgstr ""
+"Copyright (C) 2018 the Shepherd authors\n"
+"உரிமம் GPLv3+: GNU GPL மூன்றாம் பதிப்பு அல்லது அதற்குப் பின் உள்ள பதிப்புகள் ஏதேனும்\n"
+"<http://gnu.org/licenses/gpl.html>\n"
+"இது கட்டற்ற மென்பொருள். இதை மாற்றவோ மறுவிநியோகம் செய்யவோ உங்களுக்கு உரிமை உண்டு.\n"
+"சட்டத்தால் அனுமதிக்கப்பட்ட அளவிற்கு எந்த உத்தரவாதமும் இல்லை."
+
+#: modules/shepherd/support.scm:385
+msgid "Socket directory setup is insecure."
+msgstr ""
+
+#: modules/shepherd/service.scm:292
+#, scheme-format
+msgid "Enabled service ~a."
+msgstr ""
+
+#: modules/shepherd/service.scm:297
+#, scheme-format
+msgid "Disabled service ~a."
+msgstr ""
+
+#: modules/shepherd/service.scm:302
+#, scheme-format
+msgid "Service ~a is already running."
+msgstr "~a ஊழியம் ஏற்கனவே இயங்கிக்கொண்டிருக்கிறது."
+
+#: modules/shepherd/service.scm:305
+#, scheme-format
+msgid "Service ~a is currently disabled."
+msgstr "~a ஊழியம் கணினித் தொடங்கும்பொழுது தொடங்கப்படாது."
+
+#: modules/shepherd/service.scm:309
+#, scheme-format
+msgid "Service ~a conflicts with running services ~a."
+msgstr "~a ஊழியம் இயங்கிக்கொண்டிருக்கும் ~a ஊழியங்களுடன் முரண்படுகிறது."
+
+#: modules/shepherd/service.scm:321
+#, scheme-format
+msgid "Service ~a depends on ~a."
+msgstr ""
+
+#: modules/shepherd/service.scm:340
+#, scheme-format
+msgid "Service ~a has been started."
+msgstr "~a ஊழியம் தொடங்கப்பட்டது."
+
+#: modules/shepherd/service.scm:341
+#, scheme-format
+msgid "Service ~a could not be started."
+msgstr "~a ஊழியத்தைத் தொடங்க இயலவில்லை."
+
+#: modules/shepherd/service.scm:381
+#, scheme-format
+msgid "Service ~a is not running."
+msgstr "~a ஊழியம் இயங்கிக்கொண்டிருக்கவில்லை."
+
+#: modules/shepherd/service.scm:387
+#, scheme-format
+msgid "Service ~a pending to be stopped."
+msgstr "~a ஊழியம் நிறுத்தப்படும் நிலுவையிலுள்ளது."
+
+#: modules/shepherd/service.scm:423
+#, scheme-format
+msgid "Service ~a could not be stopped."
+msgstr "~a ஊழியத்தை நிறுத்தமுடியவில்லை."
+
+#: modules/shepherd/service.scm:425
+#, scheme-format
+msgid "Service ~a has been stopped."
+msgstr "~a ஊழியம் நிறுத்தப்பட்டது."
+
+#: modules/shepherd/service.scm:509
+msgid "Unknown keyword.  Try 'doc root help'."
+msgstr "அறியப்படாச் சிறப்புச் சொல். 'doc root help' இட்டுப் பார்க்கவும்."
+
+#: modules/shepherd/service.scm:642
+#, scheme-format
+msgid "No service provides ~a."
+msgstr "எவ்வூழியமும் ~a யை வழங்குவதில்லை."
+
+#: modules/shepherd/service.scm:1023
+#, scheme-format
+msgid "warning: 'waitpid' ~a failed unexpectedly: ~a"
+msgstr "எச்சரிக்கை: 'waitpid' ~a எதிர்பாராது தோல்வியுற்றது: ~a"
+
+#: modules/shepherd/service.scm:1064
+#, scheme-format
+msgid "Respawning ~a."
+msgstr ""
+
+#: modules/shepherd/service.scm:1074
+#, scheme-format
+msgid "Service ~a terminated."
+msgstr "~a ஊழியம் நிறுத்தப்பட்டது."
+
+#: modules/shepherd/service.scm:1078
+#, scheme-format
+msgid "Service ~a has been disabled."
+msgstr ""
+
+#: modules/shepherd/service.scm:1081
+msgid "  (Respawning too fast.)"
+msgstr ""
+
+#: modules/shepherd/service.scm:1167
+#, scheme-format
+msgid "Unloading all optional services: '~a'..."
+msgstr "கட்டாயமில்லாத அனைத்து ஊழியங்களும் இறக்கப்படுகின்றன: '~a'..."
+
+#: modules/shepherd/service.scm:1170 modules/shepherd/service.scm:1185
+msgid "Done."
+msgstr "முடிந்தது."
+
+#: modules/shepherd/service.scm:1179
+#, scheme-format
+msgid "Removing service '~a'..."
+msgstr "'~a' ஊழியம் நீக்கப்படுகிறது..."
+
+#: modules/shepherd/service.scm:1192
+#, scheme-format
+msgid "Loading ~a."
+msgstr "~a ஏற்றப்படுகிறது."
+
+#: modules/shepherd/service.scm:1241
+#, scheme-format
+msgid "PID ~a (~a) is dead!"
+msgstr "செயலாக்கம் ~a (~a) முடங்கியது!"
+
+#: modules/shepherd/service.scm:1256
+msgid "Exiting shepherd..."
+msgstr "shepherd வெளியேறுகிறது..."
+
+#: modules/shepherd/service.scm:1294
+msgid "Halting..."
+msgstr "நிறுத்தப்படுகிறது..."
+
+#: modules/shepherd/service.scm:1303
+msgid "Shutting down..."
+msgstr "இயக்கம் நிறுத்தப்படுகிறது..."
+
+#: modules/shepherd/service.scm:1316
+#, scheme-format
+msgid "Evaluating user expression ~a."
+msgstr "~a பயனர் கோவை கணிக்கப்படுகிறது."
+
+#: modules/shepherd/service.scm:1345
+msgid "Running as PID 1, so not daemonizing."
+msgstr "செயலாக்கம் 1 ஆக இயக்கப்படுகிறது. அதனால் மறைசெயலாக்கமாக ஆக்கவில்லை."
+
+#: modules/shepherd/service.scm:1376
+msgid "You must be kidding."
+msgstr "என்ன விளையாடுகிறாயா?"
+
+#: modules/shepherd/args.scm:44
+msgid "undocumented option"
+msgstr "ஆவணப்படுத்தப்படாச் செயல்மாற்றி"
+
+#: modules/shepherd/args.scm:136
+msgid "display version information and exit"
+msgstr "பதிப்பு விவரத்தைக் காண்பித்துவிட்டு வெளியேறு"
+
+#: modules/shepherd/args.scm:142
+msgid "display short usage message and exit"
+msgstr "சுருக்கமான பயன்பாட்டுச் செய்தியைக் காண்பித்துவிட்டு வெளியேறு"
+
+#: modules/shepherd/args.scm:189
+msgid "display this help and exit"
+msgstr "இவ்வுதவிச் செய்தியைக் காண்பித்துவிட்டு வெளியேறு"
+
+#: modules/shepherd/args.scm:193
+msgid " [OPTIONS...] "
+msgstr " [செயல்மாற்றிகள்...] "
+
+#. TRANSLATORS: The '~a' placeholders indicate the
+#. bug-reporting address, the name of this
+#. package, and its home page URL.  Please add
+#. another line saying "Report translation bugs to
+#. ...\n" with the address for translation bugs
+#. (typically your translation team's web or email
+#. address).
+#: modules/shepherd/args.scm:207
+#, scheme-format
+msgid ""
+"\n"
+"Mandatory or optional arguments to long options are also mandatory or\n"
+"optional to the corresponding short options.\n"
+"\n"
+"Report bugs to: ~a .\n"
+"~a general home page: <~a>\n"
+"General help using GNU software: <http://www.gnu.org/gethelp/>~%"
+msgstr ""
+
+#: modules/shepherd/args.scm:254
+#, scheme-format
+msgid "Option `--~a' is ambigous."
+msgstr "செயல்மாற்றி `--~a' தெளிவற்றது."
+
+#: modules/shepherd/args.scm:255
+#, scheme-format
+msgid "Unknown option: `--~a'."
+msgstr "அறியப்படாச் செயல்மாற்றி: `--~a'."
+
+#: modules/shepherd/args.scm:257
+msgid "Try `--help'."
+msgstr "`--help' போட்டுப் பார்க்கவும்."
+
+#: modules/shepherd/args.scm:281
+#, scheme-format
+msgid "Unknown option: `-~a'."
+msgstr "அறியப்படாச் செயல்மாற்றி: `-~a'."
+
+#: modules/shepherd/args.scm:294
+#, scheme-format
+msgid "Argument required by `-~a'."
+msgstr "`-~a' க்குச் செயலுருபு தேவை."
+
+#: modules/shepherd.scm:90
+msgid "use FILE to load and store state"
+msgstr ""
+
+#: modules/shepherd.scm:98
+msgid "synonym for --silent"
+msgstr ""
+
+#: modules/shepherd.scm:105
+msgid "don't do output to stdout"
+msgstr ""
+
+#: modules/shepherd.scm:115
+msgid "don't ensure that the setup is secure"
+msgstr "அமைப்பு பாதுகாப்பானதென்று உறுதி செய்யாதே"
+
+#: modules/shepherd.scm:122
+msgid "log actions in FILE"
+msgstr "செயல்களைக் <கோப்பில்> குறிப்பிடு"
+
+#: modules/shepherd.scm:129
+msgid "when ready, write PID to FILE or stdout"
+msgstr ""
+
+#: modules/shepherd.scm:136
+msgid "read configuration from FILE"
+msgstr "அமைவடிவத்தைக் <கோப்பிலிருந்துப்> படி"
+
+#: modules/shepherd.scm:144
+msgid "get commands from socket FILE or from stdin (-)"
+msgstr ""
+
+#: modules/shepherd.scm:319
+msgid "Rebooting..."
+msgstr "மறுஇயக்கப்படுகிறது..."
+
+#: modules/shepherd.scm:374
+msgid "Invalid command."
+msgstr "ஏற்கத்தகாக் கட்டளை."
+
+#: modules/shepherd.scm:393
+msgid "invalid command line"
+msgstr "ஏற்கத்தகாக் கட்டளை வரி"
