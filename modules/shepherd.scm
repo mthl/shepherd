@@ -58,7 +58,7 @@ socket file at FILE-NAME upon exit of PROC.  Return the values of PROC."
       (lambda () (proc sock))
       (lambda ()
         (close sock)
-        (delete-file file-name)))))
+        (catch-system-error (delete-file file-name))))))
 
 
 ;; Main program.
