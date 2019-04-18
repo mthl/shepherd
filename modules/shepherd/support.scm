@@ -252,12 +252,11 @@ There is NO WARRANTY, to the extent permitted by law.")))
     "Report the given error message to stderr in standard GNU error format."
     (syntax-case s ()
       ((_ (p message) args ...)
-       (string? (syntax->datum #'message))
+       (and (free-identifier=? #'p #'l10n)
+            (string? (syntax->datum #'message)))
 
-       (with-syntax ((message (string-append
-                               "~a: " (syntax->datum #'message) "~%")))
-         #'(format (current-error-port) message
-                   (program-name) args ...))))))
+       #'(format (current-error-port) "~a: ~a~%" (program-name)
+                 (format #f (l10n message) args ...))))))
 
 (define* (display-line message #:optional (port (current-output-port)))
   "Display MESSAGE followed by a newline to PORT."
