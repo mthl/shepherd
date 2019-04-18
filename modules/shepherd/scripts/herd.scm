@@ -1,5 +1,5 @@
 ;; herd.scm -- The program to herd the Shepherd.
-;; Copyright (C) 2013, 2014, 2016, 2018 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014, 2016, 2018, 2019 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;;
 ;; This file is part of the GNU Shepherd.
@@ -83,6 +83,10 @@ of pairs."
        (if running
            (begin
              (format #t (l10n "  It is started.~%"))
+
+             ;; TRANSLATORS: The "~s" bit is most of the time a placeholder
+             ;; for the PID (an integer) of the running process, and
+             ;; occasionally for another Scheme object.
              (format #t (l10n "  Running value is ~s.~%") running))
            (format #t (l10n "  It is stopped.~%")))
        (if enabled?
