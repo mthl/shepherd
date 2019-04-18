@@ -238,7 +238,7 @@ output port, and PROC's result is returned."
 
 (define* (display-version #:optional (program-name (program-name)))
   (local-output "~a (~a) ~a" program-name package-name Version)
-  (local-output (l10n "Copyright (C) 2018 the Shepherd authors
+  (local-output (l10n "Copyright (C) 2019 the Shepherd authors
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.")))
