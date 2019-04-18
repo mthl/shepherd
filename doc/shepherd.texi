@@ -638,6 +638,19 @@ service if that process terminates.  Otherwise this slot is @code{#f},
 which is the default.  See also the @code{last-respawns} slot.
 
 @item
+@vindex one-shot? (slot of <service>)
+@cindex one-shot services
+The @code{one-shot?} slot determines whether the service is a @dfn{one-shot
+service}.  A one-shot service is a service that, as soon as it has been
+successfully started, is marked as ``stopped.''  Other services can
+nonetheless require one-shot services.  One-shot services are useful to
+trigger an action before other services are started, such as a cleanup or an
+initialization action.
+
+As for other services, the @code{start} method of a one-shot service must
+return a truth value to indicate success, and false to indicate failure.
+
+@item
 @vindex start (slot of <service>)
 @cindex Starting a service
 @cindex Service constructor
@@ -768,6 +781,10 @@ Returns which symbols are provided by @var{obj}.
 
 @deffn {method} required-by (obj <service>)
 Returns which symbols are required by @var{obj}.
+@end deffn
+
+@deffn {method} one-shot? (obj <service>)
+Returns whether the service @var{obj} is a one-shot service.
 @end deffn
 
 @deffn {method} running? (obj <service>)

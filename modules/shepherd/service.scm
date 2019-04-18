@@ -1,5 +1,5 @@
 ;; service.scm -- Representation of services.
-;; Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018, 2019 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Järling <wolfgang@pro-linux.de>
 ;; Copyright (C) 2014 Alex Sassmannshausen <alex.sassmannshausen@gmail.com>
 ;; Copyright (C) 2016 Alex Kost <alezost@gmail.com>
@@ -40,6 +40,7 @@
             service?
             canonical-name
             running?
+            one-shot?
             action-list
             lookup-action
             defines-action?
@@ -159,6 +160,12 @@ respawned, shows that it has been respawned more than TIMES in SECONDS."
   (requires #:init-keyword #:requires
 	    #:init-value '()
 	    #:getter required-by)
+  ;; If true, the service is a "one-shot" service: it becomes marked as
+  ;; stopped as soon as its 'start' method as completed, but services that
+  ;; depend on it may be started.
+  (one-shot? #:init-keyword #:one-shot?
+             #:init-value #f
+             #:getter one-shot?)
   ;; If `#t', then assume the `running' slot specifies a PID and
   ;; respawn it if that process terminates.  Otherwise `#f'.
   (respawn? #:init-keyword #:respawn?
@@ -301,17 +308,19 @@ wire."
 (define-method (start (obj <service>) . args)
   (cond ((running? obj)
 	 (local-output (l10n "Service ~a is already running.")
-		       (canonical-name obj)))
+		       (canonical-name obj))
+         (slot-ref obj 'running))
 	((not (enabled? obj))
 	 (local-output (l10n "Service ~a is currently disabled.")
-		       (canonical-name obj)))
+		       (canonical-name obj))
+         (slot-ref obj 'running))
 	((let ((conflicts (conflicts-with-running obj)))
 	   (or (null? conflicts)
 	       (local-output (l10n "Service ~a conflicts with running services ~a.")
 			     (canonical-name obj)
 			     (map canonical-name conflicts)))
 	   (not (null? conflicts)))
-	 #f) ;; Dummy.
+	 (slot-ref obj 'running))
 	(else
 	 ;; It is not running and does not conflict with anything
 	 ;; that's running, so we can go on and launch it.
@@ -337,11 +346,15 @@ wire."
                                                                 key args)))))))
 
 	   ;; Status message.
-	   (local-output (if (running? obj)
-			     (l10n "Service ~a has been started.")
-                             (l10n "Service ~a could not be started."))
-			 (canonical-name obj)))))
-  (slot-ref obj 'running))
+           (let ((running (slot-ref obj 'running)))
+             (when (one-shot? obj)
+               (slot-set! obj 'running #f))
+             (local-output (if running
+			       (l10n "Service ~a has been started.")
+                               (l10n "Service ~a could not be started."))
+			   (canonical-name obj))
+
+             running)))))
 
 (define (replace-service old-service new-service)
   "Replace OLD-SERVICE with NEW-SERVICE in the services registry.  This
