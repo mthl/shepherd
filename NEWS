@@ -3,7 +3,7 @@
 #+STARTUP: content hidestars
 
 Copyright © 2002, 2003 Wolfgang Jährling
-Copyright © 2013, 2014, 2016, 2018 Ludovic Courtès <ludo@gnu.org>
+Copyright © 2013, 2014, 2016, 2018, 2019 Ludovic Courtès <ludo@gnu.org>
 
   Copying and distribution of this file, with or without modification,
   are permitted in any medium without royalty provided the copyright
@@ -11,6 +11,15 @@ Copyright © 2013, 2014, 2016, 2018 Ludovic Courtès <ludo@gnu.org>
 
 Please send Shepherd bug reports to bug-guix@gnu.org.
 
+* Changes in version 0.6.0
+** Services can now be “one-shot” (see the manual for details)
+** ‘shepherd’ deletes its socket file upon termination
+** ‘herd stop S’ is no longer an error when S is already stopped
+** ‘herd’ exits with non-zero when executing an action that fails
+** ‘shepherd’ ignores reboot(2) errors when running in a container
+** Translation of error messages has been fixed
+** New translation: ta (Tamil)
+** Updated translations: da, es, fr, pt_BR, sv, ta, uk, zh_CN
 * Changes in version 0.5.0
 ** Services now have a ‘replacement’ slot
 ** Restarting a service now restarts its dependent services as well
