@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: shepherd 0.3.3-pre1\n"
 "Report-Msgid-Bugs-To: guix-devel@gnu.org\n"
-"POT-Creation-Date: 2018-03-01 14:10+0100\n"
+"POT-Creation-Date: 2019-04-18 12:26+0200\n"
 "PO-Revision-Date: 2018-03-03 17:04+0800\n"
 "Last-Translator: Boyuan Yang <073plan@gmail.com>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
@@ -23,22 +23,22 @@ msgstr ""
 #. See
 #. <https://www.gnu.org/software/guile/manual/html_node/Formatted-Output.html>
 #. for more info.
-#: modules/shepherd/comm.scm:175
+#: modules/shepherd/comm.scm:180
 #, scheme-format
 msgid "service '~a' could not be found"
 msgstr "服务“~a”未找到"
 
-#: modules/shepherd/comm.scm:178
+#: modules/shepherd/comm.scm:183
 #, scheme-format
 msgid "service '~a' does not have an action '~a'"
 msgstr "服务“~a”没有“~a”动作"
 
-#: modules/shepherd/comm.scm:182
+#: modules/shepherd/comm.scm:187
 #, scheme-format
 msgid "exception caught while executing '~a' on service '~a':"
 msgstr "执行“~a”操作（在服务“~a”中）时捕获到了异常："
 
-#: modules/shepherd/comm.scm:187
+#: modules/shepherd/comm.scm:192
 #, scheme-format
 msgid "something went wrong: ~s"
 msgstr "出现了问题：~s"
@@ -61,70 +61,73 @@ msgstr "~a 的状态：~%"
 msgid "  It is started.~%"
 msgstr "  它已被启动。~%"
 
-#: modules/shepherd/scripts/herd.scm:86
+#. TRANSLATORS: The "~s" bit is most of the time a placeholder
+#. for the PID (an integer) of the running process, and
+#. occasionally for another Scheme object.
+#: modules/shepherd/scripts/herd.scm:90
 #, scheme-format
 msgid "  Running value is ~s.~%"
 msgstr "  运行值为 ~s。~%"
 
-#: modules/shepherd/scripts/herd.scm:87
+#: modules/shepherd/scripts/herd.scm:91
 #, scheme-format
 msgid "  It is stopped.~%"
 msgstr "  它已被停止。~%"
 
-#: modules/shepherd/scripts/herd.scm:89
+#: modules/shepherd/scripts/herd.scm:93
 #, scheme-format
 msgid "  It is enabled.~%"
 msgstr "  它已被启用。~%"
 
-#: modules/shepherd/scripts/herd.scm:90
+#: modules/shepherd/scripts/herd.scm:94
 #, scheme-format
 msgid "  It is disabled.~%"
 msgstr "  它已被禁用。~%"
 
-#: modules/shepherd/scripts/herd.scm:91
+#: modules/shepherd/scripts/herd.scm:95
 #, scheme-format
 msgid "  Provides ~a.~%"
 msgstr "  提供 ~a。~%"
 
-#: modules/shepherd/scripts/herd.scm:92
+#: modules/shepherd/scripts/herd.scm:96
 #, scheme-format
 msgid "  Requires ~a.~%"
 msgstr "  要求 ~a。~%"
 
-#: modules/shepherd/scripts/herd.scm:93
+#: modules/shepherd/scripts/herd.scm:97
 #, scheme-format
 msgid "  Conflicts with ~a.~%"
 msgstr "  与 ~a 冲突。~%"
 
-#: modules/shepherd/scripts/herd.scm:95
+#: modules/shepherd/scripts/herd.scm:99
 #, scheme-format
 msgid "  Will be respawned.~%"
 msgstr "  将被重启。~%"
 
-#: modules/shepherd/scripts/herd.scm:96
+#: modules/shepherd/scripts/herd.scm:100
 #, scheme-format
 msgid "  Will not be respawned.~%"
 msgstr "  将不会被重启。~%"
 
-#: modules/shepherd/scripts/herd.scm:99
+#: modules/shepherd/scripts/herd.scm:103
 #, scheme-format
 msgid "  Last respawned on ~a.~%"
 msgstr "  上一次重启于 ~a。~%"
 
-#: modules/shepherd/scripts/herd.scm:149
+#: modules/shepherd/scripts/herd.scm:153
 #, scheme-format
 msgid "failed to start service ~a"
 msgstr "启动服务 ~a 失败"
 
-#: modules/shepherd/scripts/herd.scm:166
+#: modules/shepherd/scripts/herd.scm:172
 msgid "premature end-of-file while talking to shepherd"
 msgstr "与 shephurd 通信时过早遇到文件终止符"
 
-#: modules/shepherd/scripts/herd.scm:181
+#: modules/shepherd/scripts/herd.scm:187
 msgid "ACTION SERVICE [ARG...]"
 msgstr "动作 服务名 [参数...]"
 
-#: modules/shepherd/scripts/herd.scm:182
+#: modules/shepherd/scripts/herd.scm:188
 msgid ""
 "Apply ACTION (start, stop, status, etc.) on \\\n"
 "SERVICE with the ARGs."
@@ -132,24 +135,40 @@ msgstr ""
 "将指定动作（启动、停止、状态等等）及参数应用\\\n"
 "在服务上。"
 
-#: modules/shepherd/scripts/herd.scm:190 modules/shepherd.scm:67
-#: modules/shepherd.scm:99 modules/shepherd.scm:106 modules/shepherd.scm:113
-#: modules/shepherd.scm:120
+#: modules/shepherd/scripts/herd.scm:196 modules/shepherd.scm:100
+#: modules/shepherd.scm:132 modules/shepherd.scm:139 modules/shepherd.scm:146
+#: modules/shepherd.scm:153
 msgid "FILE"
 msgstr "文件"
 
-#: modules/shepherd/scripts/herd.scm:191
+#: modules/shepherd/scripts/herd.scm:197
 msgid "send commands to FILE"
 msgstr "将命令发送到指定文件"
 
-#: modules/shepherd/scripts/herd.scm:204
+#: modules/shepherd/scripts/herd.scm:210
 #, scheme-format
 msgid "Usage: herd ACTION [SERVICE [OPTIONS...]]~%"
 msgstr "用法：herd 动作 [服务 [选项...]]~%"
 
-#: modules/shepherd/support.scm:209
+#: modules/shepherd/support.scm:114
+#, scheme-format
+msgid "Assertion ~a failed."
+msgstr ""
+
+#. TRANSLATORS: '~a' is a placeholder for the copyright year.
+#: modules/shepherd/support.scm:242
+#, scheme-format
+msgid "Copyright (C) ~a the Shepherd authors"
+msgstr ""
+
+#: modules/shepherd/support.scm:243
+#, fuzzy
+#| msgid ""
+#| "Copyright (C) 2018 the Shepherd authors\n"
+#| "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
+#| "This is free software: you are free to change and redistribute it.\n"
+#| "There is NO WARRANTY, to the extent permitted by law."
 msgid ""
-"Copyright (C) 2018 the Shepherd authors\n"
 "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
 "This is free software: you are free to change and redistribute it.\n"
 "There is NO WARRANTY, to the extent permitted by law."
@@ -159,21 +178,194 @@ msgstr ""
 "这是自由软件：您可以自由地对其进行修改和再分发。\n"
 "在法律允许的范围内没有任何质保。"
 
-#: modules/shepherd/service.scm:336
+#: modules/shepherd/support.scm:404
+#, fuzzy
+#| msgid "don't ensure that the setup is secure"
+msgid "Socket directory setup is insecure."
+msgstr "不保证安装是安全的"
+
+#: modules/shepherd/service.scm:300
+#, fuzzy, scheme-format
+#| msgid "failed to start service ~a"
+msgid "Enabled service ~a."
+msgstr "启动服务 ~a 失败"
+
+#: modules/shepherd/service.scm:305
+#, fuzzy, scheme-format
+#| msgid "failed to start service ~a"
+msgid "Disabled service ~a."
+msgstr "启动服务 ~a 失败"
+
+#: modules/shepherd/service.scm:310
+#, fuzzy, scheme-format
+#| msgid "Service ~a has been started."
+msgid "Service ~a is already running."
+msgstr "服务 ~a 已启动。"
+
+#: modules/shepherd/service.scm:314
+#, fuzzy, scheme-format
+#| msgid "Service ~a has been started."
+msgid "Service ~a is currently disabled."
+msgstr "服务 ~a 已启动。"
+
+#: modules/shepherd/service.scm:319
+#, scheme-format
+msgid "Service ~a conflicts with running services ~a."
+msgstr ""
+
+#: modules/shepherd/service.scm:331
+#, fuzzy, scheme-format
+#| msgid "Service ~a has been started."
+msgid "Service ~a depends on ~a."
+msgstr "服务 ~a 已启动。"
+
+#: modules/shepherd/service.scm:353
 #, scheme-format
 msgid "Service ~a has been started."
 msgstr "服务 ~a 已启动。"
 
-#: modules/shepherd/service.scm:337
+#: modules/shepherd/service.scm:354
 #, scheme-format
 msgid "Service ~a could not be started."
 msgstr "服务 ~a 无法启动。"
+
+#: modules/shepherd/service.scm:395
+#, fuzzy, scheme-format
+#| msgid "Service ~a has been started."
+msgid "Service ~a is not running."
+msgstr "服务 ~a 已启动。"
+
+#: modules/shepherd/service.scm:401
+#, fuzzy, scheme-format
+#| msgid "Service ~a could not be started."
+msgid "Service ~a pending to be stopped."
+msgstr "服务 ~a 无法启动。"
+
+#: modules/shepherd/service.scm:437
+#, fuzzy, scheme-format
+#| msgid "Service ~a could not be started."
+msgid "Service ~a could not be stopped."
+msgstr "服务 ~a 无法启动。"
+
+#: modules/shepherd/service.scm:439
+#, fuzzy, scheme-format
+#| msgid "Service ~a has been started."
+msgid "Service ~a has been stopped."
+msgstr "服务 ~a 已启动。"
+
+#: modules/shepherd/service.scm:523
+msgid "Unknown keyword.  Try 'doc root help'."
+msgstr ""
+
+#: modules/shepherd/service.scm:661
+#, fuzzy, scheme-format
+#| msgid "  Provides ~a.~%"
+msgid "No service provides ~a."
+msgstr "  提供 ~a。~%"
+
+#: modules/shepherd/service.scm:1042
+#, scheme-format
+msgid "warning: 'waitpid' ~a failed unexpectedly: ~a"
+msgstr ""
+
+#: modules/shepherd/service.scm:1083
+#, scheme-format
+msgid "Respawning ~a."
+msgstr ""
+
+#: modules/shepherd/service.scm:1093
+#, fuzzy, scheme-format
+#| msgid "Service ~a has been started."
+msgid "Service ~a terminated."
+msgstr "服务 ~a 已启动。"
+
+#: modules/shepherd/service.scm:1097
+#, fuzzy, scheme-format
+#| msgid "Service ~a has been started."
+msgid "Service ~a has been disabled."
+msgstr "服务 ~a 已启动。"
+
+#: modules/shepherd/service.scm:1100
+msgid "  (Respawning too fast.)"
+msgstr ""
+
+#: modules/shepherd/service.scm:1176
+#, scheme-format
+msgid "Unloading all optional services: '~a'..."
+msgstr ""
+
+#: modules/shepherd/service.scm:1179 modules/shepherd/service.scm:1194
+msgid "Done."
+msgstr ""
+
+#: modules/shepherd/service.scm:1188
+#, scheme-format
+msgid "Removing service '~a'..."
+msgstr ""
+
+#: modules/shepherd/service.scm:1201
+#, scheme-format
+msgid "Loading ~a."
+msgstr ""
+
+#: modules/shepherd/service.scm:1250
+#, scheme-format
+msgid "PID ~a (~a) is dead!"
+msgstr ""
+
+#: modules/shepherd/service.scm:1265
+msgid "Exiting shepherd..."
+msgstr ""
+
+#: modules/shepherd/service.scm:1303
+msgid "Halting..."
+msgstr ""
+
+#: modules/shepherd/service.scm:1312
+msgid "Shutting down..."
+msgstr ""
+
+#: modules/shepherd/service.scm:1325
+#, scheme-format
+msgid "Evaluating user expression ~a."
+msgstr ""
+
+#: modules/shepherd/service.scm:1354
+msgid "Running as PID 1, so not daemonizing."
+msgstr ""
+
+#: modules/shepherd/service.scm:1385
+msgid "You must be kidding."
+msgstr ""
 
 #: modules/shepherd/args.scm:44
 msgid "undocumented option"
 msgstr "未被文档记录的选项"
 
-#: modules/shepherd/args.scm:199
+#: modules/shepherd/args.scm:136
+msgid "display version information and exit"
+msgstr ""
+
+#: modules/shepherd/args.scm:142
+msgid "display short usage message and exit"
+msgstr ""
+
+#: modules/shepherd/args.scm:189
+msgid "display this help and exit"
+msgstr ""
+
+#: modules/shepherd/args.scm:193
+msgid " [OPTIONS...] "
+msgstr ""
+
+#. TRANSLATORS: The '~a' placeholders indicate the
+#. bug-reporting address, the name of this
+#. package, and its home page URL.  Please add
+#. another line saying "Report translation bugs to
+#. ...\n" with the address for translation bugs
+#. (typically your translation team's web or email
+#. address).
+#: modules/shepherd/args.scm:207
 #, scheme-format
 msgid ""
 "\n"
@@ -191,44 +383,72 @@ msgstr ""
 "~a 通用主页：<~a>\n"
 "使用 GNU 软件的通用帮助：<http://www.gnu.org/gethelp/>~%"
 
-#: modules/shepherd/args.scm:246
-#, scheme-format
-msgid "Option `--~a' is ambigous."
+#: modules/shepherd/args.scm:254
+#, fuzzy, scheme-format
+#| msgid "Option `--~a' is ambigous."
+msgid "Option `--~a' is ambiguous."
 msgstr "选项“--~a”有歧义。"
 
-#: modules/shepherd/args.scm:247
+#: modules/shepherd/args.scm:255
 #, scheme-format
 msgid "Unknown option: `--~a'."
 msgstr "未知的选项：“--~a”。"
 
-#: modules/shepherd.scm:68
+#: modules/shepherd/args.scm:257
+msgid "Try `--help'."
+msgstr ""
+
+#: modules/shepherd/args.scm:281
+#, fuzzy, scheme-format
+#| msgid "Unknown option: `--~a'."
+msgid "Unknown option: `-~a'."
+msgstr "未知的选项：“--~a”。"
+
+#: modules/shepherd/args.scm:294
+#, scheme-format
+msgid "Argument required by `-~a'."
+msgstr ""
+
+#: modules/shepherd.scm:101
 msgid "use FILE to load and store state"
 msgstr "使用文件来加载并存储状态"
 
-#: modules/shepherd.scm:76
+#: modules/shepherd.scm:109
 msgid "synonym for --silent"
 msgstr "等效于 --silent"
 
-#: modules/shepherd.scm:83
+#: modules/shepherd.scm:116
 msgid "don't do output to stdout"
 msgstr "不要输出至标准输出"
 
-#: modules/shepherd.scm:93
+#: modules/shepherd.scm:126
 msgid "don't ensure that the setup is secure"
 msgstr "不保证安装是安全的"
 
-#: modules/shepherd.scm:100
+#: modules/shepherd.scm:133
 msgid "log actions in FILE"
 msgstr "在文件中记录动作"
 
-#: modules/shepherd.scm:107
+#: modules/shepherd.scm:140
 msgid "when ready, write PID to FILE or stdout"
 msgstr "准备就绪时，将 PID 写入文件或标准输出"
 
-#: modules/shepherd.scm:114
+#: modules/shepherd.scm:147
 msgid "read configuration from FILE"
 msgstr "从文件读取配置"
 
-#: modules/shepherd.scm:122
+#: modules/shepherd.scm:155
 msgid "get commands from socket FILE or from stdin (-)"
 msgstr "从套接字文件或者标准输入（-）获取命令"
+
+#: modules/shepherd.scm:344
+msgid "Rebooting..."
+msgstr ""
+
+#: modules/shepherd.scm:399
+msgid "Invalid command."
+msgstr ""
+
+#: modules/shepherd.scm:418
+msgid "invalid command line"
+msgstr ""

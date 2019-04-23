@@ -6,15 +6,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: shepherd 0.3.3-pre1\n"
 "Report-Msgid-Bugs-To: guix-devel@gnu.org\n"
-"POT-Creation-Date: 2018-03-01 14:10+0100\n"
+"POT-Creation-Date: 2019-04-18 12:26+0200\n"
 "PO-Revision-Date: 2018-03-03 21:00+0200\n"
 "Last-Translator: Joe Hansen <joedalton2@yahoo.dk>\n"
 "Language-Team: Danish <dansk@dansk-gruppen.dk>\n"
 "Language: da\n"
-"X-Bugs: Report translation errors to the Language-Team address.\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
 
 #. TRANSLATORS: Strings occasionally contain escape sequences starting
 #. with '~' (tilde).  For example, '~a' corresponds to '%s' in C printf
@@ -22,22 +22,22 @@ msgstr ""
 #. See
 #. <https://www.gnu.org/software/guile/manual/html_node/Formatted-Output.html>
 #. for more info.
-#: modules/shepherd/comm.scm:175
+#: modules/shepherd/comm.scm:180
 #, scheme-format
 msgid "service '~a' could not be found"
 msgstr "tjenesten »~a« kunne ikke findes"
 
-#: modules/shepherd/comm.scm:178
+#: modules/shepherd/comm.scm:183
 #, scheme-format
 msgid "service '~a' does not have an action '~a'"
 msgstr "tjenesten »~a« har ikke handlingen »~a«"
 
-#: modules/shepherd/comm.scm:182
+#: modules/shepherd/comm.scm:187
 #, scheme-format
 msgid "exception caught while executing '~a' on service '~a':"
 msgstr "undtagelse opstået under afvikling af »~a« på tjenesten »~a«"
 
-#: modules/shepherd/comm.scm:187
+#: modules/shepherd/comm.scm:192
 #, scheme-format
 msgid "something went wrong: ~s"
 msgstr "noget gik galt: ~s"
@@ -61,70 +61,73 @@ msgstr "Status for ~a:~%"
 msgid "  It is started.~%"
 msgstr "  Den er startet.~%"
 
-#: modules/shepherd/scripts/herd.scm:86
+#. TRANSLATORS: The "~s" bit is most of the time a placeholder
+#. for the PID (an integer) of the running process, and
+#. occasionally for another Scheme object.
+#: modules/shepherd/scripts/herd.scm:90
 #, scheme-format
 msgid "  Running value is ~s.~%"
 msgstr "  Kørende værdi er ~s.~%"
 
-#: modules/shepherd/scripts/herd.scm:87
+#: modules/shepherd/scripts/herd.scm:91
 #, scheme-format
 msgid "  It is stopped.~%"
 msgstr "  Den er stoppet.~%"
 
-#: modules/shepherd/scripts/herd.scm:89
+#: modules/shepherd/scripts/herd.scm:93
 #, scheme-format
 msgid "  It is enabled.~%"
 msgstr "  Den er aktiveret.~%"
 
-#: modules/shepherd/scripts/herd.scm:90
+#: modules/shepherd/scripts/herd.scm:94
 #, scheme-format
 msgid "  It is disabled.~%"
 msgstr "  Den er deaktiveret.~%"
 
-#: modules/shepherd/scripts/herd.scm:91
+#: modules/shepherd/scripts/herd.scm:95
 #, scheme-format
 msgid "  Provides ~a.~%"
 msgstr "  Tilbyder ~a.~%"
 
-#: modules/shepherd/scripts/herd.scm:92
+#: modules/shepherd/scripts/herd.scm:96
 #, scheme-format
 msgid "  Requires ~a.~%"
 msgstr "  Kræver ~a.~%"
 
-#: modules/shepherd/scripts/herd.scm:93
+#: modules/shepherd/scripts/herd.scm:97
 #, scheme-format
 msgid "  Conflicts with ~a.~%"
 msgstr "  Er i konflikt med ~a.~%"
 
-#: modules/shepherd/scripts/herd.scm:95
+#: modules/shepherd/scripts/herd.scm:99
 #, scheme-format
 msgid "  Will be respawned.~%"
 msgstr "  Vil blive opdelt på ny.~%"
 
-#: modules/shepherd/scripts/herd.scm:96
+#: modules/shepherd/scripts/herd.scm:100
 #, scheme-format
 msgid "  Will not be respawned.~%"
 msgstr "  Vil ikke blive opdelt på ny.~%"
 
-#: modules/shepherd/scripts/herd.scm:99
+#: modules/shepherd/scripts/herd.scm:103
 #, scheme-format
 msgid "  Last respawned on ~a.~%"
 msgstr "  Sidst opdelt på ny på ~a.~%"
 
-#: modules/shepherd/scripts/herd.scm:149
+#: modules/shepherd/scripts/herd.scm:153
 #, scheme-format
 msgid "failed to start service ~a"
 msgstr "kunne ikke starte tjenesten ~a"
 
-#: modules/shepherd/scripts/herd.scm:166
+#: modules/shepherd/scripts/herd.scm:172
 msgid "premature end-of-file while talking to shepherd"
 msgstr "for tidlig »slut på fil« under kommunikation med shepherd"
 
-#: modules/shepherd/scripts/herd.scm:181
+#: modules/shepherd/scripts/herd.scm:187
 msgid "ACTION SERVICE [ARG...]"
 msgstr "HANDLING TJENSTE [ARG ...]"
 
-#: modules/shepherd/scripts/herd.scm:182
+#: modules/shepherd/scripts/herd.scm:188
 msgid ""
 "Apply ACTION (start, stop, status, etc.) on \\\n"
 "SERVICE with the ARGs."
@@ -132,24 +135,40 @@ msgstr ""
 "Anvend HANDLING (start, stop, status etc.) på \\\n"
 "TJENESTE med ARGUMENTERNE."
 
-#: modules/shepherd/scripts/herd.scm:190 modules/shepherd.scm:67
-#: modules/shepherd.scm:99 modules/shepherd.scm:106 modules/shepherd.scm:113
-#: modules/shepherd.scm:120
+#: modules/shepherd/scripts/herd.scm:196 modules/shepherd.scm:100
+#: modules/shepherd.scm:132 modules/shepherd.scm:139 modules/shepherd.scm:146
+#: modules/shepherd.scm:153
 msgid "FILE"
 msgstr "FIL"
 
-#: modules/shepherd/scripts/herd.scm:191
+#: modules/shepherd/scripts/herd.scm:197
 msgid "send commands to FILE"
 msgstr "send kommandoer til FIL"
 
-#: modules/shepherd/scripts/herd.scm:204
+#: modules/shepherd/scripts/herd.scm:210
 #, scheme-format
 msgid "Usage: herd ACTION [SERVICE [OPTIONS...]]~%"
 msgstr "Brug: herd HANDLING [TJENESTE [TILVALG ...]]~%"
 
-#: modules/shepherd/support.scm:209
+#: modules/shepherd/support.scm:114
+#, scheme-format
+msgid "Assertion ~a failed."
+msgstr ""
+
+#. TRANSLATORS: '~a' is a placeholder for the copyright year.
+#: modules/shepherd/support.scm:242
+#, scheme-format
+msgid "Copyright (C) ~a the Shepherd authors"
+msgstr ""
+
+#: modules/shepherd/support.scm:243
+#, fuzzy
+#| msgid ""
+#| "Copyright (C) 2018 the Shepherd authors\n"
+#| "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
+#| "This is free software: you are free to change and redistribute it.\n"
+#| "There is NO WARRANTY, to the extent permitted by law."
 msgid ""
-"Copyright (C) 2018 the Shepherd authors\n"
 "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
 "This is free software: you are free to change and redistribute it.\n"
 "There is NO WARRANTY, to the extent permitted by law."
@@ -159,21 +178,194 @@ msgstr ""
 "Dette er et frit program: du kan frit ændre og videredistribuere det.\n"
 "Der er INGEN GARANTI, indenfor loves udstrækning."
 
-#: modules/shepherd/service.scm:336
+#: modules/shepherd/support.scm:404
+#, fuzzy
+#| msgid "don't ensure that the setup is secure"
+msgid "Socket directory setup is insecure."
+msgstr "sikr ikke at opsætningen er sikker"
+
+#: modules/shepherd/service.scm:300
+#, fuzzy, scheme-format
+#| msgid "failed to start service ~a"
+msgid "Enabled service ~a."
+msgstr "kunne ikke starte tjenesten ~a"
+
+#: modules/shepherd/service.scm:305
+#, fuzzy, scheme-format
+#| msgid "failed to start service ~a"
+msgid "Disabled service ~a."
+msgstr "kunne ikke starte tjenesten ~a"
+
+#: modules/shepherd/service.scm:310
+#, fuzzy, scheme-format
+#| msgid "Service ~a has been started."
+msgid "Service ~a is already running."
+msgstr "Tjenesten ~a er blevet startet."
+
+#: modules/shepherd/service.scm:314
+#, fuzzy, scheme-format
+#| msgid "Service ~a has been started."
+msgid "Service ~a is currently disabled."
+msgstr "Tjenesten ~a er blevet startet."
+
+#: modules/shepherd/service.scm:319
+#, scheme-format
+msgid "Service ~a conflicts with running services ~a."
+msgstr ""
+
+#: modules/shepherd/service.scm:331
+#, fuzzy, scheme-format
+#| msgid "Service ~a has been started."
+msgid "Service ~a depends on ~a."
+msgstr "Tjenesten ~a er blevet startet."
+
+#: modules/shepherd/service.scm:353
 #, scheme-format
 msgid "Service ~a has been started."
 msgstr "Tjenesten ~a er blevet startet."
 
-#: modules/shepherd/service.scm:337
+#: modules/shepherd/service.scm:354
 #, scheme-format
 msgid "Service ~a could not be started."
 msgstr "Tjenesten ~a kunne ikke startes."
+
+#: modules/shepherd/service.scm:395
+#, fuzzy, scheme-format
+#| msgid "Service ~a has been started."
+msgid "Service ~a is not running."
+msgstr "Tjenesten ~a er blevet startet."
+
+#: modules/shepherd/service.scm:401
+#, fuzzy, scheme-format
+#| msgid "Service ~a could not be started."
+msgid "Service ~a pending to be stopped."
+msgstr "Tjenesten ~a kunne ikke startes."
+
+#: modules/shepherd/service.scm:437
+#, fuzzy, scheme-format
+#| msgid "Service ~a could not be started."
+msgid "Service ~a could not be stopped."
+msgstr "Tjenesten ~a kunne ikke startes."
+
+#: modules/shepherd/service.scm:439
+#, fuzzy, scheme-format
+#| msgid "Service ~a has been started."
+msgid "Service ~a has been stopped."
+msgstr "Tjenesten ~a er blevet startet."
+
+#: modules/shepherd/service.scm:523
+msgid "Unknown keyword.  Try 'doc root help'."
+msgstr ""
+
+#: modules/shepherd/service.scm:661
+#, fuzzy, scheme-format
+#| msgid "  Provides ~a.~%"
+msgid "No service provides ~a."
+msgstr "  Tilbyder ~a.~%"
+
+#: modules/shepherd/service.scm:1042
+#, scheme-format
+msgid "warning: 'waitpid' ~a failed unexpectedly: ~a"
+msgstr ""
+
+#: modules/shepherd/service.scm:1083
+#, scheme-format
+msgid "Respawning ~a."
+msgstr ""
+
+#: modules/shepherd/service.scm:1093
+#, fuzzy, scheme-format
+#| msgid "Service ~a has been started."
+msgid "Service ~a terminated."
+msgstr "Tjenesten ~a er blevet startet."
+
+#: modules/shepherd/service.scm:1097
+#, fuzzy, scheme-format
+#| msgid "Service ~a has been started."
+msgid "Service ~a has been disabled."
+msgstr "Tjenesten ~a er blevet startet."
+
+#: modules/shepherd/service.scm:1100
+msgid "  (Respawning too fast.)"
+msgstr ""
+
+#: modules/shepherd/service.scm:1176
+#, scheme-format
+msgid "Unloading all optional services: '~a'..."
+msgstr ""
+
+#: modules/shepherd/service.scm:1179 modules/shepherd/service.scm:1194
+msgid "Done."
+msgstr ""
+
+#: modules/shepherd/service.scm:1188
+#, scheme-format
+msgid "Removing service '~a'..."
+msgstr ""
+
+#: modules/shepherd/service.scm:1201
+#, scheme-format
+msgid "Loading ~a."
+msgstr ""
+
+#: modules/shepherd/service.scm:1250
+#, scheme-format
+msgid "PID ~a (~a) is dead!"
+msgstr ""
+
+#: modules/shepherd/service.scm:1265
+msgid "Exiting shepherd..."
+msgstr ""
+
+#: modules/shepherd/service.scm:1303
+msgid "Halting..."
+msgstr ""
+
+#: modules/shepherd/service.scm:1312
+msgid "Shutting down..."
+msgstr ""
+
+#: modules/shepherd/service.scm:1325
+#, scheme-format
+msgid "Evaluating user expression ~a."
+msgstr ""
+
+#: modules/shepherd/service.scm:1354
+msgid "Running as PID 1, so not daemonizing."
+msgstr ""
+
+#: modules/shepherd/service.scm:1385
+msgid "You must be kidding."
+msgstr ""
 
 #: modules/shepherd/args.scm:44
 msgid "undocumented option"
 msgstr "tilvalget er ikke dokumenteret"
 
-#: modules/shepherd/args.scm:199
+#: modules/shepherd/args.scm:136
+msgid "display version information and exit"
+msgstr ""
+
+#: modules/shepherd/args.scm:142
+msgid "display short usage message and exit"
+msgstr ""
+
+#: modules/shepherd/args.scm:189
+msgid "display this help and exit"
+msgstr ""
+
+#: modules/shepherd/args.scm:193
+msgid " [OPTIONS...] "
+msgstr ""
+
+#. TRANSLATORS: The '~a' placeholders indicate the
+#. bug-reporting address, the name of this
+#. package, and its home page URL.  Please add
+#. another line saying "Report translation bugs to
+#. ...\n" with the address for translation bugs
+#. (typically your translation team's web or email
+#. address).
+#: modules/shepherd/args.scm:207
 #, scheme-format
 msgid ""
 "\n"
@@ -192,44 +384,72 @@ msgstr ""
 "~a generel hjemmeside: <~a>\n"
 "Generel hjælp til GNU-programmer: <http://www.gnu.org/gethelp/>~%"
 
-#: modules/shepherd/args.scm:246
-#, scheme-format
-msgid "Option `--~a' is ambigous."
+#: modules/shepherd/args.scm:254
+#, fuzzy, scheme-format
+#| msgid "Option `--~a' is ambigous."
+msgid "Option `--~a' is ambiguous."
 msgstr "Tilvalget »--~a« er tvetydigt."
 
-#: modules/shepherd/args.scm:247
+#: modules/shepherd/args.scm:255
 #, scheme-format
 msgid "Unknown option: `--~a'."
 msgstr "Ukendt tilvalg: »--~a«."
 
-#: modules/shepherd.scm:68
+#: modules/shepherd/args.scm:257
+msgid "Try `--help'."
+msgstr ""
+
+#: modules/shepherd/args.scm:281
+#, fuzzy, scheme-format
+#| msgid "Unknown option: `--~a'."
+msgid "Unknown option: `-~a'."
+msgstr "Ukendt tilvalg: »--~a«."
+
+#: modules/shepherd/args.scm:294
+#, scheme-format
+msgid "Argument required by `-~a'."
+msgstr ""
+
+#: modules/shepherd.scm:101
 msgid "use FILE to load and store state"
 msgstr "brug FIL til at indlæse og lagre tilstand"
 
-#: modules/shepherd.scm:76
+#: modules/shepherd.scm:109
 msgid "synonym for --silent"
 msgstr "synonym for --silent"
 
-#: modules/shepherd.scm:83
+#: modules/shepherd.scm:116
 msgid "don't do output to stdout"
 msgstr "send ikke uddata til standardud"
 
-#: modules/shepherd.scm:93
+#: modules/shepherd.scm:126
 msgid "don't ensure that the setup is secure"
 msgstr "sikr ikke at opsætningen er sikker"
 
-#: modules/shepherd.scm:100
+#: modules/shepherd.scm:133
 msgid "log actions in FILE"
 msgstr "log handlinger i FIL"
 
-#: modules/shepherd.scm:107
+#: modules/shepherd.scm:140
 msgid "when ready, write PID to FILE or stdout"
 msgstr "når klar, skriv PID til FIL eller standardud"
 
-#: modules/shepherd.scm:114
+#: modules/shepherd.scm:147
 msgid "read configuration from FILE"
 msgstr "læs konfiguration fra FIL"
 
-#: modules/shepherd.scm:122
+#: modules/shepherd.scm:155
 msgid "get commands from socket FILE or from stdin (-)"
 msgstr "hent kommandoer fra sokkel-FIL eller fra standardind (-)"
+
+#: modules/shepherd.scm:344
+msgid "Rebooting..."
+msgstr ""
+
+#: modules/shepherd.scm:399
+msgid "Invalid command."
+msgstr ""
+
+#: modules/shepherd.scm:418
+msgid "invalid command line"
+msgstr ""
