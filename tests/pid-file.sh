@@ -34,7 +34,11 @@ cat > "$conf"<<EOF
 (use-modules (ice-9 match))
 
 (define %command
-  '("$SHELL" "-c" "echo \$\$ > $PWD/$service_pid ; sleep 600"))
+  ;; Purposefully introduce a delay between the time the PID file
+  ;; is created and the time it actually contains a valid PID.  This
+  ;; simulates PID files not created atomically, as is the case with
+  ;; wpa_supplicant 2.7 for instance.
+  '("$SHELL" "-c" "echo > $PWD/$service_pid ; sleep 1.5; echo \$\$ > $PWD/$service_pid ; exec sleep 600"))
 
 (register-services
  (make <service>
@@ -48,6 +52,15 @@ cat > "$conf"<<EOF
                                       ;; slow enough that creating
                                       ;; $service_pid could take
                                       ;; up to 4 seconds or so.
+                                      #:pid-file-timeout 6)
+   #:stop  (make-kill-destructor)
+   #:respawn? #f)
+
+ (make <service>
+   ;; Same one, but actually produces the PID file.
+   #:provides '(test-works)
+   #:start (make-forkexec-constructor %command
+                                      #:pid-file "$PWD/$service_pid"
                                       #:pid-file-timeout 6)
    #:stop  (make-kill-destructor)
    #:respawn? #f))
@@ -71,5 +84,18 @@ $herd status test | grep stopped
 test -f "$service_pid"
 
 # Make sure it did not leave a process behind it.
+if kill -0 `cat "$service_pid"`
+then false; else true; fi
+
+# Now start the service that works.
+$herd start test-works
+$herd status test-works | grep started
+test -f "$service_pid"
+kill -0 "`cat $service_pid`"
+known_pid="`$herd status test-works | grep Running \
+   | sed -es'/.*Running value.* \([0-9]\+\)\.$/\1/g'`"
+test `cat $service_pid` -eq $known_pid
+
+$herd stop test-works
 if kill -0 `cat "$service_pid"`
 then false; else true; fi

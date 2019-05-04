@@ -717,9 +717,20 @@ otherwise return the number that was read (a PID)."
   (let loop ()
     (catch 'system-error
       (lambda ()
-        (string->number
-         (string-trim-both
-          (call-with-input-file file get-string-all))))
+        (match (string->number
+                (string-trim-both
+                 (call-with-input-file file get-string-all)))
+          (#f
+           ;; If we didn't get an integer, it may be because the daemon didn't
+           ;; create FILE atomically and isn't done writing to it.  Try again.
+           (loop))
+          ((? integer? pid)
+           ;; It's possible, though unlikely, that PID is not a valid PID, for
+           ;; instance because writes to FILE did not complete.  However, we
+           ;; don't do (kill pid 0) because if the process lives in a separate
+           ;; PID namespace, then PID is probably invalid in our own
+           ;; namespace.
+           pid)))
       (lambda args
         (let ((errno (system-error-errno args)))
           (if (= ENOENT errno)
