@@ -714,7 +714,17 @@ set when starting a service."
 number.  Return #f if FILE was not created or does not contain a number;
 otherwise return the number that was read (a PID)."
   (define start (current-time))
+
   (let loop ()
+    (define (try-again)
+      (and (< (current-time) (+ start max-delay))
+           (begin
+             ;; FILE does not exist yet, so wait and try again.
+             ;; XXX: Ideally we would yield to the main event loop
+             ;; and/or use inotify.
+             (sleep 1)
+             (loop))))
+
     (catch 'system-error
       (lambda ()
         (match (string->number
@@ -723,7 +733,7 @@ otherwise return the number that was read (a PID)."
           (#f
            ;; If we didn't get an integer, it may be because the daemon didn't
            ;; create FILE atomically and isn't done writing to it.  Try again.
-           (loop))
+           (try-again))
           ((? integer? pid)
            ;; It's possible, though unlikely, that PID is not a valid PID, for
            ;; instance because writes to FILE did not complete.  However, we
@@ -734,13 +744,7 @@ otherwise return the number that was read (a PID)."
       (lambda args
         (let ((errno (system-error-errno args)))
           (if (= ENOENT errno)
-              (and (< (current-time) (+ start max-delay))
-                   (begin
-                     ;; FILE does not exist yet, so wait and try again.
-                     ;; XXX: Ideally we would yield to the main event loop
-                     ;; and/or use inotify.
-                     (sleep 1)
-                     (loop)))
+              (try-again)
               (apply throw args)))))))
 
 (define* (exec-command command
