@@ -709,10 +709,16 @@ results."
 set when starting a service."
   (environ))
 
-(define* (read-pid-file file #:key (max-delay 5))
+(define* (read-pid-file file #:key (max-delay 5)
+                        (validate-pid? #f))
   "Wait for MAX-DELAY seconds for FILE to show up, and read its content as a
 number.  Return #f if FILE was not created or does not contain a number;
-otherwise return the number that was read (a PID)."
+otherwise return the number that was read (a PID).
+
+When VALIDATE-PID? is true, succeed if and only if the number that was read is
+the PID of an existing process in the current PID namespace.  This test cannot
+be used if FILE might contain a PID from another PID namespace--i.e., the
+daemon writing FILE is running in a separate PID namespace."
   (define start (current-time))
 
   (let loop ()
@@ -736,11 +742,13 @@ otherwise return the number that was read (a PID)."
            (try-again))
           ((? integer? pid)
            ;; It's possible, though unlikely, that PID is not a valid PID, for
-           ;; instance because writes to FILE did not complete.  However, we
-           ;; don't do (kill pid 0) because if the process lives in a separate
-           ;; PID namespace, then PID is probably invalid in our own
-           ;; namespace.
-           pid)))
+           ;; instance because writes to FILE did not complete.  When
+           ;; VALIDATE-PID? is true, check that PID is valid in the current
+           ;; PID namespace.
+           (if (or (not validate-pid?)
+                   (catch-system-error (kill pid 0) #t))
+               pid
+               (try-again)))))
       (lambda args
         (let ((errno (system-error-errno args)))
           (if (= ENOENT errno)
@@ -931,7 +939,8 @@ start."
                                         environment-variables)))
             (if pid-file
                 (match (read-pid-file pid-file
-                                      #:max-delay pid-file-timeout)
+                                      #:max-delay pid-file-timeout
+                                      #:validate-pid? #t)
                   (#f
                    (catch-system-error (kill pid SIGTERM))
                    #f)
