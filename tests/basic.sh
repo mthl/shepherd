@@ -215,6 +215,15 @@ $herd eval root "(action root-service 'unload \"test-loaded\")"
 if $herd status test-loaded
 then false; else true; fi
 
+# Load code that triggers a syntax error and make sure that shepherd survives.
+cat > "$confdir/some-conf.scm" <<EOF
+(define x y z)
+EOF
+
+if $herd load root "$confdir/some-conf.scm"
+then false; else true; fi
+$herd status			# still here?
+
 # Evaluate silly code, make sure nothing breaks.
 if $herd eval root '(/ 0 0)'
 then false; else true; fi

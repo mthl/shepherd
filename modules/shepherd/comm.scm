@@ -1,5 +1,5 @@
 ;; comm.scm -- Communication between processes and general output.
-;; Copyright (C) 2013, 2014, 2016, 2018 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014, 2016, 2018, 2019 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;; Copyright (C) 2018 Danny Milosavljevic <dannym@scratchpost.org>
 ;;
@@ -163,6 +163,8 @@ wrong---premature end-of-file, invalid sexp, etc."
 (define-method (result->sexp (symbol <symbol>)) symbol)
 (define-method (result->sexp (string <string>)) string)
 (define-method (result->sexp (list <list>)) (map result->sexp list))
+(define-method (result->sexp (pair <pair>))
+  (cons (result->sexp (car pair)) (result->sexp (cdr pair))))
 (define-method (result->sexp (kw <keyword>)) kw)
 (define-method (result->sexp (obj <top>)) (object->string obj))
 
