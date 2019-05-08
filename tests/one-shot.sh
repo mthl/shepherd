@@ -76,16 +76,19 @@ do
     rm -f "$stamp"
     $herd start test
     test -f "$stamp"
-    $herd status test | grep stopped
+    $herd status test | grep stopped.*one-shot
     grep "test.*started" "$log"
     $herd stop test		# no-op since it's already stopped
 done
+
+$herd status | grep -i '^one-shot'
+$herd status
 
 rm -f "$stamp" "$stamp-2"
 $herd start test-2
 test -f "$stamp"
 test -f "$stamp-2"
-$herd status test | grep stopped
+$herd status test | grep stopped.*one-shot
 $herd status test-2 | grep started
 $herd stop test-2
 if test -f "$stamp-2"; then false; else true; fi

@@ -26,6 +26,7 @@
   #:use-module (ice-9 rdelim)
   #:use-module (ice-9 match)
   #:use-module (srfi srfi-1)
+  #:use-module (srfi srfi-11)
   #:use-module (srfi srfi-19)
   #:export (main))
 
@@ -57,17 +58,30 @@ of pairs."
                   (format #t " ~a ~a~%" bullet
                           (service-canonical-name service)))
                 (sort services service<?))))      ;get deterministic output
-  (call-with-values
-      (lambda ()
-        (partition (match-lambda
-                     (('service ('version 0 _ ...) properties ...)
-                      (car (assoc-ref properties 'running))))
-                   services))
-    (lambda (started stopped)
-      (display-services (l10n "Started:\n") "+"
-                        started)
-      (display-services (l10n "Stopped:\n") "-"
-                        stopped))))
+
+  (let*-values (((started stopped)
+                 (partition (match-lambda
+                              (('service ('version 0 _ ...) properties ...)
+                               (car (assoc-ref properties 'running))))
+                            services))
+                ((one-shot stopped)
+                 (partition (match-lambda
+                              (('service ('version 0 _ ...) properties ...)
+                               ;; Prior to 0.6.1, shepherd did not send the
+                               ;; 'one-shot?' property; thus, do not assume
+                               ;; that it's available.
+                               (and=> (assoc-ref properties 'one-shot?) car)))
+                            stopped)))
+    (display-services (l10n "Started:\n") "+"
+                      started)
+    (display-services (l10n "Stopped:\n") "-"
+                      stopped)
+
+    ;; TRANSLATORS: Here "one-shot" refers to "one-shot services".  These are
+    ;; services that are immediately marked as stopped once their 'start'
+    ;; method has completed.
+    (display-services (l10n "One-shot:\n") "*"
+                      one-shot)))
 
 (define (display-detailed-status services)
   "Display the detailed status of SERVICES."
@@ -78,17 +92,19 @@ of pairs."
   (match service
     (('service ('version 0 _ ...) properties ...)
      (alist-let* properties (provides requires running respawn? enabled?
-                             conflicts last-respawns)
+                             conflicts last-respawns one-shot?)
        (format #t (l10n "Status of ~a:~%") (first provides))
-       (if running
-           (begin
-             (format #t (l10n "  It is started.~%"))
+       (cond (running
+              (format #t (l10n "  It is started.~%"))
 
-             ;; TRANSLATORS: The "~s" bit is most of the time a placeholder
-             ;; for the PID (an integer) of the running process, and
-             ;; occasionally for another Scheme object.
-             (format #t (l10n "  Running value is ~s.~%") running))
-           (format #t (l10n "  It is stopped.~%")))
+              ;; TRANSLATORS: The "~s" bit is most of the time a placeholder
+              ;; for the PID (an integer) of the running process, and
+              ;; occasionally for another Scheme object.
+              (format #t (l10n "  Running value is ~s.~%") running))
+             (one-shot?
+              (format #t (l10n "  It is stopped (one-shot).~%")))
+             (else
+              (format #t (l10n "  It is stopped.~%"))))
        (if enabled?
            (format #t (l10n "  It is enabled.~%"))
            (format #t (l10n "  It is disabled.~%")))
