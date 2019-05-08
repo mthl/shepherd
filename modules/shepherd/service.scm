@@ -562,7 +562,10 @@ clients."
             (enabled? ,(enabled? service))
             (running ,(result->sexp (slot-ref service 'running)))
             (conflicts ,(map canonical-name (conflicts-with service)))
-            (last-respawns ,(slot-ref service 'last-respawns))))
+            (last-respawns ,(slot-ref service 'last-respawns))
+            ,@(if (slot-ref service 'one-shot?)
+                  '((one-shot? #t))
+                  '())))
 
 (define-method (result->sexp (service <service>))
   ;; Serialize SERVICE to an sexp.
