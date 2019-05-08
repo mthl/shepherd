@@ -224,6 +224,17 @@ if $herd load root "$confdir/some-conf.scm"
 then false; else true; fi
 $herd status			# still here?
 
+# Load code that throws an object with no read syntax.
+cat > "$confdir/some-conf.scm" <<EOF
+(use-modules (srfi srfi-9))
+(define-record-type <something> (something) something?)
+(throw 'what?! (something))
+EOF
+
+if $herd load root "$confdir/some-conf.scm"
+then false; else true; fi
+$herd status			# still here?
+
 # Evaluate silly code, make sure nothing breaks.
 if $herd eval root '(/ 0 0)'
 then false; else true; fi
