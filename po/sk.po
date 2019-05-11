@@ -1,0 +1,446 @@
+# This file is put in the public domain.
+#
+# This file is distributed under the same license as the shepherd package.
+#
+# Andrej Kacian <andrej@kacian.sk>, 2019.
+msgid ""
+msgstr ""
+"Project-Id-Version: shepherd 0.6.1-pre1\n"
+"Report-Msgid-Bugs-To: guix-devel@gnu.org\n"
+"POT-Creation-Date: 2019-05-08 16:22+0200\n"
+"PO-Revision-Date: 2019-05-08 21:01+0100\n"
+"Last-Translator: Andrej Kacian <andrej@kacian.sk>\n"
+"Language-Team: Slovak <sk-i18n@lists.linux.sk>\n"
+"Language: sk\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: Lokalize 2.0\n"
+
+#. TRANSLATORS: Strings occasionally contain escape sequences starting
+#. with '~' (tilde).  For example, '~a' corresponds to '%s' in C printf
+#. syntax and '~%' corresponds to '\n'.  These must be preserved as is.
+#. See
+#. <https://www.gnu.org/software/guile/manual/html_node/Formatted-Output.html>
+#. for more info.
+#: modules/shepherd/comm.scm:182
+#, scheme-format
+msgid "service '~a' could not be found"
+msgstr "služba '~a' nebola nájdená"
+
+#: modules/shepherd/comm.scm:185
+#, scheme-format
+msgid "service '~a' does not have an action '~a'"
+msgstr "služba '~a' nemá akciu '~a'"
+
+#: modules/shepherd/comm.scm:189
+#, scheme-format
+msgid "exception caught while executing '~a' on service '~a':"
+msgstr "pri vykonávaní '~a' služby '~a' bola zachytená výnimka:"
+
+#: modules/shepherd/comm.scm:194
+#, scheme-format
+msgid "something went wrong: ~s"
+msgstr "niečo nie je v poriadku: ~s"
+
+#: modules/shepherd/scripts/herd.scm:75
+msgid "Started:\n"
+msgstr "Bežiace:\n"
+
+#: modules/shepherd/scripts/herd.scm:77
+msgid "Stopped:\n"
+msgstr "Zastavené:\n"
+
+#. TRANSLATORS: Here "one-shot" refers to "one-shot services".  These are
+#. services that are immediately marked as stopped once their 'start'
+#. method has completed.
+#: modules/shepherd/scripts/herd.scm:83
+msgid "One-shot:\n"
+msgstr "Jednorázové:\n"
+
+#: modules/shepherd/scripts/herd.scm:96
+#, scheme-format
+msgid "Status of ~a:~%"
+msgstr "Status ~a:~%"
+
+#: modules/shepherd/scripts/herd.scm:98
+#, scheme-format
+msgid "  It is started.~%"
+msgstr " Je spustená.~%"
+
+#. TRANSLATORS: The "~s" bit is most of the time a placeholder
+#. for the PID (an integer) of the running process, and
+#. occasionally for another Scheme object.
+#: modules/shepherd/scripts/herd.scm:103
+#, scheme-format
+msgid "  Running value is ~s.~%"
+msgstr "Aktuálna hodnota je ~s.~%"
+
+#: modules/shepherd/scripts/herd.scm:105
+#, scheme-format
+msgid "  It is stopped (one-shot).~%"
+msgstr " Je zastavená (jednorázová).~%"
+
+#: modules/shepherd/scripts/herd.scm:107
+#, scheme-format
+msgid "  It is stopped.~%"
+msgstr " Je zastavená.~%"
+
+#: modules/shepherd/scripts/herd.scm:109
+#, scheme-format
+msgid "  It is enabled.~%"
+msgstr " Je povolená.~%"
+
+#: modules/shepherd/scripts/herd.scm:110
+#, scheme-format
+msgid "  It is disabled.~%"
+msgstr " Je zakázaná.~%"
+
+#: modules/shepherd/scripts/herd.scm:111
+#, scheme-format
+msgid "  Provides ~a.~%"
+msgstr " Poskytuje ~a.~%"
+
+#: modules/shepherd/scripts/herd.scm:112
+#, scheme-format
+msgid "  Requires ~a.~%"
+msgstr " Vyžaduje ~a.~%"
+
+#: modules/shepherd/scripts/herd.scm:113
+#, scheme-format
+msgid "  Conflicts with ~a.~%"
+msgstr " Konflikt s ~a.~%"
+
+#: modules/shepherd/scripts/herd.scm:115
+#, scheme-format
+msgid "  Will be respawned.~%"
+msgstr " Bude znovu spustená.~%"
+
+#: modules/shepherd/scripts/herd.scm:116
+#, scheme-format
+msgid "  Will not be respawned.~%"
+msgstr " Nebude znovu spustená.~%"
+
+#: modules/shepherd/scripts/herd.scm:119
+#, scheme-format
+msgid "  Last respawned on ~a.~%"
+msgstr " Naposledy znovu spustená ~a.~%"
+
+#: modules/shepherd/scripts/herd.scm:169
+#, scheme-format
+msgid "failed to start service ~a"
+msgstr "nepodarilo sa spustit službu ~a"
+
+#: modules/shepherd/scripts/herd.scm:188
+msgid "premature end-of-file while talking to shepherd"
+msgstr "predčasný koniec súboru pri komunikácii so shepherdom"
+
+#: modules/shepherd/scripts/herd.scm:203
+msgid "ACTION SERVICE [ARG...]"
+msgstr "AKCIA SLUŽBA [PARAM...]"
+
+#: modules/shepherd/scripts/herd.scm:204
+msgid ""
+"Apply ACTION (start, stop, status, etc.) on \\\n"
+"SERVICE with the ARGs."
+msgstr ""
+"Aplikuje AKCIU (spustiť, zastaviť, stav atď.) na \\\n"
+"SLUŽBE s PARAMetrami"
+
+#: modules/shepherd/scripts/herd.scm:212 modules/shepherd.scm:100
+#: modules/shepherd.scm:132 modules/shepherd.scm:139 modules/shepherd.scm:146
+#: modules/shepherd.scm:153
+msgid "FILE"
+msgstr "SÚBOR"
+
+#: modules/shepherd/scripts/herd.scm:213
+msgid "send commands to FILE"
+msgstr "odošle príkazy do SÚBORU"
+
+#: modules/shepherd/scripts/herd.scm:226
+#, scheme-format
+msgid "Usage: herd ACTION [SERVICE [OPTIONS...]]~%"
+msgstr "Použitie: herd AKCIA [SLUŽBA [PARAMETRE...]]~%"
+
+#: modules/shepherd/support.scm:114
+#, scheme-format
+msgid "Assertion ~a failed."
+msgstr "Predpoklad ~a neplatí."
+
+#. TRANSLATORS: '~a' is a placeholder for the copyright year.
+#: modules/shepherd/support.scm:242
+#, scheme-format
+msgid "Copyright (C) ~a the Shepherd authors"
+msgstr "Copyright (C) ~a autori Shepherdu"
+
+#: modules/shepherd/support.scm:243
+msgid ""
+"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
+"This is free software: you are free to change and redistribute it.\n"
+"There is NO WARRANTY, to the extent permitted by law."
+msgstr ""
+"Licencia GPLv3+ verzia 3 alebo vyšsia <http://gnu.org/licenses/gpl.html>\n"
+"Toto je slobodný softvér: je možné meniť a redistribuovať ho.\n"
+"Nevzťahuje sa naň ŽIADNA ZÁRUKA, v rozsahu povolenom zákonom."
+
+#: modules/shepherd/support.scm:404
+msgid "Socket directory setup is insecure."
+msgstr "Nastavenia adresára so socketmi nie je bezpečné."
+
+#: modules/shepherd/service.scm:300
+#, scheme-format
+msgid "Enabled service ~a."
+msgstr "Služba ~a bola povolená."
+
+#: modules/shepherd/service.scm:305
+#, scheme-format
+msgid "Disabled service ~a."
+msgstr "Služba ~a bola zakázaná."
+
+#: modules/shepherd/service.scm:310
+#, scheme-format
+msgid "Service ~a is already running."
+msgstr "Služba ~a už beží."
+
+#: modules/shepherd/service.scm:314
+#, scheme-format
+msgid "Service ~a is currently disabled."
+msgstr "Služba ~a je zakázaná."
+
+#: modules/shepherd/service.scm:319
+#, scheme-format
+msgid "Service ~a conflicts with running services ~a."
+msgstr "Služba ~a má konflikt s bežiacimi službami ~a."
+
+#: modules/shepherd/service.scm:331
+#, scheme-format
+msgid "Service ~a depends on ~a."
+msgstr "Služba ~a vyžaduje ~a."
+
+#: modules/shepherd/service.scm:353
+#, scheme-format
+msgid "Service ~a has been started."
+msgstr "Služba ~a bola spustená."
+
+#: modules/shepherd/service.scm:354
+#, scheme-format
+msgid "Service ~a could not be started."
+msgstr "Nepodarilo sa spustiť službu ~a."
+
+#: modules/shepherd/service.scm:395
+#, scheme-format
+msgid "Service ~a is not running."
+msgstr "Služba ~a nebeží."
+
+#: modules/shepherd/service.scm:401
+#, scheme-format
+msgid "Service ~a pending to be stopped."
+msgstr "Služba ~a bude zastavená."
+
+#: modules/shepherd/service.scm:437
+#, scheme-format
+msgid "Service ~a could not be stopped."
+msgstr "Nepodarilo sa zastaviť službu ~a."
+
+#: modules/shepherd/service.scm:439
+#, scheme-format
+msgid "Service ~a has been stopped."
+msgstr "Služba ~a bola zastavená."
+
+#: modules/shepherd/service.scm:523
+msgid "Unknown keyword.  Try 'doc root help'."
+msgstr "Neznáme kľúčové slovo. Vyskúšaj 'doc root help'."
+
+#: modules/shepherd/service.scm:664
+#, scheme-format
+msgid "No service provides ~a."
+msgstr "Žiadna služba neposkytuje ~a."
+
+#: modules/shepherd/service.scm:1069
+#, scheme-format
+msgid "warning: 'waitpid' ~a failed unexpectedly: ~a"
+msgstr "varovanie: 'waitpid' ~a neočakávane zlyhal: ~a"
+
+#: modules/shepherd/service.scm:1110
+#, scheme-format
+msgid "Respawning ~a."
+msgstr "Znovu spúšťam ~a."
+
+#: modules/shepherd/service.scm:1120
+#, scheme-format
+msgid "Service ~a terminated."
+msgstr "Služba ~a bola ukončená."
+
+#: modules/shepherd/service.scm:1124
+#, scheme-format
+msgid "Service ~a has been disabled."
+msgstr "Služba ~a bola zakázaná."
+
+#: modules/shepherd/service.scm:1127
+msgid "  (Respawning too fast.)"
+msgstr " (Pričasto sa reštartuje.)"
+
+#: modules/shepherd/service.scm:1203
+#, scheme-format
+msgid "Unloading all optional services: '~a'..."
+msgstr "Odstraňujem všetky voliteľné služby: '~a'..."
+
+#: modules/shepherd/service.scm:1206 modules/shepherd/service.scm:1221
+msgid "Done."
+msgstr "Hotovo."
+
+#: modules/shepherd/service.scm:1215
+#, scheme-format
+msgid "Removing service '~a'..."
+msgstr "Odstraňujem službu '~a'..."
+
+#: modules/shepherd/service.scm:1228
+#, scheme-format
+msgid "Loading ~a."
+msgstr "Naťahujem ~a."
+
+#: modules/shepherd/service.scm:1277
+#, scheme-format
+msgid "PID ~a (~a) is dead!"
+msgstr "PID ~a (~a) je mŕtvy!"
+
+#: modules/shepherd/service.scm:1292
+msgid "Exiting shepherd..."
+msgstr "Ukončujem shepherd..."
+
+#: modules/shepherd/service.scm:1330
+msgid "Halting..."
+msgstr "Zastavujem..."
+
+#: modules/shepherd/service.scm:1339
+msgid "Shutting down..."
+msgstr "Vypínam sa..."
+
+#: modules/shepherd/service.scm:1352
+#, scheme-format
+msgid "Evaluating user expression ~a."
+msgstr "Vyhodnocujem výraz ~a."
+
+#: modules/shepherd/service.scm:1381
+msgid "Running as PID 1, so not daemonizing."
+msgstr "Bežím ako PID 1, takže neprechádzam do režimu démon."
+
+#: modules/shepherd/service.scm:1412
+msgid "You must be kidding."
+msgstr "Asi žartuješ."
+
+#: modules/shepherd/args.scm:44
+msgid "undocumented option"
+msgstr "nezdokumentovaná voľba"
+
+#: modules/shepherd/args.scm:136
+msgid "display version information and exit"
+msgstr "zobrazí informácie o verzie a ukončí sa"
+
+#: modules/shepherd/args.scm:142
+msgid "display short usage message and exit"
+msgstr "zobrazí krátku nápovedu použitia a ukončí sa"
+
+#: modules/shepherd/args.scm:189
+msgid "display this help and exit"
+msgstr "zobrazí túto nápovedu a ukončí sa"
+
+#: modules/shepherd/args.scm:193
+msgid " [OPTIONS...] "
+msgstr " [PARAMETERE...] "
+
+#. TRANSLATORS: The '~a' placeholders indicate the
+#. bug-reporting address, the name of this
+#. package, and its home page URL.  Please add
+#. another line saying "Report translation bugs to
+#. ...\n" with the address for translation bugs
+#. (typically your translation team's web or email
+#. address).
+#: modules/shepherd/args.scm:207
+#, scheme-format
+msgid ""
+"\n"
+"Mandatory or optional arguments to long options are also mandatory or\n"
+"optional to the corresponding short options.\n"
+"\n"
+"Report bugs to: ~a .\n"
+"~a general home page: <~a>\n"
+"General help using GNU software: <http://www.gnu.org/gethelp/>~%"
+msgstr ""
+"\n"
+" Povinné či voliteľné hodnoty pre dlhé parametre sú taktiež povinné alebo\n"
+"voliteľné pre príslušné krátke parametre.\n"
+"\n"
+"Chyby hlás na: ~a.\n"
+"Všeobecná domovská stránka ~a: <~a>\n"
+"Všeobecná pomoc pre GNU softvér: <http://www.gnu.org/gethelp/>~%"
+
+#: modules/shepherd/args.scm:254
+#, scheme-format
+msgid "Option `--~a' is ambiguous."
+msgstr "Voľba `--~a' je nejednoznačná."
+
+#: modules/shepherd/args.scm:255
+#, scheme-format
+msgid "Unknown option: `--~a'."
+msgstr "Neznámy parameter: `--~a'."
+
+#: modules/shepherd/args.scm:257
+msgid "Try `--help'."
+msgstr "Skús '--help'."
+
+#: modules/shepherd/args.scm:281
+#, scheme-format
+msgid "Unknown option: `-~a'."
+msgstr "Neznámy parameter: `-~a'."
+
+#: modules/shepherd/args.scm:294
+#, scheme-format
+msgid "Argument required by `-~a'."
+msgstr "`-~a' vyžaduje hodnotu."
+
+#: modules/shepherd.scm:101
+msgid "use FILE to load and store state"
+msgstr "použi SÚBOR pre načítanie alebo uloženie stavu"
+
+#: modules/shepherd.scm:109
+msgid "synonym for --silent"
+msgstr "synonym pre --silent"
+
+#: modules/shepherd.scm:116
+msgid "don't do output to stdout"
+msgstr "nepouži štandardný výstup"
+
+#: modules/shepherd.scm:126
+msgid "don't ensure that the setup is secure"
+msgstr "nekontroluj či je nastavenie bezpečné"
+
+#: modules/shepherd.scm:133
+msgid "log actions in FILE"
+msgstr "zapisuj vykonané akcie do súboru SÚBOR"
+
+#: modules/shepherd.scm:140
+msgid "when ready, write PID to FILE or stdout"
+msgstr "keď sa dá, zapíš PID do SÚBORu alebo na štandardný výstup"
+
+#: modules/shepherd.scm:147
+msgid "read configuration from FILE"
+msgstr "načítaj nastavenie zo SÚBORu"
+
+#: modules/shepherd.scm:155
+msgid "get commands from socket FILE or from stdin (-)"
+msgstr "čítaj príkazy zo socketu SÚBOR, alebo zo štandardného vstupu (-)"
+
+#: modules/shepherd.scm:344
+msgid "Rebooting..."
+msgstr "Rebootujem..."
+
+#: modules/shepherd.scm:399
+msgid "Invalid command."
+msgstr "Neplatný príkaz."
+
+#: modules/shepherd.scm:418
+msgid "invalid command line"
+msgstr "neplatný príkazový riadok"
