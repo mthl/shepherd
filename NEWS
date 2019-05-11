@@ -11,6 +11,14 @@ Copyright © 2013, 2014, 2016, 2018, 2019 Ludovic Courtès <ludo@gnu.org>
 
 Please send Shepherd bug reports to bug-guix@gnu.org.
 
+* Changes in version 0.6.1
+** ‘herd status’ distinguishes between “stopped” and “one-shot” services
+** ‘read-pid-file’ gracefully handles PID files not created atomically
+   (<https://bugs.gnu.org/35550>)
+** ‘shepherd’ no longer crashes when asked to load files with syntax errors
+   (<https://bugs.gnu.org/35631>)
+** New translations: de, sk
+** Updated translations: da, es, fr, pt_BR
 * Changes in version 0.6.0
 ** Services can now be “one-shot” (see the manual for details)
 ** ‘shepherd’ deletes its socket file upon termination
