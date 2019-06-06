@@ -198,34 +198,6 @@ socket file at FILE-NAME upon exit of PROC.  Return the values of PROC."
       ;; Start the 'root' service.
       (start root-service)
 
-      ;; This _must_ succeed.  (We could also put the `catch' around
-      ;; `main', but it is often useful to get the backtrace, and
-      ;; `caught-error' does not do this yet.)
-      (catch #t
-        (lambda ()
-          (load-in-user-module (or config-file (default-config-file))))
-        (lambda (key . args)
-          (caught-error key args)
-          (quit 1)))
-      ;; Start what was started last time.
-      (and persistency
-           (catch 'system-error
-             (lambda ()
-               (start-in-order (read (open-input-file
-                                      persistency-state-file))))
-             (lambda (key . args)
-               (apply format #f (gettext (cadr args)) (caddr args))
-               (quit 1))))
-
-      (when (provided? 'threads)
-        ;; XXX: This terrible hack allows us to make sure that signal handlers
-        ;; get a chance to run in a timely fashion.  Without it, after an EINTR,
-        ;; we could restart the accept(2) call below before the corresponding
-        ;; async has been queued.  See the thread at
-        ;; <https://lists.gnu.org/archive/html/guile-devel/2013-07/msg00004.html>.
-        (sigaction SIGALRM (lambda _ (alarm 1)))
-        (alarm 1))
-
       (when (= 1 (getpid))
         ;; When running as PID 1, disable hard reboots upon ctrl-alt-del.
         ;; Instead, the kernel will send us SIGINT so that we can gracefully
@@ -258,6 +230,34 @@ socket file at FILE-NAME upon exit of PROC.  Return the values of PROC."
       (sigaction SIGHUP
         (lambda _
           (stop root-service)))
+
+      ;; This _must_ succeed.  (We could also put the `catch' around
+      ;; `main', but it is often useful to get the backtrace, and
+      ;; `caught-error' does not do this yet.)
+      (catch #t
+        (lambda ()
+          (load-in-user-module (or config-file (default-config-file))))
+        (lambda (key . args)
+          (caught-error key args)
+          (quit 1)))
+      ;; Start what was started last time.
+      (and persistency
+           (catch 'system-error
+             (lambda ()
+               (start-in-order (read (open-input-file
+                                      persistency-state-file))))
+             (lambda (key . args)
+               (apply format #f (gettext (cadr args)) (caddr args))
+               (quit 1))))
+
+      (when (provided? 'threads)
+        ;; XXX: This terrible hack allows us to make sure that signal handlers
+        ;; get a chance to run in a timely fashion.  Without it, after an EINTR,
+        ;; we could restart the accept(2) call below before the corresponding
+        ;; async has been queued.  See the thread at
+        ;; <https://lists.gnu.org/archive/html/guile-devel/2013-07/msg00004.html>.
+        (sigaction SIGALRM (lambda _ (alarm 1)))
+        (alarm 1))
 
       ;; Ignore SIGPIPE so that we don't die if a client closes the connection
       ;; prematurely.
