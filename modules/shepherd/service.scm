@@ -931,7 +931,6 @@ start."
                     (apply throw args))))))
 
           (clean-up pid-file)
-          (clean-up log-file)
 
           (let ((pid (fork+exec-command command
                                         #:user user
