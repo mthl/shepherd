@@ -11,6 +11,11 @@ Copyright © 2013, 2014, 2016, 2018, 2019 Ludovic Courtès <ludo@gnu.org>
 
 Please send Shepherd bug reports to bug-guix@gnu.org.
 
+* Changes in version 0.6.2
+** New crash handler allows shepherd as PID 1 to dump core on GNU/Linux
+** ‘make-forkexec-constructor’ no longer removes log file
+** Disable reboot on ctrl-alt-del before loading the config file
+   (<https://bugs.gnu.org/35996>)
 * Changes in version 0.6.1
 ** ‘herd status’ distinguishes between “stopped” and “one-shot” services
 ** ‘read-pid-file’ gracefully handles PID files not created atomically
