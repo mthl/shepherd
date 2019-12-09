@@ -211,7 +211,12 @@ socket file at FILE-NAME upon exit of PROC.  Return the values of PROC."
               ;; 'reboot_pid_ns' in kernel/pid_namespace.c.)  We get EPERM in
               ;; a user namespace that lacks CAP_SYS_BOOT.
               (unless (member err (list EINVAL EPERM))
-                (apply throw args))))))
+                (apply throw args)))))
+
+        ;; Load the SIGSEGV/SIGABRT handler.  This is what allows PID 1 to
+        ;; dump core on "/", should something go wrong.
+        (false-if-exception
+         (dynamic-link (string-append %pkglibdir "/crash-handler"))))
 
       ;; Stop everything when we get SIGINT.
       (sigaction SIGINT

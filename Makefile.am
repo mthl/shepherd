@@ -68,6 +68,36 @@ CLEANFILES =						\
   $(nodist_scriptsgo_DATA)				\
   $(bin_SCRIPTS) $(sbin_SCRIPTS)
 
+
+# Crash handler.
+
+EXTRA_DIST = etc/crash-handler.c
+
+if BUILD_CRASH_HANDLER
+
+# Build the crash handler "manually" rather than with Libtool.
+
+all-local: etc/crash-handler.so
+install-crash-handler:
+	$(MKDIR_P) $(DESTDIR)$(pkglibdir)
+	$(INSTALL) -m 755 etc/crash-handler.so \
+	           $(DESTDIR)$(pkglibdir)/crash-handler.so
+
+etc/crash-handler.so: etc/crash-handler.c
+	$(AM_V_GEN)$(MKDIR_P) etc;			\
+	$(CC) -O2 -g -Wall -shared -fPIC -o "$@" "$^"
+
+CLEANFILES += etc/crash-handler.so
+
+else !BUILD_CRASH_HANDLER
+
+install-crash-handler:
+
+endif !BUILD_CRASH_HANDLER
+
+.PHONY: install-crash-handler
+
+
 # Documentation.
 info_TEXINFOS = doc/shepherd.texi
 doc_shepherd_TEXINFOS = doc/fdl-1.3.texi
@@ -93,7 +123,7 @@ dist_man1_MANS = doc/shepherd.1 doc/herd.1
 dist_man8_MANS = doc/halt.8 doc/reboot.8
 
 # Things not automatically included in the distribution.
-EXTRA_DIST =					\
+EXTRA_DIST +=					\
   build-aux/config.rpath			\
   ChangeLog-2003				\
   QUESTIONS					\
@@ -111,7 +141,7 @@ install-data-local:
 
 # Relocate the script---i.e., have them refer to the installed module
 # directory.
-install-exec-hook: install-executable-symlinks
+install-exec-hook: install-executable-symlinks install-crash-handler
 	for script in							\
 	   $(bin_SCRIPTS:%=$(DESTDIR)$(bindir)/%)			\
 	   $(sbin_SCRIPTS:%=$(DESTDIR)$(sbindir)/%) ;			\
@@ -126,9 +156,10 @@ install-exec-hook: install-executable-symlinks
 install-executable-symlinks:
 	cd $(DESTDIR)$(sbindir); ln -s halt shutdown
 
-# Remove the 'shutdown' symlink.
+# Remove the 'shutdown' symlink and 'crash-handler.so'.
 uninstall-hook:
 	cd $(DESTDIR)$(sbindir); rm -f shutdown
+	cd $(DESTDIR)$(pkglibdir); rm -f crash-handler.so
 
 # 'sed' expression to instantiate templates.
 instantiate =						\
@@ -136,6 +167,7 @@ instantiate =						\
   -e 's,%modsrcdir%,${abs_top_srcdir}/modules,g'	\
   -e 's,%modbuilddir%,${abs_top_builddir}/modules,g'	\
   -e 's,%localstatedir%,${localstatedir},g'		\
+  -e 's,%pkglibdir%,${pkglibdir},g'			\
   -e 's,%sysconfdir%,${sysconfdir},g'			\
   -e 's,%localedir%,${localedir},g'			\
   -e 's,%VERSION%,@VERSION@,g'				\

@@ -87,6 +87,14 @@ AC_COMPUTE_INT([PR_SET_CHILD_SUBREAPER], [PR_SET_CHILD_SUBREAPER], [#include <sy
 AC_SUBST([PR_SET_CHILD_SUBREAPER])
 AC_MSG_RESULT([done])
 
+AC_MSG_CHECKING([whether to build crash handler])
+case "$host_os" in
+  linux-gnu*)  build_crash_handler=yes;;
+  *)           build_crash_handler=no;;
+esac
+AC_MSG_RESULT([$build_crash_handler])
+AM_CONDITIONAL([BUILD_CRASH_HANDLER], [test "x$build_crash_handler" = "xyes"])
+
 dnl Manual pages.
 AM_MISSING_PROG([HELP2MAN], [help2man])
 
