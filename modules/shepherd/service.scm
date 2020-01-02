@@ -485,9 +485,14 @@ is not already running, and will return SERVICE's canonical name in a list."
         (and (eq? root-service obj)
              (eq? key 'quit)
              (apply quit args))
-        (if (eq? key 'srfi-34)
-            (apply throw key args)                ;handled by callers
-            (report-exception the-action obj key args))))))
+
+        ;; Re-throw SRFI-34 exceptions that the caller will handle.
+        (cond ((eq? key 'srfi-34)                 ;Guile 2.x
+               (apply throw key args))
+              ((eq? key '%exception)              ;Guile 3.x
+               (raise-exception (car args)))
+              (else
+               (report-exception the-action obj key args)))))))
 
 ;; Display documentation about the service.
 (define-method (doc (obj <service>) . args)
