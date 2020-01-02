@@ -1,6 +1,6 @@
 ;; support.scm -- Various support facilities, used by herd and shepherd.
 ;; Copyright (C) 2014 A.Sassmannshausen <alex.sassmannshausen@gmail.com>
-;; Copyright (C) 2013, 2014, 2016, 2018 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014, 2016, 2018, 2020 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;; Copyright (C) 2016 Mathieu Lirzin <mthl@gnu.org>
 ;; Copyright (C) 2018 Danny Milosavljevic <dannym@scratchpost.org>
@@ -239,7 +239,7 @@ output port, and PROC's result is returned."
 (define* (display-version #:optional (program-name (program-name)))
   (local-output "~a (~a) ~a" program-name package-name Version)
   ;; TRANSLATORS: '~a' is a placeholder for the copyright year.
-  (local-output (l10n "Copyright (C) ~a the Shepherd authors") 2019)
+  (local-output (l10n "Copyright (C) ~a the Shepherd authors") 2020)
   (local-output (l10n "\
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.
