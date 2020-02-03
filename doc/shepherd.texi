@@ -6,7 +6,7 @@
 
 @include version.texi
 @set OLD-YEARS 2002, 2003
-@set NEW-YEARS 2013, 2016, 2018
+@set NEW-YEARS 2013, 2016, 2018, 2019, 2020
 
 @copying
 Copyright @copyright{} @value{OLD-YEARS} Wolfgang J@"ahrling@*
@@ -946,6 +946,17 @@ unless the @var{group} keyword argument is present and not false.
 @code{fork+exec-command} does the same as @code{exec-command}, but in
 a separate process whose PID it returns.
 @end deffn
+
+@defvr {Scheme Variable} default-environment-variables
+This parameter (@pxref{Parameters,,, guile, GNU Guile Reference Manual})
+specifies the default list of environment variables to be defined when
+the procedures above create a new process.
+
+It must be a list of strings where each string has the format
+@code{@var{name}=@var{value}}.  It defaults to what @code{environ}
+returns when the program starts (@pxref{Runtime Environment,
+@code{environ},, guile, GNU Guile Reference Manual}).
+@end defvr
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 

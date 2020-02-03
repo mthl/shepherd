@@ -1,5 +1,5 @@
 ;; service.scm -- Representation of services.
-;; Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018, 2019 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Järling <wolfgang@pro-linux.de>
 ;; Copyright (C) 2014 Alex Sassmannshausen <alex.sassmannshausen@gmail.com>
 ;; Copyright (C) 2016 Alex Kost <alezost@gmail.com>
@@ -70,6 +70,8 @@
             provided-by
             required-by
             handle-unknown
+
+            default-environment-variables
             make-forkexec-constructor
             make-kill-destructor
             exec-command
@@ -712,10 +714,10 @@ results."
                                passwd:dir)
                         (getcwd)))))
 
-(define (default-environment-variables)
-  "Return the list of environment variable name/value pairs that should be
-set when starting a service."
-  (environ))
+(define default-environment-variables
+  ;; The default list of environment variable name/value pairs that should be
+  ;; set when starting a service.
+  (make-parameter (environ)))
 
 (define* (read-pid-file file #:key (max-delay 5)
                         (validate-pid? #f))
