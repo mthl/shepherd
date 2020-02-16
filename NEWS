@@ -11,7 +11,7 @@ Copyright © 2013, 2014, 2016, 2018, 2019, 2020 Ludovic Courtès <ludo@gnu.org>
 
 Please send Shepherd bug reports to bug-guix@gnu.org.
 
-* Changes in version 0.6.2
+* Changes in version 0.7.0
 ** New crash handler allows shepherd as PID 1 to dump core on GNU/Linux
 ** (shepherd service) now exports ‘default-environment-variables’
 ** ‘make-forkexec-constructor’ no longer removes log file
