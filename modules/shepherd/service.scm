@@ -1392,7 +1392,7 @@ we want to receive these signals."
                  #t)
                (primitive-exit 0))))))
      (persistency
-      "Safe the current state of running and non-running services.
+      "Save the current state of running and non-running services.
 This status gets written into a file on termination, so that we can
 restore the status on next startup.  Optionally, you can pass a file
 name as argument that will be used to store the status."
@@ -1401,7 +1401,7 @@ name as argument that will be used to store the status."
                (when file
                  (set! persistency-state-file file))))
      (no-persistency
-      "Don't safe state in a file on exit."
+      "Don't save state in a file on exit."
       (lambda (running)
 	(set! persistency #f)))
      (cd
