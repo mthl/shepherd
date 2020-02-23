@@ -11,6 +11,7 @@
 @copying
 Copyright @copyright{} @value{OLD-YEARS} Wolfgang J@"ahrling@*
 Copyright @copyright{} @value{NEW-YEARS} Ludovic Courtès
+Copyright @copyright{} @value{2020} Brice Waegeneire
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -273,11 +274,6 @@ about the service, like what it provides, what it depends on and with which
 other services it conflicts (because they provide a virtual service that is
 also provided by that particular service).
 
-Another special action is @code{list-actions}, which displays a list
-of the additional actions a service provides; obviously, it can also
-be called when the service is not running.  Services cannot provide
-their own implementation of @code{list-actions}.
-
 A special service is @code{root}, which is used for controlling the
 Shepherd itself.  You can also reference to this service as
 @code{shepherd}.  It implements various actions.  For example, the
@@ -291,6 +287,20 @@ to load arbitrary code into the Shepherd at runtime, like this:
 
 @example
 herd load shepherd ~/additional-services.scm
+@end example
+
+In the same vein the special action @code{doc} describes it service when
+called without an argument or describes a service-specific action when
+called with the action as the additional arguments.  You can even get
+the list of the service-specific actions a service provides when using
+with the additional argument @code{list-actions}.
+@example
+$ herd doc root
+The root service is used to operate on shepherd itself.
+$ herd doc root list-actions
+root (help status halt power-off load eval unload reload daemonize persistency no-persistency cd restart)
+$ herd doc root action power-off
+power-off: Halt the system and turn it off.
 @end example
 
 This is enough now about the @command{herd} and @command{shepherd} programs, we
