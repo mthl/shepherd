@@ -26,6 +26,8 @@
 ;; Apache running when I am online, I made Apache conflict with the
 ;; ISDN setup.
 
+(use-modules (srfi srfi-1))
+
 ;; Laziness.
 (define (number->symbol num)
   (string->symbol (number->string num)))
@@ -122,7 +124,7 @@
   (loop default-terms))
 
 ;; Go into background.
-(action 'dmd 'daemonize)
+(action 'shepherd 'daemonize)
 
 ;; Setup internet, a mailer and a few terms.
 (for-each start
