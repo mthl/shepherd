@@ -208,7 +208,7 @@ service, you use the following, probably not very surprising, command:
 herd stop networking
 @end example
 
-There are two more actions you can perform on every service: The
+There are two more actions you can perform on every service: the
 actions @code{enable} and @code{disable} are used to prevent and allow
 starting of the particular service.  If a service is intended to be
 restarted whenever it terminates (how this can be done will not be
@@ -248,7 +248,7 @@ be available:
 herd reload-modules apache
 @end example
 
-The service-specific actions can only be used when the service is
+Service-specific actions can only be used when the service is
 started, i.e. the only thing you can do to a stopped service is
 starting it.  An exception exists, see below.  (If you may at some
 point find this too restrictive because you want to use variants of
