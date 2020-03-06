@@ -1,6 +1,6 @@
 # Makefile.am -- How to build and install the Shepherd.
 # Copyright © 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
-# Copyright © 2013, 2014, 2015, 2016, 2018, 2019 Ludovic Courtès <ludo@gnu.org>
+# Copyright © 2013, 2014, 2015, 2016, 2018, 2019, 2020 Ludovic Courtès <ludo@gnu.org>
 # Copyright © 2018 Carlo Zancanaro <carlo@zancanaro.id.au>
 #
 # This file is part of the GNU Shepherd.
@@ -109,13 +109,13 @@ AM_V_HELP2MAN_0 = @echo "  HELP2MAN" $@;
 HELP2MANFLAGS = --source=GNU --info-page=$(PACKAGE_TARNAME)
 gen_man = $(AM_V_HELP2MAN)LANGUAGE= $(HELP2MAN) $(HELP2MANFLAGS)
 
-doc/shepherd.1: modules/shepherd.scm
+doc/shepherd.1: modules/shepherd.scm configure.ac
 	$(gen_man) --output="$@" "$(top_builddir)/`basename "$@" .1`"
 
-doc/%.1: modules/shepherd/scripts/%.scm
+doc/%.1: modules/shepherd/scripts/%.scm configure.ac
 	$(gen_man) --output="$@" "$(top_builddir)/`basename "$@" .1`"
 
-doc/%.8: modules/shepherd/scripts/%.scm
+doc/%.8: modules/shepherd/scripts/%.scm configure.ac
 	$(gen_man) --section=8 --output="$@"	\
 	  "$(top_builddir)/`basename "$@" .8`"
 
