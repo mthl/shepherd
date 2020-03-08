@@ -903,7 +903,9 @@ the current directory to @var{directory}, changes the environment to
 @var{environment-variables} (using the @code{environ} procedure), sets the
 current user to @var{user} and the current group to @var{group} unless they
 are @code{#f}, and executes @var{command} (a list of strings.)  The result of
-the procedure will be the PID of the child process.
+the procedure will be the PID of the child process.  Note that this will
+not work as expected if the process ``daemonizes'' (forks); in that
+case, you will need to pass @code{#:pid-file}, as explained below.
 
 When @var{pid-file} is true, it must be the name of a PID file
 associated with the process being launched; the return value is the PID
