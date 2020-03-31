@@ -289,11 +289,11 @@ to load arbitrary code into the Shepherd at runtime, like this:
 herd load shepherd ~/additional-services.scm
 @end example
 
-In the same vein the special action @code{doc} describes it service when
-called without an argument or describes a service-specific action when
-called with the action as the additional arguments.  You can even get
-the list of the service-specific actions a service provides when using
-with the additional argument @code{list-actions}.
+In the same vein the special action @code{doc} describes its service
+when called without an argument or describes a service-specific action
+when called with the action as the additional arguments.  You can even
+get the list of the service-specific actions a service provides when
+using with the additional argument @code{list-actions}.
 @example
 $ herd doc root
 The root service is used to operate on shepherd itself.
