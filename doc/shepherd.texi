@@ -1238,9 +1238,9 @@ This chapter contains information about the design and the
 implementation details of the Shepherd for people who want to hack it.
 
 The GNU@tie{}Shepherd is developed by a group of people in connection
-with @uref{https://www.gnu.org/software/guix/, GuixSD}, GNU's advanced
-distribution, but it can be used on other distros as well.  You're very
-much welcome to join us!  You can report bugs to
+with @uref{https://www.gnu.org/software/guix/, Guix System}, GNU's
+advanced distribution, but it can be used on other distros as well.
+You're very much welcome to join us!  You can report bugs to
 @email{bug-guix@@gnu.org} and send patches or suggestions to
 @email{guix-devel@@gnu.org}.
 
