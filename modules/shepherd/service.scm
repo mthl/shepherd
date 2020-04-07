@@ -814,7 +814,7 @@ false."
              ;; Redirect stout and stderr to use LOG-FILE.
              (catch-system-error (close-fdes 1))
              (catch-system-error (close-fdes 2))
-             (dup2 (open-fdes log-file (logior O_CREAT O_WRONLY O_APPEND)) 1)
+             (dup2 (open-fdes log-file (logior O_CREAT O_WRONLY O_APPEND) #o640) 1)
              (dup2 1 2))
            (lambda (key . args)
              (format (current-error-port)
