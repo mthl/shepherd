@@ -777,12 +777,14 @@ daemon writing FILE is running in a separate PID namespace."
                        (group #f)
                        (log-file #f)
                        (directory (default-service-directory))
+                       (file-creation-mask #f)
                        (environment-variables (default-environment-variables)))
-  "Run COMMAND as the current process from DIRECTORY, and with
-ENVIRONMENT-VARIABLES (a list of strings like \"PATH=/bin\".)  File
-descriptors 1 and 2 are kept as is or redirected to LOG-FILE if it's true,
-whereas file descriptor 0 (standard input) points to /dev/null; all other file
-descriptors are closed prior to yielding control to COMMAND.
+  "Run COMMAND as the current process from DIRECTORY, with FILE-CREATION-MASK
+if it's true, and with ENVIRONMENT-VARIABLES (a list of strings like
+\"PATH=/bin\").  File descriptors 1 and 2 are kept as is or redirected to
+LOG-FILE if it's true, whereas file descriptor 0 (standard input) points to
+/dev/null; all other file descriptors are closed prior to yielding control to
+COMMAND.
 
 By default, COMMAND is run as the current user.  If the USER keyword
 argument is present and not false, change to USER immediately before
@@ -846,6 +848,9 @@ false."
            (print-exception (current-error-port) #f key args)
            (primitive-exit 1))))
 
+     (when file-creation-mask
+       (umask file-creation-mask))
+
      ;; As the last action, close file descriptors.  Doing it last makes
      ;; "error in the finalization thread: Bad file descriptor" issues
      ;; unlikely on 2.2.
@@ -877,6 +882,7 @@ false."
                             (group #f)
                             (log-file #f)
                             (directory (default-service-directory))
+                            (file-creation-mask #f)
                             (environment-variables
                              (default-environment-variables)))
   "Spawn a process that executed COMMAND as per 'exec-command', and return
@@ -892,6 +898,7 @@ its PID."
                       #:group group
                       #:log-file log-file
                       #:directory directory
+                      #:file-creation-mask file-creation-mask
                       #:environment-variables environment-variables)
         pid)))
 
@@ -902,13 +909,15 @@ its PID."
                                     (directory (default-service-directory))
                                     (environment-variables
                                      (default-environment-variables))
+                                    (file-creation-mask #f)
                                     (pid-file #f)
                                     (pid-file-timeout
                                      (default-pid-file-timeout))
                                     (log-file #f))
   "Return a procedure that forks a child process, closes all file
 descriptors except the standard output and standard error descriptors, sets
-the current directory to @var{directory}, changes the environment to
+the current directory to @var{directory}, sets the umask to
+@var{file-creation-mask} unless it is @code{#f}, changes the environment to
 @var{environment-variables} (using the @code{environ} procedure), sets the
 current user to @var{user} and the current group to @var{group} unless they
 are @code{#f}, and executes @var{command} (a list of strings.)  The result of
@@ -936,6 +945,7 @@ start."
                                   #:group group
                                   #:log-file log-file
                                   #:directory directory
+                                  #:file-creation-mask file-creation-mask
                                   #:environment-variables
                                   environment-variables)))
       (if pid-file

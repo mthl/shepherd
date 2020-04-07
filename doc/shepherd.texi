@@ -896,10 +896,12 @@ execution of the @var{command} was successful, @code{#t} if not.
   [#:pid-file #f] [#:pid-file-timeout (default-pid-file-timeout)] @
   [#:log-file #f] @
   [#:directory (default-service-directory)] @
+  [#:file-creation-mask #f] @
   [#:environment-variables (default-environment-variables)]
 Return a procedure that forks a child process, closes all file
 descriptors except the standard output and standard error descriptors, sets
-the current directory to @var{directory}, changes the environment to
+the current directory to @var{directory}, sets the umask to
+@var{file-creation-mask} unless it is @code{#f}, changes the environment to
 @var{environment-variables} (using the @code{environ} procedure), sets the
 current user to @var{user} and the current group to @var{group} unless they
 are @code{#f}, and executes @var{command} (a list of strings.)  The result of
@@ -937,13 +939,16 @@ procedures.
   [#:group #f] @
   [#:log-file #f] @
   [#:directory (default-service-directory)] @
+  [#:file-creation-mask #f] @
   [#:environment-variables (default-environment-variables)]
 @deffnx {procedure} fork+exec-command @var{command} @
   [#:user #f] @
   [#:group #f] @
   [#:directory (default-service-directory)] @
+  [#:file-creation-mask #f] @
   [#:environment-variables (default-environment-variables)]
-Run @var{command} as the current process from @var{directory}, and with
+Run @var{command} as the current process from @var{directory}, with
+@var{file-creation-mask} if it's true, and with
 @var{environment-variables} (a list of strings like @code{"PATH=/bin"}.)
 File descriptors 1 and 2 are kept as is or redirected to @var{log-file}
 if it's true, whereas file descriptor 0
