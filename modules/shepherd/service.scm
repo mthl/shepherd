@@ -29,6 +29,7 @@
   #:use-module (srfi srfi-34)
   #:use-module (srfi srfi-35)
   #:use-module (rnrs io ports)
+  #:use-module ((ice-9 control) #:select (call/ec))
   #:use-module (ice-9 match)
   #:use-module (ice-9 format)
   #:autoload   (ice-9 pretty-print) (truncated-print)

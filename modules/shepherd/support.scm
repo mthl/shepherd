@@ -25,7 +25,6 @@
   #:use-module (ice-9 match)
   #:export (buffering-mode
 
-            call/ec
             caught-error
             assert
             label
@@ -79,18 +78,6 @@
      (if-2.0 _IOFBF 'block))
     ((_ none)
      (if-2.0 _IONBF 'none))))
-
-;; Implement `call-with-escape-continuation' with `catch' and `throw'.
-;; FIXME: Multiple return values.
-(define (call/ec proc)
-  (let* ((catch-sym (gensym))
-	 (escape (lambda (value)
-		   (throw catch-sym value))))
-    (catch catch-sym
-      (lambda ()
-	(proc escape))
-      (lambda (sym value)
-	value))))
 
 ;; Report the caught error.
 ;; FIXME: Needs some more work.

@@ -20,6 +20,7 @@
 (define-module (shepherd args)
   #:use-module (oop goops)
   #:use-module (srfi srfi-1)
+  #:use-module ((ice-9 control) #:select (call/ec))
   #:use-module (shepherd support)
   #:use-module (shepherd config)
   #:export (<option>
