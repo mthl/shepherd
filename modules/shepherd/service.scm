@@ -952,7 +952,8 @@ start."
                                       #:max-delay pid-file-timeout
                                       #:validate-pid? #t)
                   (#f
-                   (catch-system-error (kill pid SIGTERM))
+                   ;; Send SIGTERM to the whole process group.
+                   (catch-system-error (kill (- pid) SIGTERM))
                    #f)
                   ((? integer? pid)
                    pid))

@@ -1,5 +1,5 @@
 # GNU Shepherd --- Test the #:pid-file option of 'make-forkexec-constructor'.
-# Copyright © 2016, 2019 Ludovic Courtès <ludo@gnu.org>
+# Copyright © 2016, 2019, 2020 Ludovic Courtès <ludo@gnu.org>
 #
 # This file is part of the GNU Shepherd.
 #
@@ -40,6 +40,15 @@ cat > "$conf"<<EOF
   ;; wpa_supplicant 2.7 for instance.
   '("$SHELL" "-c" "echo > $PWD/$service_pid ; sleep 1.5; echo \$\$ > $PWD/$service_pid ; exec sleep 600"))
 
+(define %daemon-command
+  ;; Emulate a daemon by forking and exiting right away.
+  (quasiquote ("guile" "-c"
+    ,(object->string '(when (zero? (primitive-fork))
+                        (call-with-output-file "$PWD/$service_pid"
+                          (lambda (port)
+                            (display (getpid) port)))
+                        (sleep 100))))))
+
 (register-services
  (make <service>
    ;; A service that never produces its PID file, yet leaves a process
@@ -63,6 +72,16 @@ cat > "$conf"<<EOF
                                       #:pid-file "$PWD/$service_pid"
                                       #:pid-file-timeout 6)
    #:stop  (make-kill-destructor)
+   #:respawn? #f)
+
+ (make <service>
+   ;; This one "daemonizes", fails to create a PID file, but leaves
+   ;; a child process behind it.
+   #:provides '(test-daemonizes)
+   #:start (make-forkexec-constructor %daemon-command
+                                      #:pid-file "/does-not-exist"
+                                      #:pid-file-timeout 6)
+   #:stop  (make-kill-destructor)
    #:respawn? #f))
 EOF
 
@@ -84,6 +103,18 @@ $herd status test | grep stopped
 test -f "$service_pid"
 
 # Make sure it did not leave a process behind it.
+if kill -0 `cat "$service_pid"`
+then false; else true; fi
+
+# Now a service that "daemonizes" but fails to start.
+rm -f "$service_pid"
+if $herd start test-daemonizes
+then false; else true; fi
+
+$herd status test-daemonizes | grep stopped
+
+# Make sure it did not leave its child process behind it.
+test -f "$service_pid"
 if kill -0 `cat "$service_pid"`
 then false; else true; fi
 
