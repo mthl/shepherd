@@ -895,15 +895,18 @@ its PID."
                       #:environment-variables environment-variables)
         pid)))
 
-(define make-forkexec-constructor
-  (let ((warn-deprecated-form
-         ;; Until 0.1, this procedure took a rest list.
-         (lambda ()
-           (issue-deprecation-warning
-            "This 'make-forkexec-constructor' form is deprecated; use
- (make-forkexec-constructor '(\"PROGRAM\" \"ARGS\"...)."))))
-    (case-lambda*
-     "Return a procedure that forks a child process, closes all file
+(define* (make-forkexec-constructor command
+                                    #:key
+                                    (user #f)
+                                    (group #f)
+                                    (directory (default-service-directory))
+                                    (environment-variables
+                                     (default-environment-variables))
+                                    (pid-file #f)
+                                    (pid-file-timeout
+                                     (default-pid-file-timeout))
+                                    (log-file #f))
+  "Return a procedure that forks a child process, closes all file
 descriptors except the standard output and standard error descriptors, sets
 the current directory to @var{directory}, changes the environment to
 @var{environment-variables} (using the @code{environ} procedure), sets the
@@ -916,53 +919,36 @@ the process being launched; the return value is the PID read from that file,
 once that file has been created.  If @var{pid-file} does not show up in less
 than @var{pid-file-timeout} seconds, the service is considered as failing to
 start."
-     ((command #:key
-               (user #f)
-               (group #f)
-               (directory (default-service-directory))
-               (environment-variables (default-environment-variables))
-               (pid-file #f)
-               (pid-file-timeout (default-pid-file-timeout))
-               (log-file #f))
-      (let ((command (if (string? command)
-                         (begin
-                           (warn-deprecated-form)
-                           (list command))
-                         command)))
-        (lambda args
-          (define (clean-up file)
-            (when file
-              (catch 'system-error
-                (lambda ()
-                  (delete-file file))
-                (lambda args
-                  (unless (= ENOENT (system-error-errno args))
-                    (apply throw args))))))
+  (lambda args
+    (define (clean-up file)
+      (when file
+        (catch 'system-error
+          (lambda ()
+            (delete-file file))
+          (lambda args
+            (unless (= ENOENT (system-error-errno args))
+              (apply throw args))))))
 
-          (clean-up pid-file)
+    (clean-up pid-file)
 
-          (let ((pid (fork+exec-command command
-                                        #:user user
-                                        #:group group
-                                        #:log-file log-file
-                                        #:directory directory
-                                        #:environment-variables
-                                        environment-variables)))
-            (if pid-file
-                (match (read-pid-file pid-file
-                                      #:max-delay pid-file-timeout
-                                      #:validate-pid? #t)
-                  (#f
-                   ;; Send SIGTERM to the whole process group.
-                   (catch-system-error (kill (- pid) SIGTERM))
-                   #f)
-                  ((? integer? pid)
-                   pid))
-                pid)))))
-     ((program . program-args)
-      ;; The old form, documented until 0.1 included.
-      (warn-deprecated-form)
-      (make-forkexec-constructor (cons program program-args))))))
+    (let ((pid (fork+exec-command command
+                                  #:user user
+                                  #:group group
+                                  #:log-file log-file
+                                  #:directory directory
+                                  #:environment-variables
+                                  environment-variables)))
+      (if pid-file
+          (match (read-pid-file pid-file
+                                #:max-delay pid-file-timeout
+                                #:validate-pid? #t)
+            (#f
+             ;; Send SIGTERM to the whole process group.
+             (catch-system-error (kill (- pid) SIGTERM))
+             #f)
+            ((? integer? pid)
+             pid))
+          pid))))
 
 (define* (make-kill-destructor #:optional (signal SIGTERM))
   "Return a procedure that sends SIGNAL to the process group of the PID given
