@@ -1274,9 +1274,8 @@ file when persistence is enabled."
 unexpectedly stopped running. This procedure is used as a fallback on systems
 where prctl/PR_SET_CHILD_SUBREAPER is unsupported."
   (define (process-exists? pid)
-    (catch #t
-      (lambda () (kill pid 0) #t)
-      (lambda _ #f)))
+    (catch-system-error (kill pid 0) #t))
+
   (for-each-service (lambda (service)
                       (let ((running (slot-ref service 'running)))
                         (when (and (integer? running)
