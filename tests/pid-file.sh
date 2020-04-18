@@ -34,11 +34,7 @@ cat > "$conf"<<EOF
 (use-modules (ice-9 match))
 
 (define %command
-  ;; Purposefully introduce a delay between the time the PID file
-  ;; is created and the time it actually contains a valid PID.  This
-  ;; simulates PID files not created atomically, as is the case with
-  ;; wpa_supplicant 2.7 for instance.
-  '("$SHELL" "-c" "echo > $PWD/$service_pid ; sleep 1.5; echo \$\$ > $PWD/$service_pid ; exec sleep 600"))
+  '("$SHELL" "-c" "echo \$\$ > $PWD/$service_pid ; exec sleep 600"))
 
 (define %daemon-command
   ;; Emulate a daemon by forking and exiting right away.
@@ -46,6 +42,19 @@ cat > "$conf"<<EOF
     ,(object->string '(when (zero? (primitive-fork))
                         (call-with-output-file "$PWD/$service_pid"
                           (lambda (port)
+                            (display (getpid) port)))
+                        (sleep 100))))))
+
+(define %daemon-command-successful
+  ;; Purposefully introduce a delay between the time the PID file
+  ;; is created and the time it actually contains a valid PID.  This
+  ;; simulates PID files not created atomically, as is the case with
+  ;; wpa_supplicant 2.7 for instance.
+  (quasiquote ("guile" "-c"
+    ,(object->string '(when (zero? (primitive-fork))
+                        (call-with-output-file "$PWD/$service_pid"
+                          (lambda (port)
+                            (usleep 1500000)
                             (display (getpid) port)))
                         (sleep 100))))))
 
@@ -68,7 +77,7 @@ cat > "$conf"<<EOF
  (make <service>
    ;; Same one, but actually produces the PID file.
    #:provides '(test-works)
-   #:start (make-forkexec-constructor %command
+   #:start (make-forkexec-constructor %daemon-command-successful
                                       #:pid-file "$PWD/$service_pid"
                                       #:pid-file-timeout 6)
    #:stop  (make-kill-destructor)

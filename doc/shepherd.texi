@@ -919,8 +919,10 @@ created if it does not exist, otherwise it is appended to.
 @end deffn
 
 @deffn {procedure} make-kill-destructor [@var{signal}]
-Returns a procedure that sends @var{signal} to the pid which it takes
-as argument.  This @emph{does} work together with respawning services,
+Return a procedure that sends @var{signal} to the process group of the
+PID given as argument, where @var{signal} defaults to @code{SIGTERM}.
+
+This @emph{does} work together with respawning services,
 because in that case the @code{stop} method of the @code{<service>}
 class sets the @code{running} slot to @code{#f} before actually
 calling the destructor; if it would not do that, killing the process

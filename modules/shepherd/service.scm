@@ -963,13 +963,16 @@ start."
       (warn-deprecated-form)
       (make-forkexec-constructor (cons program program-args))))))
 
-;; Produce a destructor that sends SIGNAL to the process with the pid
-;; given as argument, where SIGNAL defaults to `SIGTERM'.
-(define make-kill-destructor
-  (lambda* (#:optional (signal SIGTERM))
-    (lambda (pid . args)
-      (kill pid signal)
-      #f)))
+(define* (make-kill-destructor #:optional (signal SIGTERM))
+  "Return a procedure that sends SIGNAL to the process group of the PID given
+as argument, where SIGNAL defaults to `SIGTERM'."
+  (lambda (pid . args)
+    ;; Kill the whole process group PID belongs to.  Don't assume that PID
+    ;; is a process group ID: that's not the case when using #:pid-file,
+    ;; where the process group ID is the PID of the process that
+    ;; "daemonized".
+    (kill (- (getpgid pid)) signal)
+    #f))
 
 ;; Produce a constructor that executes a command.
 (define (make-system-constructor . command)
