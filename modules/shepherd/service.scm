@@ -77,6 +77,7 @@
             make-kill-destructor
             exec-command
             fork+exec-command
+            default-pid-file-timeout
             read-pid-file
             make-system-constructor
             make-system-destructor
@@ -720,7 +721,11 @@ results."
   ;; set when starting a service.
   (make-parameter (environ)))
 
-(define* (read-pid-file file #:key (max-delay 5)
+(define default-pid-file-timeout
+  ;; Maximum number of seconds to wait for a PID file to show up.
+  (make-parameter 5))
+
+(define* (read-pid-file file #:key (max-delay (default-pid-file-timeout))
                         (validate-pid? #f))
   "Wait for MAX-DELAY seconds for FILE to show up, and read its content as a
 number.  Return #f if FILE was not created or does not contain a number;
@@ -890,10 +895,6 @@ its PID."
                       #:environment-variables environment-variables)
         pid)))
 
-(define %pid-file-timeout
-  ;; Maximum number of seconds we wait for a PID file to show up.
-  5)
-
 (define make-forkexec-constructor
   (let ((warn-deprecated-form
          ;; Until 0.1, this procedure took a rest list.
@@ -921,7 +922,7 @@ start."
                (directory (default-service-directory))
                (environment-variables (default-environment-variables))
                (pid-file #f)
-               (pid-file-timeout %pid-file-timeout)
+               (pid-file-timeout (default-pid-file-timeout))
                (log-file #f))
       (let ((command (if (string? command)
                          (begin

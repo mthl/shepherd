@@ -893,7 +893,7 @@ execution of the @var{command} was successful, @code{#t} if not.
 @deffn {procedure} make-forkexec-constructor @var{command} @
   [#:user #f] @
   [#:group #f] @
-  [#:pid-file #f] [#:pid-file-timeout %pid-file-timeout] @
+  [#:pid-file #f] [#:pid-file-timeout (default-pid-file-timeout)] @
   [#:log-file #f] @
   [#:directory (default-service-directory)] @
   [#:environment-variables (default-environment-variables)]
@@ -970,6 +970,12 @@ It must be a list of strings where each string has the format
 @code{@var{name}=@var{value}}.  It defaults to what @code{environ}
 returns when the program starts (@pxref{Runtime Environment,
 @code{environ},, guile, GNU Guile Reference Manual}).
+@end defvr
+
+@defvr {Scheme Variable} default-pid-file-timeout
+This parameter (@pxref{Parameters,,, guile, GNU Guile Reference Manual})
+specified the default PID file timeout in seconds, when
+@code{#:pid-file} is used (see above).  It defaults to 5 seconds.
 @end defvr
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
