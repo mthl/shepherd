@@ -172,7 +172,7 @@ ctrlaltdel(8) and see kernel/reboot.c in Linux."
     (lambda (pid)
       "Return the process group ID for process PID."
       (let-values (((result err) (proc pid)))
-        (if (= 1 result)
+        (if (= -1 result)
             (throw 'system-error "getpgid" "~A"
                    (list (strerror err))
                    (list err))
