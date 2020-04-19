@@ -1124,18 +1124,6 @@ warning messages.  The current implementation is not very good,
 though.
 @end deffn
 
-@deffn {procedure} call/cc proc
-An alias for @code{call-with-current-continuation}.
-@end deffn
-
-@deffn {procedure} call/ec proc
-A simplistic implementation of the nonstandard, but popular procedure
-@code{call-with-escape-continuation}, i.e. a @code{call/cc} for
-outgoing continuations only.  Note that the variant included in the Shepherd is
-not aware of @code{dynamic-wind} at all and does not yet support
-returning multiple values.
-@end deffn
-
 @cindex system errors
 @deffn {macro} without-system-error expr@dots{}
 Evaluates the @var{expr}s, not going further if a system error occurs,
