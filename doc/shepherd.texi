@@ -135,7 +135,7 @@ reference section.
 
 Note that all the full file names in the following text are based on
 the assumption that you have installed the Shepherd with an empty prefix.  If
-your the Shepherd installation for example resides in @code{/usr/local}
+your Shepherd installation for example resides in @code{/usr/local}
 instead, add this directory name in front of the absolute file names
 mentioned below.
 
