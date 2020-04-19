@@ -851,30 +851,23 @@ false."
      (when file-creation-mask
        (umask file-creation-mask))
 
-     ;; As the last action, close file descriptors.  Doing it last makes
-     ;; "error in the finalization thread: Bad file descriptor" issues
-     ;; unlikely on 2.2.
-     (let loop ((i 3))
-       (when (< i max-fd)
-         ;; First try to close any ports associated with file descriptor I.
-         ;; Otherwise the finalization thread might get around to closing
-         ;; those ports eventually, which will raise an EBADF exception (on
-         ;; 2.2), leading to messages like "error in the finalization
-         ;; thread: Bad file descriptor".
-         (for-each (lambda (port)
-                     (catch-system-error (close-port port)))
-                   (fdes->ports i))
-         (catch-system-error (close-fdes i))
-         (loop (+ i 1)))))
+     ;; Last, close all file descriptors.  Do that after shutting down the
+     ;; finalization thread since we will close its pipe, leading to
+     ;; "error in the finalization thread: Bad file descriptor".
+     (without-automatic-finalization
+      (let loop ((i 3))
+        (when (< i max-fd)
+          (catch-system-error (close-fdes i))
+          (loop (+ i 1))))
 
-     (catch 'system-error
-       (lambda ()
-         (apply execlp program program args))
-       (lambda args
-         (format (current-error-port)
-                 "exec of ~s failed: ~a~%"
-                 program (strerror (system-error-errno args)))
-         (primitive-exit 1))))))
+      (catch 'system-error
+        (lambda ()
+          (apply execlp program program args))
+        (lambda args
+          (format (current-error-port)
+                  "exec of ~s failed: ~a~%"
+                  program (strerror (system-error-errno args)))
+          (primitive-exit 1))))))))
 
 (define* (fork+exec-command command
                             #:key
