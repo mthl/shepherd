@@ -1,5 +1,5 @@
 ;; shepherd.scm -- The daemon shepherd.
-;; Copyright (C) 2013, 2014, 2016, 2018, 2019 Ludovic Courtès <ludo@gnu.org>
+;; Copyright (C) 2013, 2014, 2016, 2018, 2019, 2020 Ludovic Courtès <ludo@gnu.org>
 ;; Copyright (C) 2002, 2003 Wolfgang Jährling <wolfgang@pro-linux.de>
 ;; Copyright (C) 2018 Carlo Zancanaro <carlo@zancanaro.id.au>
 ;; Copyright (C) 2018 Danny Milosavljevic <dannym@scratchpost.org>
@@ -255,15 +255,6 @@ socket file at FILE-NAME upon exit of PROC.  Return the values of PROC."
                (apply format #f (gettext (cadr args)) (caddr args))
                (quit 1))))
 
-      (when (provided? 'threads)
-        ;; XXX: This terrible hack allows us to make sure that signal handlers
-        ;; get a chance to run in a timely fashion.  Without it, after an EINTR,
-        ;; we could restart the accept(2) call below before the corresponding
-        ;; async has been queued.  See the thread at
-        ;; <https://lists.gnu.org/archive/html/guile-devel/2013-07/msg00004.html>.
-        (sigaction SIGALRM (lambda _ (alarm 1)))
-        (alarm 1))
-
       ;; Ignore SIGPIPE so that we don't die if a client closes the connection
       ;; prematurely.
       (sigaction SIGPIPE SIG_IGN)
@@ -292,11 +283,22 @@ socket file at FILE-NAME upon exit of PROC.  Return the values of PROC."
                     (setvbuf command-source (buffering-mode block) 1024)
                     (process-connection command-source))
                    (_ #f)))
-               (match (select (list sock) (list) (list) (if poll-services? 0.5 #f))
+
+               ;; XXX: Until we use signalfd(2), there's always a time window
+               ;; before 'select' during which a handler async can be queued
+               ;; but not executed.  Work around it by exiting 'select' every
+               ;; few seconds.
+               (match (select (list sock) (list) (list)
+                              (if poll-services? 0.5 30))
                  (((sock) _ _)
                   (read-from sock))
                  (_
-                  #f))
+                  ;; 'select' returned an empty set, probably due to EINTR.
+                  ;; Explicitly call the SIGCHLD handler because we cannot be
+                  ;; sure the async will be queued and executed before we call
+                  ;; 'select' again.
+                  (handle-SIGCHLD)))
+
                (when poll-services?
                  (check-for-dead-services))
                (next-command))))))))

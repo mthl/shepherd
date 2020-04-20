@@ -217,3 +217,20 @@ Turning finalization off shuts down the finalization thread as a side effect."
      ;; Nothing to do here: Guile 2.0 does not have a separate finalization
      ;; thread.
      (begin exp ...))))
+
+(cond-expand
+  ((and guile-2 (not guile-2.2))
+   ;; On Guile 2.0, 'select' throws upon EINTR or EAGAIN.  The trick below
+   ;; enables the sane behavior found on 2.2/3.0.
+   (set! select
+     (let ((real-select select))
+       (lambda args
+         (catch 'system-error
+           (lambda ()
+             (apply real-select args))
+           (lambda args
+             (if (memv (system-error-errno args) (list EINTR EAGAIN))
+                 '(() () ())
+                 (apply throw args))))))))
+  (else #t))
+

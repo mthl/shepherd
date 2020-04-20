@@ -880,7 +880,7 @@ false."
                              (default-environment-variables)))
   "Spawn a process that executed COMMAND as per 'exec-command', and return
 its PID."
-  ;; Install the SIGCHLD handler if this is the first fork+exec-command call
+  ;; Install the SIGCHLD handler if this is the first fork+exec-command call.
   (unless %sigchld-handler-installed?
     (sigaction SIGCHLD handle-SIGCHLD SA_NOCLDSTOP)
     (set! %sigchld-handler-installed? #t))
@@ -1063,15 +1063,11 @@ returned in unspecified."
       (lambda ()
         (waitpid what flags))
       (lambda args
-        ;; Did we get ECHILD or something?  If we did, that's a problem,
-        ;; because this procedure is supposed to be called only upon
-        ;; SIGCHLD.
-        (let ((errno (system-error-errno args)))
-          (local-output (l10n "warning: 'waitpid' ~a failed unexpectedly: ~a")
-                        what (strerror errno))
-          '(0 . #f))))))
+        (if (memv (system-error-errno args) (list ECHILD EINTR))
+            '(0 . #f)
+            (apply throw args))))))
 
-(define (handle-SIGCHLD signum)
+(define* (handle-SIGCHLD #:optional (signum SIGCHLD))
   "Handle SIGCHLD, possibly by respawning the service that just died, or
 otherwise by updating its state."
   (let loop ()
