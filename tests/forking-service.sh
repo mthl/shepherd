@@ -1,5 +1,5 @@
 # GNU Shepherd --- Test detecting a forked process' termination
-# Copyright © 2016 Ludovic Courtès <ludo@gnu.org>
+# Copyright © 2016, 2020 Ludovic Courtès <ludo@gnu.org>
 # Copyright © 2018 Carlo Zancanaro <carlo@zancanaro.id.au>
 #
 # This file is part of the GNU Shepherd.
@@ -45,6 +45,9 @@ function cleanup
 trap cleanup EXIT
 
 cat > "$conf"<<EOF
+;; Leave a timeout long enough for slow machines.
+(default-pid-file-timeout 10)
+
 (define %command
   '("$SHELL" "-c" "sleep 600 & echo \$! > $PWD/$service_pid"))
 
