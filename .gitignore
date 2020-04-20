@@ -61,6 +61,7 @@ Makefile.in
 /po/shepherd.pot
 /po/stamp-po
 /po/*.mo
+/po/*.gmo
 /doc/shepherd.aux
 /doc/shepherd.cp
 /doc/shepherd.cps
@@ -74,3 +75,5 @@ Makefile.in
 /doc/shepherd.tps
 /doc/shepherd.vr
 /doc/shepherd.vrs
+/ABOUT-NLS
+/etc/crash-handler.so
