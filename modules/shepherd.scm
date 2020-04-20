@@ -276,6 +276,11 @@ socket file at FILE-NAME upon exit of PROC.  Return the values of PROC."
                (#t (display (getpid)))
                (_  #t))
 
+             ;; XXX: This call mostly to resolve 'handle-SIGCHLD' upfront.
+             ;; This works around Guile 3.0.2 occasionally failing with:
+             ;; "Failed to autoload handle-SIGCHLD in (ice-9 readline):"
+             (handle-SIGCHLD)
+
              (let next-command ()
                (define (read-from sock)
                  (match (accept sock)
