@@ -213,7 +213,7 @@ Turning finalization off shuts down the finalization thread as a side effect."
            (%set-automatic-finalization-enabled?! enabled?))))))
 
   (else
-   (define-syntax-rule (without-automatic-finalization exp)
+   (define-syntax-rule (without-automatic-finalization exp ...)
      ;; Nothing to do here: Guile 2.0 does not have a separate finalization
      ;; thread.
-     exp)))
+     (begin exp ...))))
