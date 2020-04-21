@@ -11,6 +11,25 @@ Copyright © 2013, 2014, 2016, 2018, 2019, 2020 Ludovic Courtès <ludo@gnu.org>
 
 Please send Shepherd bug reports to bug-guix@gnu.org.
 
+* Changes in version 0.8.0
+** Kill the whole process group when the PID file doesn’t show up
+   (<https://bugs.gnu.org/40672>)
+** ‘make-kill-destructor’ kills the process group
+** New ‘default-pid-file-timeout’ SRFI-39 parameter
+** New #:file-creation-mask parameter for ‘make-forkexec-constructor’
+** ‘make-forkexec-constructor’ creates log files as #o640
+   (<https://bugs.gnu.org/40405>)
+** Improve documentation and examples
+** Ensure man pages are up to date
+   (<https://bugs.gnu.org/39694>)
+** Fix compilation on systems without ‘prctl’ such as GNU/Hurd
+** Remove kludge that would send SIGALRM every second
+** Address “error in finalization thread” warning
+** ‘make-forkexec-constructor’ no longer supports old calling convention
+
+The first argument must be a list of strings.  Passing several strings has
+been deprecated since 0.1.
+
 * Changes in version 0.7.0
 ** New crash handler allows shepherd as PID 1 to dump core on GNU/Linux
 ** (shepherd service) now exports ‘default-environment-variables’
