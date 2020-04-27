@@ -222,6 +222,7 @@ TESTS =						\
   tests/misbehaved-client.sh			\
   tests/no-home.sh				\
   tests/pid-file.sh				\
+  tests/file-creation-mask.sh			\
   tests/status-sexp.sh				\
   tests/forking-service.sh			\
   tests/one-shot.sh				\
