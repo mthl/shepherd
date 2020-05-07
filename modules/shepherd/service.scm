@@ -5,6 +5,7 @@
 ;; Copyright (C) 2016 Alex Kost <alezost@gmail.com>
 ;; Copyright (C) 2018 Carlo Zancanaro <carlo@zancanaro.id.au>
 ;; Copyright (C) 2019 Ricardo Wurmus <rekado@elephly.net>
+;; Copyright (C) 2020 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;
 ;; This file is part of the GNU Shepherd.
 ;;
@@ -884,7 +885,18 @@ its PID."
   (unless %sigchld-handler-installed?
     (sigaction SIGCHLD handle-SIGCHLD SA_NOCLDSTOP)
     (set! %sigchld-handler-installed? #t))
-  (let ((pid (primitive-fork)))
+
+  ;; When forking a process, the signal handlers are inherited, until it
+  ;; forks. If SIGTERM is received by the forked process, before it calls
+  ;; execv, the installed SIGTERM handler, stopping Shepherd will be called.
+  ;; To avoid this, save the SIGTERM handler, disable it, and restore it once,
+  ;; the process has been forked. This way, the forked process will use the
+  ;; default SIGTERM handler stopping the process.
+  (let ((term-handler (match (sigaction SIGTERM)
+                        ((proc . _)
+                         proc)))
+        (pid (and (sigaction SIGTERM SIG_DFL)
+                  (primitive-fork))))
     (if (zero? pid)
         (exec-command command
                       #:user user
@@ -893,7 +905,10 @@ its PID."
                       #:directory directory
                       #:file-creation-mask file-creation-mask
                       #:environment-variables environment-variables)
-        pid)))
+        (begin
+          ;; Restore the initial SIGTERM handler.
+          (sigaction SIGTERM term-handler)
+          pid))))
 
 (define* (make-forkexec-constructor command
                                     #:key
@@ -957,11 +972,15 @@ start."
   "Return a procedure that sends SIGNAL to the process group of the PID given
 as argument, where SIGNAL defaults to `SIGTERM'."
   (lambda (pid . args)
-    ;; Kill the whole process group PID belongs to.  Don't assume that PID
-    ;; is a process group ID: that's not the case when using #:pid-file,
-    ;; where the process group ID is the PID of the process that
-    ;; "daemonized".
-    (kill (- (getpgid pid)) signal)
+    ;; Kill the whole process group PID belongs to.  Don't assume that PID is
+    ;; a process group ID: that's not the case when using #:pid-file, where
+    ;; the process group ID is the PID of the process that "daemonized".  If
+    ;; this procedure is called, between the process fork and exec, the PGID
+    ;; will still be zero (the Shepherd PGID). In that case, use the PID.
+    (let ((pgid (getpgid pid)))
+      (if (= (getpgid 0) pgid)
+          (kill pid signal) ;don't kill ourself
+          (kill (- pgid) signal)))
     #f))
 
 ;; Produce a constructor that executes a command.

@@ -71,6 +71,17 @@ cat > "$conf"<<EOF
                                       #:pid-file "$PWD/$service2_pid")
    #:stop  (make-kill-destructor)
    #:respawn? #t))
+
+(define %command3
+  '("$SHELL" "-c" "sleep 600"))
+
+(register-services
+ (make <service>
+   ;; A service that forks into a different process.
+   #:provides '(test3)
+   #:start (make-forkexec-constructor %command3)
+   #:stop  (make-kill-destructor)
+   #:respawn? #t))
 EOF
 cat $conf
 
@@ -113,3 +124,10 @@ sleep 1;
 $herd status test2 | grep started
 test "`cat $PWD/$service2_started`" = "started
 started"
+
+# Try to trigger eventual race conditions, when killing a process between fork
+# and execv calls.
+for i in `seq 1 50`
+do
+    $herd restart test3
+done
