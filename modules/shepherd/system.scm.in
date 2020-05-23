@@ -51,8 +51,8 @@ the returned procedure is called."
                           #:return-errno? #t))
     (lambda args
       (lambda _
-        (error (format #f "~a: syscall->procedure failed: ~s"
-                       name args))))))
+        (throw 'system-error name  "~A" (list (strerror ENOSYS))
+               (list ENOSYS))))))
 
 (define %libc-reboot
   ;; libc's 'reboot' function as declared in <sys/reboot.h>.
@@ -106,20 +106,15 @@ ctrlaltdel(8) and see kernel/reboot.c in Linux."
 (define PR_SET_CHILD_SUBREAPER @PR_SET_CHILD_SUBREAPER@)
 
 (define prctl
-  (if (false-if-exception (dynamic-func "prctl" (dynamic-link)))
-      (let ((proc (syscall->procedure long "prctl" (list int int))))
-        (lambda (process operation)
-          "Perform an operation on the given process"
-          (let-values (((result err) (proc process operation)))
-            (if (= -1 result)
-                (throw 'system-error "prctl" "~A"
-                       (list (strerror err))
-                       (list err))
-                result))))
-      (lambda (process operation)
-        ;; Libc lacks 'prctl', as is the case on GNU/Hurd.
-        (throw 'system-error "prctl" "~A" (list strerror ENOSYS)
-               (list ENOSYS)))))
+  (let ((proc (syscall->procedure long "prctl" (list int int))))
+    (lambda (process operation)
+      "Perform an operation on the given process"
+      (let-values (((result err) (proc process operation)))
+        (if (= -1 result)
+            (throw 'system-error "prctl" "~A"
+                   (list (strerror err))
+                   (list err))
+            result)))))
 
 (define (max-file-descriptors)
   "Return the maximum number of open file descriptors allowed."
