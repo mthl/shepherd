@@ -6,6 +6,7 @@
 ;; Copyright (C) 2018 Carlo Zancanaro <carlo@zancanaro.id.au>
 ;; Copyright (C) 2019 Ricardo Wurmus <rekado@elephly.net>
 ;; Copyright (C) 2020 Mathieu Othacehe <m.othacehe@gmail.com>
+;; Copyright (C) 2020 Oleg Pykhalov <go.wigust@gmail.com>
 ;;
 ;; This file is part of the GNU Shepherd.
 ;;
@@ -773,10 +774,15 @@ daemon writing FILE is running in a separate PID namespace."
               (try-again)
               (apply throw args)))))))
 
+(define (format-supplementary-groups supplementary-groups)
+  (list->vector (map (lambda (group) (group:gid (getgr group)))
+                     supplementary-groups)))
+
 (define* (exec-command command
                        #:key
                        (user #f)
                        (group #f)
+                       (supplementary-groups '())
                        (log-file #f)
                        (directory (default-service-directory))
                        (file-creation-mask #f)
@@ -832,7 +838,7 @@ false."
        (catch #t
          (lambda ()
            ;; Clear supplementary groups.
-           (setgroups #())
+           (setgroups (format-supplementary-groups supplementary-groups))
            (setgid (group:gid (getgr group))))
          (lambda (key . args)
            (format (current-error-port)
@@ -879,6 +885,7 @@ false."
                             #:key
                             (user #f)
                             (group #f)
+                            (supplementary-groups '())
                             (log-file #f)
                             (directory (default-service-directory))
                             (file-creation-mask #f)
@@ -909,6 +916,7 @@ its PID."
             (exec-command command
                           #:user user
                           #:group group
+                          #:supplementary-groups supplementary-groups
                           #:log-file log-file
                           #:directory directory
                           #:file-creation-mask file-creation-mask
@@ -919,6 +927,7 @@ its PID."
                                     #:key
                                     (user #f)
                                     (group #f)
+                                    (supplementary-groups '())
                                     (directory (default-service-directory))
                                     (environment-variables
                                      (default-environment-variables))
@@ -956,6 +965,7 @@ start."
     (let ((pid (fork+exec-command command
                                   #:user user
                                   #:group group
+                                  #:supplementary-groups supplementary-groups
                                   #:log-file log-file
                                   #:directory directory
                                   #:file-creation-mask file-creation-mask

@@ -11,7 +11,8 @@
 @copying
 Copyright @copyright{} @value{OLD-YEARS} Wolfgang J@"ahrling@*
 Copyright @copyright{} @value{NEW-YEARS} Ludovic Courtès@*
-Copyright @copyright{} 2020 Brice Waegeneire
+Copyright @copyright{} 2020 Brice Waegeneire@*
+Copyright @copyright{} 2020 Oleg Pykhalov
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -893,21 +894,24 @@ execution of the @var{command} was successful, @code{#t} if not.
 @deffn {procedure} make-forkexec-constructor @var{command} @
   [#:user #f] @
   [#:group #f] @
+  [#:supplementary-groups '()] @
   [#:pid-file #f] [#:pid-file-timeout (default-pid-file-timeout)] @
   [#:log-file #f] @
   [#:directory (default-service-directory)] @
   [#:file-creation-mask #f] @
   [#:environment-variables (default-environment-variables)]
 Return a procedure that forks a child process, closes all file
-descriptors except the standard output and standard error descriptors, sets
-the current directory to @var{directory}, sets the umask to
-@var{file-creation-mask} unless it is @code{#f}, changes the environment to
-@var{environment-variables} (using the @code{environ} procedure), sets the
-current user to @var{user} and the current group to @var{group} unless they
-are @code{#f}, and executes @var{command} (a list of strings.)  The result of
-the procedure will be the PID of the child process.  Note that this will
-not work as expected if the process ``daemonizes'' (forks); in that
-case, you will need to pass @code{#:pid-file}, as explained below.
+descriptors except the standard output and standard error descriptors,
+sets the current directory to @var{directory}, sets the umask to
+@var{file-creation-mask} unless it is @code{#f}, changes the environment
+to @var{environment-variables} (using the @code{environ} procedure),
+sets the current user to @var{user} the current group to @var{group}
+unless they are @code{#f} and supplementary groups to
+@var{supplementary-groups} unless they are @code{'()}, and executes
+@var{command} (a list of strings.)  The result of the procedure will be
+the PID of the child process.  Note that this will not work as expected
+if the process ``daemonizes'' (forks); in that case, you will need to
+pass @code{#:pid-file}, as explained below.
 
 When @var{pid-file} is true, it must be the name of a PID file
 associated with the process being launched; the return value is the PID
@@ -937,6 +941,7 @@ procedures.
 @deffn {procedure} exec-command @var{command} @
   [#:user #f] @
   [#:group #f] @
+  [#:supplementary-groups '()] @
   [#:log-file #f] @
   [#:directory (default-service-directory)] @
   [#:file-creation-mask #f] @
@@ -944,6 +949,7 @@ procedures.
 @deffnx {procedure} fork+exec-command @var{command} @
   [#:user #f] @
   [#:group #f] @
+  [#:supplementary-groups '()] @
   [#:directory (default-service-directory)] @
   [#:file-creation-mask #f] @
   [#:environment-variables (default-environment-variables)]
@@ -955,12 +961,13 @@ if it's true, whereas file descriptor 0
 (standard input) points to @file{/dev/null}; all other file descriptors
 are closed prior to yielding control to @var{command}.
 
-By default, @var{command} is run as the current user.  If the
-@var{user} keyword argument is present and not false, change to
-@var{user} immediately before invoking @var{command}.  @var{user} may
-be a string, indicating a user name, or a number, indicating a user
-ID.  Likewise, @var{command} will be run under the current group,
-unless the @var{group} keyword argument is present and not false.
+By default, @var{command} is run as the current user.  If the @var{user}
+keyword argument is present and not false, change to @var{user}
+immediately before invoking @var{command}.  @var{user} may be a string,
+indicating a user name, or a number, indicating a user ID.  Likewise,
+@var{command} will be run under the current group, unless the
+@var{group} keyword argument is present and not false, and
+@var{supplementary-groups} is not @code{'()}.
 
 @code{fork+exec-command} does the same as @code{exec-command}, but in
 a separate process whose PID it returns.
