@@ -20,8 +20,10 @@
 
 (define-module (shepherd system)
   #:use-module (system foreign)
+  #:use-module (ice-9 binary-ports)
   #:use-module (rnrs bytevectors)
   #:use-module (srfi srfi-11)
+  #:use-module (srfi srfi-26)
   #:export (disable-reboot-on-ctrl-alt-del
             reboot
             halt
@@ -30,6 +32,11 @@
             prctl
             PR_SET_CHILD_SUBREAPER
             getpgid
+            SFD_CLOEXEC
+            signalfd
+            consume-signalfd-siginfo
+            block-signals
+            unblock-signals
             without-automatic-finalization))
 
 ;; The <sys/reboot.h> constants.
@@ -131,6 +138,64 @@ ctrlaltdel(8) and see kernel/reboot.c in Linux."
                    (list (strerror err))
                    (list err))
             result)))))
+
+(define (allocate-sigset)
+  (bytevector->pointer (make-bytevector @SIZEOF_SIGSET_T@)))
+
+(define sigemptyset
+  (syscall->procedure int "sigemptyset" '(*)))
+
+(define sigaddset
+  (syscall->procedure int "sigaddset" `(* ,int)))
+
+(define (sigset signals)
+  "Return a pointer to a fresh 'sigset_t' for SIGNALS."
+  (let ((set (allocate-sigset)))
+    (sigemptyset set)
+    (for-each (cut sigaddset set <>) signals)
+    set))
+
+(define %sizeof-struct-signalfd-siginfo
+  ;; Size of 'struct signalfd_siginfo' or zero if it doesn't exist, as is the
+  ;; case on GNU/Hurd.
+  @SIZEOF_STRUCT_SIGNALFD_SIGINFO@)
+
+(define SFD_CLOEXEC @SFD_CLOEXEC@)
+
+(define signalfd
+  (let ((proc (syscall->procedure int "signalfd" `(,int * ,int))))
+    (lambda* (fd signals #:optional (flags SFD_CLOEXEC))
+      "Return an open input port over a signal file descriptor for SIGNALS, a
+list of signal constants; if FD is -1, a new file descriptor is allocated,
+otherwise FD is returned and its associated state is updated.  FLAGS must be a
+bitmask of SFD_CLOEXEC or SFD_NONBLOCK."
+      (fdopen (proc fd (sigset signals) flags) "r0"))))
+
+(define (consume-signalfd-siginfo port)
+  "Read a 'signalfd_siginfo' structure from PORT and discard it.  Return the
+number of the signal received."
+  (let ((bv (get-bytevector-n port %sizeof-struct-signalfd-siginfo)))
+    ;; The first 'uint32_t' field of 'struct signalfd_siginfo' is the signal
+    ;; number.
+    (bytevector-u32-native-ref bv 0)))
+
+(define SIG_BLOCK @SIG_BLOCK@)
+(define SIG_UNBLOCK @SIG_UNBLOCK@)
+
+(define sigprocmask
+  (let ((proc (syscall->procedure int "pthread_sigmask" `(,int * *))))
+    (lambda (how signals)
+      "Add SIGNALS, a list of SIG* values, to the set of blocked signals if
+HOW is SIG_BLOCK, or unblock them if HOW is SIG_UNBLOCK."
+      (proc how (sigset signals) %null-pointer))))
+
+(define (block-signals signals)
+  "Block SIGNALS, a list of SIG* values, in the current thread."
+  (sigprocmask SIG_BLOCK signals))
+
+(define (unblock-signals signals)
+  "Unblock SIGNALS, a list of SIG* values, in the current thread."
+  (sigprocmask SIG_UNBLOCK signals))
 
 
 ;;;

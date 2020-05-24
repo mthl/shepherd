@@ -87,6 +87,24 @@ AC_COMPUTE_INT([PR_SET_CHILD_SUBREAPER], [PR_SET_CHILD_SUBREAPER], [#include <sy
 AC_SUBST([PR_SET_CHILD_SUBREAPER])
 AC_MSG_RESULT([done])
 
+dnl Check the size of 'signalfd_siginfo'.  If it's undefined, returns zero.
+AC_CHECK_SIZEOF([struct signalfd_siginfo], [], [#include <sys/signalfd.h>])
+AC_CHECK_SIZEOF([sigset_t], [], [#include <signal.h>])
+
+AC_MSG_CHECKING([<sys/signalfd.h> and <sys/signal.h> constants])
+AC_COMPUTE_INT([SFD_CLOEXEC], [SFD_CLOEXEC], [#include <sys/signalfd.h>])
+AC_COMPUTE_INT([SIG_BLOCK], [SIG_BLOCK], [#include <sys/signal.h>])
+AC_COMPUTE_INT([SIG_UNBLOCK], [SIG_UNBLOCK], [#include <sys/signal.h>])
+AC_MSG_RESULT([done])
+
+SIZEOF_STRUCT_SIGNALFD_SIGINFO="$ac_cv_sizeof_struct_signalfd_siginfo"
+SIZEOF_SIGSET_T="$ac_cv_sizeof_sigset_t"
+AC_SUBST([SIZEOF_STRUCT_SIGNALFD_SIGINFO])
+AC_SUBST([SIZEOF_SIGSET_T])
+AC_SUBST([SFD_CLOEXEC])
+AC_SUBST([SIG_BLOCK])
+AC_SUBST([SIG_UNBLOCK])
+
 AC_MSG_CHECKING([whether to build crash handler])
 case "$host_os" in
   linux-gnu*)  build_crash_handler=yes;;
