@@ -898,13 +898,18 @@ its PID."
         (pid (and (sigaction SIGTERM SIG_DFL)
                   (primitive-fork))))
     (if (zero? pid)
-        (exec-command command
-                      #:user user
-                      #:group group
-                      #:log-file log-file
-                      #:directory directory
-                      #:file-creation-mask file-creation-mask
-                      #:environment-variables environment-variables)
+        (begin
+          ;; Unblock any signals that might have been blocked by the parent
+          ;; process if using 'signalfd'.
+          (unblock-signals (list SIGCHLD SIGINT SIGHUP SIGTERM))
+
+          (exec-command command
+                        #:user user
+                        #:group group
+                        #:log-file log-file
+                        #:directory directory
+                        #:file-creation-mask file-creation-mask
+                        #:environment-variables environment-variables))
         (begin
           ;; Restore the initial SIGTERM handler.
           (sigaction SIGTERM term-handler)

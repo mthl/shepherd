@@ -24,6 +24,7 @@
   #:use-module (ice-9 format)
   #:use-module (ice-9 rdelim)   ;; Line-based I/O.
   #:autoload   (ice-9 readline) (activate-readline) ;for interactive use
+  #:use-module ((ice-9 threads) #:select (all-threads))
   #:use-module (oop goops)      ;; Defining classes and methods.
   #:use-module (srfi srfi-1)    ;; List library.
   #:use-module (srfi srfi-26)
@@ -60,6 +61,57 @@ socket file at FILE-NAME upon exit of PROC.  Return the values of PROC."
         (close sock)
         (catch-system-error (delete-file file-name))))))
 
+(define (maybe-signal-port signals)
+  "Return a signal port for SIGNALS, using 'signalfd' on GNU/Linux, or #f if
+that is not supported."
+  (catch 'system-error
+    (lambda ()
+      (let ((port (signalfd -1 signals)))
+        ;; As per the signalfd(2) man page, block SIGNALS.  The tricky bit is
+        ;; that SIGNALS must be blocked for all the threads; new threads will
+        ;; inherit the signal mask, but we must ensure that neither Guile's
+        ;; signal delivery thread nor its finalization thread are already
+        ;; running, because if they do, they are not blocking SIGNALS.  The
+        ;; signal delivery thread is started on the first call to 'sigaction'
+        ;; so we arrange to not call 'sigaction' beforehand; as for the
+        ;; finalization thread, use 'without-automatic-finalization' to
+        ;; temporarily stop it.
+        (without-automatic-finalization
+         (let ((count (length (all-threads))))
+           (if (= 1 count)
+               (begin
+                 (block-signals signals)
+                 port)
+               (begin
+                 (local-output (l10n "warning: \
+already ~a threads running, disabling 'signalfd' support")
+                               count)
+                 (close-port port)
+                 #f))))))
+    (lambda args
+      (if (= ENOSYS (system-error-errno args))
+          #f
+          (apply throw args)))))
+
+(define (handle-signal-port port)
+  "Read from PORT, a signalfd port, and handle the signal accordingly."
+  (let ((signal (consume-signalfd-siginfo port)))
+    (cond ((= signal SIGCHLD)
+           (handle-SIGCHLD))
+          ((= signal SIGINT)
+           (handle-SIGINT))
+          ((memv signal (list SIGTERM SIGHUP))
+           (stop root-service))
+          (else
+           #f))))
+
+(define (handle-SIGINT . _)
+  "Handle SIGINT by stopping the Shepherd, which means rebooting if we're PID 1."
+  (catch 'quit
+    (lambda ()
+      (stop root-service))
+    quit-exception-handler))
+
 
 ;; Main program.
 (define (main . args)
@@ -81,6 +133,12 @@ socket file at FILE-NAME upon exit of PROC.  Return the values of PROC."
                (or (= ENOSYS errno)        ;prctl unavailable
                    (= EINVAL errno)        ;PR_SET_CHILD_SUBREAPER unavailable
                    (apply throw args)))))))
+
+  (define signal-port
+    ;; Attempt to create a "signal port" via 'signalfd'.  This must be called
+    ;; before the 'sigaction' procedure is called, because 'sigaction' spawns
+    ;; the signal thread.
+    (maybe-signal-port (list SIGCHLD SIGINT SIGTERM SIGHUP)))
 
   (initialize-cli)
 
@@ -219,12 +277,7 @@ socket file at FILE-NAME upon exit of PROC.  Return the values of PROC."
          (dynamic-link (string-append %pkglibdir "/crash-handler"))))
 
       ;; Stop everything when we get SIGINT.
-      (sigaction SIGINT
-        (lambda _
-          (catch 'quit
-            (lambda ()
-              (stop root-service))
-            quit-exception-handler)))
+      (sigaction SIGINT handle-SIGINT)
 
       ;; Stop everything when we get SIGTERM.
       (sigaction SIGTERM
@@ -281,7 +334,9 @@ socket file at FILE-NAME upon exit of PROC.  Return the values of PROC."
              ;; "Failed to autoload handle-SIGCHLD in (ice-9 readline):"
              (handle-SIGCHLD)
 
-             (let next-command ()
+             (let next-command ((ports (if signal-port
+                                           (list signal-port sock)
+                                           (list sock))))
                (define (read-from sock)
                  (match (accept sock)
                    ((command-source . client-address)
@@ -289,14 +344,17 @@ socket file at FILE-NAME upon exit of PROC.  Return the values of PROC."
                     (process-connection command-source))
                    (_ #f)))
 
-               ;; XXX: Until we use signalfd(2), there's always a time window
+               ;; When not using signalfd(2), there's always a time window
                ;; before 'select' during which a handler async can be queued
                ;; but not executed.  Work around it by exiting 'select' every
                ;; few seconds.
-               (match (select (list sock) (list) (list)
-                              (if poll-services? 0.5 30))
-                 (((sock) _ _)
-                  (read-from sock))
+               (match (select ports (list) (list)
+                              (and (not signal-port)
+                                   (if poll-services? 0.5 30)))
+                 (((port _ ...) _ _)
+                  (if (and signal-port (eq? port signal-port))
+                      (handle-signal-port port)
+                      (read-from sock)))
                  (_
                   ;; 'select' returned an empty set, probably due to EINTR.
                   ;; Explicitly call the SIGCHLD handler because we cannot be
@@ -306,7 +364,7 @@ socket file at FILE-NAME upon exit of PROC.  Return the values of PROC."
 
                (when poll-services?
                  (check-for-dead-services))
-               (next-command))))))))
+               (next-command ports))))))))
 
 ;; Start all of SERVICES, which is a list of canonical names (FIXME?),
 ;; but in a order where all dependencies are fulfilled before we
