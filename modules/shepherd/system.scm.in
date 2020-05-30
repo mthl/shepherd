@@ -37,6 +37,8 @@
             consume-signalfd-siginfo
             block-signals
             unblock-signals
+            set-blocked-signals
+            with-blocked-signals
             without-automatic-finalization))
 
 ;; The <sys/reboot.h> constants.
@@ -200,6 +202,7 @@ number of the signal received."
 
 (define SIG_BLOCK @SIG_BLOCK@)
 (define SIG_UNBLOCK @SIG_UNBLOCK@)
+(define SIG_SETMASK @SIG_SETMASK@)
 
 (define sigprocmask
   (let ((proc (syscall->procedure int "pthread_sigmask" `(,int * *))))
@@ -224,6 +227,24 @@ set of blocked signals as a list of SIG* values."
 (define (unblock-signals signals)
   "Unblock SIGNALS, a list of SIG* values, in the current thread."
   (sigprocmask SIG_UNBLOCK signals))
+
+(define (set-blocked-signals signals)
+  "Block exactly the signals listed in SIGNALS, a list of SIG* values, in the
+current thread."
+  (sigprocmask SIG_SETMASK signals))
+
+(define (call-with-blocked-signals signals thunk)
+  (let ((previous-set #f))
+    (dynamic-wind
+      (lambda ()
+        (set! previous-set (block-signals signals)))
+      thunk
+      (lambda ()
+        (set-blocked-signals previous-set)))))
+
+(define-syntax-rule (with-blocked-signals signals exp ...)
+  "Evaluate EXP... in a context where SIGNALS are blocked."
+  (call-with-blocked-signals signals (lambda () exp ...)))
 
 
 ;;;

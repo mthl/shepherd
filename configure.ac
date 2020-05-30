@@ -95,6 +95,7 @@ AC_MSG_CHECKING([<sys/signalfd.h> and <sys/signal.h> constants])
 AC_COMPUTE_INT([SFD_CLOEXEC], [SFD_CLOEXEC], [#include <sys/signalfd.h>])
 AC_COMPUTE_INT([SIG_BLOCK], [SIG_BLOCK], [#include <sys/signal.h>])
 AC_COMPUTE_INT([SIG_UNBLOCK], [SIG_UNBLOCK], [#include <sys/signal.h>])
+AC_COMPUTE_INT([SIG_SETMASK], [SIG_SETMASK], [#include <sys/signal.h>])
 AC_MSG_RESULT([done])
 
 SIZEOF_STRUCT_SIGNALFD_SIGINFO="$ac_cv_sizeof_struct_signalfd_siginfo"
@@ -104,6 +105,7 @@ AC_SUBST([SIZEOF_SIGSET_T])
 AC_SUBST([SFD_CLOEXEC])
 AC_SUBST([SIG_BLOCK])
 AC_SUBST([SIG_UNBLOCK])
+AC_SUBST([SIG_SETMASK])
 
 AC_MSG_CHECKING([whether to build crash handler])
 case "$host_os" in
