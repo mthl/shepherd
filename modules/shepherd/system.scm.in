@@ -187,7 +187,12 @@ number of the signal received."
     (lambda (how signals)
       "Add SIGNALS, a list of SIG* values, to the set of blocked signals if
 HOW is SIG_BLOCK, or unblock them if HOW is SIG_UNBLOCK."
-      (proc how (sigset signals) %null-pointer))))
+      (let-values (((result err)
+                    (proc how (sigset signals) %null-pointer)))
+        (if (= -1 result)
+            (throw 'system-error "sigprocmask" "~A"
+                   (list (strerror err)) (list err))
+            result)))))
 
 (define (block-signals signals)
   "Block SIGNALS, a list of SIG* values, in the current thread."
