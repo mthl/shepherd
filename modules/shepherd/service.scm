@@ -870,6 +870,10 @@ false."
                   program (strerror (system-error-errno args)))
           (primitive-exit 1))))))))
 
+(define %precious-signals
+  ;; Signals that the shepherd process handles.
+  (list SIGCHLD SIGINT SIGHUP SIGTERM))
+
 (define* (fork+exec-command command
                             #:key
                             (user #f)
@@ -886,33 +890,28 @@ its PID."
     (sigaction SIGCHLD handle-SIGCHLD SA_NOCLDSTOP)
     (set! %sigchld-handler-installed? #t))
 
-  ;; When forking a process, the signal handlers are inherited, until it
-  ;; forks. If SIGTERM is received by the forked process, before it calls
-  ;; execv, the installed SIGTERM handler, stopping Shepherd will be called.
-  ;; To avoid this, save the SIGTERM handler, disable it, and restore it once,
-  ;; the process has been forked. This way, the forked process will use the
-  ;; default SIGTERM handler stopping the process.
-  (let ((term-handler (match (sigaction SIGTERM)
-                        ((proc . _)
-                         proc)))
-        (pid (and (sigaction SIGTERM SIG_DFL)
-                  (primitive-fork))))
-    (if (zero? pid)
-        (begin
-          ;; Unblock any signals that might have been blocked by the parent
-          ;; process if using 'signalfd'.
-          (unblock-signals (list SIGCHLD SIGINT SIGHUP SIGTERM))
+  ;; Child processes inherit signal handlers until they exec.  If one of
+  ;; %PRECIOUS-SIGNALS is received by the child before it execs, the installed
+  ;; handler, which stops shepherd, is called.  To avoid this, block signals
+  ;; so that the child process never executes those handlers.
+  (with-blocked-signals %precious-signals
+    (let ((pid (primitive-fork)))
+      (if (zero? pid)
+          (begin
+            ;; First restore the default handlers.
+            (for-each (cut sigaction <> SIG_DFL) %precious-signals)
 
-          (exec-command command
-                        #:user user
-                        #:group group
-                        #:log-file log-file
-                        #:directory directory
-                        #:file-creation-mask file-creation-mask
-                        #:environment-variables environment-variables))
-        (begin
-          ;; Restore the initial SIGTERM handler.
-          (sigaction SIGTERM term-handler)
+            ;; Unblock any signals that have been blocked by the parent
+            ;; process.
+            (unblock-signals %precious-signals)
+
+            (exec-command command
+                          #:user user
+                          #:group group
+                          #:log-file log-file
+                          #:directory directory
+                          #:file-creation-mask file-creation-mask
+                          #:environment-variables environment-variables))
           pid))))
 
 (define* (make-forkexec-constructor command
