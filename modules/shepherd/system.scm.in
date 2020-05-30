@@ -148,12 +148,31 @@ ctrlaltdel(8) and see kernel/reboot.c in Linux."
 (define sigaddset
   (syscall->procedure int "sigaddset" `(* ,int)))
 
+(define sigismember
+  (let ((proc (syscall->procedure int "sigismember" `(* ,int))))
+    (lambda (set signal)
+      (not (zero? (proc set signal))))))
+
 (define (sigset signals)
   "Return a pointer to a fresh 'sigset_t' for SIGNALS."
   (let ((set (allocate-sigset)))
     (sigemptyset set)
     (for-each (cut sigaddset set <>) signals)
     set))
+
+(define sigset->list
+  (let ((all-signals
+         (filter integer?
+                 (module-map (lambda (symbol variable)
+                               (let ((str (symbol->string symbol)))
+                                 (and (string-prefix? "SIG" str)
+                                      (not (string-prefix? "SIG_" str))
+                                      (variable-ref variable))))
+                             (resolve-interface '(guile))))))
+    (lambda (set)
+      "Return the list of integers (signal numbers) corresponding to SET, a
+sigset pointer."
+      (filter (cut sigismember set <>) all-signals))))
 
 (define %sizeof-struct-signalfd-siginfo
   ;; Size of 'struct signalfd_siginfo' or zero if it doesn't exist, as is the
@@ -186,13 +205,17 @@ number of the signal received."
   (let ((proc (syscall->procedure int "pthread_sigmask" `(,int * *))))
     (lambda (how signals)
       "Add SIGNALS, a list of SIG* values, to the set of blocked signals if
-HOW is SIG_BLOCK, or unblock them if HOW is SIG_UNBLOCK."
+HOW is SIG_BLOCK, or unblock them if HOW is SIG_UNBLOCK.  Return the previous
+set of blocked signals as a list of SIG* values."
+      (define old
+        (allocate-sigset))
+
       (let-values (((result err)
-                    (proc how (sigset signals) %null-pointer)))
+                    (proc how (sigset signals) old)))
         (if (= -1 result)
             (throw 'system-error "sigprocmask" "~A"
                    (list (strerror err)) (list err))
-            result)))))
+            (sigset->list old))))))
 
 (define (block-signals signals)
   "Block SIGNALS, a list of SIG* values, in the current thread."
