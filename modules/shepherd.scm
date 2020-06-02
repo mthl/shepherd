@@ -93,24 +93,28 @@ already ~a threads running, disabling 'signalfd' support")
           #f
           (apply throw args)))))
 
-(define (handle-signal-port port)
-  "Read from PORT, a signalfd port, and handle the signal accordingly."
-  (let ((signal (consume-signalfd-siginfo port)))
-    (cond ((= signal SIGCHLD)
-           (handle-SIGCHLD))
-          ((= signal SIGINT)
-           (handle-SIGINT))
-          ((memv signal (list SIGTERM SIGHUP))
-           (stop root-service))
-          (else
-           #f))))
-
-(define (handle-SIGINT . _)
+(define (handle-SIGINT)
   "Handle SIGINT by stopping the Shepherd, which means rebooting if we're PID 1."
   (catch 'quit
     (lambda ()
       (stop root-service))
     quit-exception-handler))
+
+(define (signal-handler signal)
+  "Return the signal handler for SIGNAL."
+  (cond ((= signal SIGCHLD)
+         (lambda _ (handle-SIGCHLD)))
+        ((= signal SIGINT)
+         (lambda _ (handle-SIGINT)))
+        ((memv signal (list SIGTERM SIGHUP))
+         (lambda _ (stop root-service)))
+        (else
+         (const #f))))
+
+(define (handle-signal-port port)
+  "Read from PORT, a signalfd port, and handle the signal accordingly."
+  (let ((signal (consume-signalfd-siginfo port)))
+    ((signal-handler signal))))
 
 
 ;; Main program.
@@ -138,7 +142,7 @@ already ~a threads running, disabling 'signalfd' support")
     ;; Attempt to create a "signal port" via 'signalfd'.  This must be called
     ;; before the 'sigaction' procedure is called, because 'sigaction' spawns
     ;; the signal thread.
-    (maybe-signal-port (list SIGCHLD SIGINT SIGTERM SIGHUP)))
+    (maybe-signal-port %precious-signals))
 
   (initialize-cli)
 
@@ -276,18 +280,11 @@ already ~a threads running, disabling 'signalfd' support")
         (false-if-exception
          (dynamic-link (string-append %pkglibdir "/crash-handler"))))
 
-      ;; Stop everything when we get SIGINT.
-      (sigaction SIGINT handle-SIGINT)
-
-      ;; Stop everything when we get SIGTERM.
-      (sigaction SIGTERM
-        (lambda _
-          (stop root-service)))
-
-      ;; Stop everything when we get SIGHUP.
-      (sigaction SIGHUP
-        (lambda _
-          (stop root-service)))
+      ;; Install signal handlers for everything but SIGCHLD, which is taken
+      ;; care of in (shepherd services).
+      (for-each (lambda (signal)
+                  (sigaction signal (signal-handler signal)))
+                (delete SIGCHLD %precious-signals))
 
       ;; This _must_ succeed.  (We could also put the `catch' around
       ;; `main', but it is often useful to get the backtrace, and

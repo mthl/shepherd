@@ -68,6 +68,7 @@
             lookup-services
             respawn-service
             handle-SIGCHLD
+            %precious-signals
             register-services
             provided-by
             required-by
