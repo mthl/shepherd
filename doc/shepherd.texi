@@ -13,6 +13,7 @@ Copyright @copyright{} @value{OLD-YEARS} Wolfgang J@"ahrling@*
 Copyright @copyright{} @value{NEW-YEARS} Ludovic Courtès@*
 Copyright @copyright{} 2020 Brice Waegeneire@*
 Copyright @copyright{} 2020 Oleg Pykhalov
+Copyright @copyright{} 2020 Jan (janneke) Nieuwenhuizen@*
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -146,10 +147,11 @@ configuration file.  When it is started with superuser privileges, it
 tries to use @code{/etc/shepherd.scm}.  When started as normal user, it
 looks for a file called @code{$XDG_CONFIG_HOME/shepherd/init.scm}.  If
 the @code{XDG_CONFIG_HOME} environment variable is not defined,
-@code{$HOME/.config/shepherd/init.scm} is used instead.  With the option
-@code{--config} (or, for short, @code{-c}), you can specify where to
-look instead.  So if you want to start @command{shepherd} with an
-alternative file, use one of the following commands:
+@code{$HOME/.config/shepherd/init.scm} is used instead (@pxref{Managing
+User Services }).  With the option @code{--config} (or, for short,
+@code{-c}), you can specify where to look instead.  So if you want to
+start @command{shepherd} with an alternative file, use one of the
+following commands:
 
 @example
 shepherd --config=/etc/shepherd.scm.old
@@ -589,6 +591,7 @@ defined in the @code{(shepherd service)} module.
 * Service De- and Constructors:: Commonly used ways of starting and
                                    stopping services.
 * Service Examples::             Examples that show how services are used.
+* Managing User Services::       Running the Shepherd as a user.
 * The root and unknown services:: Special services in the Shepherd.
 @end menu
 
@@ -1021,6 +1024,76 @@ also specifies some more initial values for the slots:
         #:actions (make-actions
                    (reload-modules (...))
                    (restart (...)))))
+@end lisp
+
+@node Managing User Services
+@section Managing User Services
+
+The Shepherd can be used to manage services for an unprivileged user.
+First, you may want to ensure it is up and running every time you log
+in.  One way to accomplish that is by adding the following lines to
+@file{~/.bash_profile} (@pxref{Bash Startup Files,,, bash, The GNU Bash
+Reference Manual}):
+
+@verbatim
+if [[ ! -S ${XDG_RUNTIME_DIR-$HOME/.cache}/shepherd/socket ]]; then
+    shepherd
+fi
+@end verbatim
+
+Then, we suggest the following top-level
+@file{$XDG_CONFIG_HOME/shepherd/init.scm} file, which will automatically
+load individual service definitions from
+@file{~/.config/shepherd/init.d}:
+
+@lisp
+(use-modules (shepherd service)
+             ((ice-9 ftw) #:select (scandir)))
+
+;; Load all the files in the directory 'init.d' with a suffix '.scm'.
+(for-each
+  (lambda (file)
+    (load (string-append "init.d/" file)))
+  (scandir (string-append (dirname (current-filename)) "/init.d")
+           (lambda (file)
+             (string-suffix? ".scm" file))))
+
+;; Send shepherd into the background
+(action 'shepherd 'daemonize)
+@end lisp
+
+Then, individual user services can be put in
+@code{$XDG_CONFIG_HOME/shepherd/init.d/}, e.g., for @command{ssh-agent}.
+
+@lisp
+;;; Commentary:
+;;;
+;;; Add to your ~/.bash_profile:
+;;;
+;;; SSH_AUTH_SOCK=$@{XDG_RUNTIME_DIR-$HOME/.cache@}/ssh-agent/socket
+;;; export SSH_AUTH_SOCK
+;;;
+;;; Code:
+
+(use-modules (shepherd support))
+
+(define ssh-agent
+  (make <service>
+    #:provides '(ssh-agent)
+    #:docstring "Run `ssh-agent'"
+    #:start (lambda ()
+              (let ((socket-dir (string-append %user-runtime-dir "/ssh-agent")))
+                (unless (file-exists? socket-dir)
+                  (mkdir-p socket-dir)
+                  (chmod socket-dir #o700))
+                (fork+exec-command
+                 `("ssh-agent" "-D" "-a" ,(string-append socket-dir "/socket"))
+                 #:log-file (string-append %user-log-dir "/ssh-agent.log"))))
+    #:stop (make-kill-destructor)
+    #:respawn? #t))
+
+(register-services ssh-agent)
+(start ssh-agent)
 @end lisp
 
 @c @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

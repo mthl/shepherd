@@ -60,6 +60,10 @@
             persistency
             persistency-state-file
 
+            %user-log-dir
+            %user-config-dir
+            %user-runtime-dir
+
             verify-dir))
 
 (define-syntax-rule (if-2.0 subsequent alternate)
