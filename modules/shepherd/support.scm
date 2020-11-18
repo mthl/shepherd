@@ -271,6 +271,12 @@ There is NO WARRANTY, to the extent permitted by law.")))
                      (string-append user-homedir "/.config"))
                  "/shepherd"))
 
+(define %user-log-dir
+  ;; Default log directory if shepherd is run as a normal user.
+  (string-append (or (getenv "XDG_DATA_DIR")
+                     (string-append user-homedir "/.local/share"))
+                 "/shepherd"))
+
 (define %user-runtime-dir
   ;; Default runtime directory if shepherd is run as a normal user.
   (string-append (or (getenv "XDG_RUNTIME_DIR")
@@ -302,8 +308,8 @@ TARGET should be a string representing a filepath + name."
 ;; Logging.
 (define (user-default-log-file)
   "Return the file name of the user's default log file."
-  (mkdir-p %user-config-dir #o700)
-  (string-append %user-config-dir "/shepherd.log"))
+  (mkdir-p %user-log-dir #o700)
+  (string-append %user-log-dir "/shepherd.log"))
 
 (define default-logfile-date-format
   ;; 'strftime' format string to prefix each entry in the log.

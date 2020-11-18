@@ -417,7 +417,7 @@ permissions are not as expected.
 Log output into @var{file}.
 
 For unprivileged users, the default log file is
-@file{$XDG_CONFIG_HOME/shepherd/shepherd.log}.
+@file{$XDG_DATA_DIR/.local/share/shepherd/shepherd.log}.
 
 @cindex syslog
 When running as root, the default behavior is to connect to

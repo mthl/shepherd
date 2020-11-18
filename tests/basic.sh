@@ -24,6 +24,7 @@ herd --version
 socket="t-socket-$$"
 conf="t-conf-$$"
 confdir="t-confdir-$$"
+datadir="t-datadir-$$"
 log="t-log-$$"
 stamp="t-stamp-$$"
 pid="t-pid-$$"
@@ -259,7 +260,9 @@ test -f "$log"
 
 # Set XDG_CONFIG_HOME for configuration files.
 export XDG_CONFIG_HOME=$confdir
+export XDG_DATA_DIR=$datadir
 mkdir -p $confdir/shepherd
+mkdir -p $datadir/shepherd
 mv $conf $confdir/shepherd/init.scm
 rm -f "$pid" "$socket"
 shepherd -I -s "$socket" --pid="$pid" &
@@ -281,3 +284,4 @@ $herd stop root
 ! kill -0 $shepherd_pid
 
 rm -rf $confdir
+rm -rf $datadir
